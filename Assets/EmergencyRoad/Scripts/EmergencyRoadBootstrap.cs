@@ -31,11 +31,9 @@ namespace EmergencyRoad
             bool isMenu=(authoring != null && authoring.SceneKind == EmergencyRoadSceneKind.Menu) || scene.name == "Menu";
             var activeView = menuView != null ? menuView.transform : gameView != null ? gameView.transform : null;
             if(authoring!=null&&authoring.PreviewRoot!=null&&activeView!=null&&activeView.IsChildOf(authoring.PreviewRoot))activeView.SetParent(authoring.transform,true);
-            if (!isMenu&&authoring != null && authoring.PreviewRoot != null) authoring.PreviewRoot.gameObject.SetActive(false);
             Debug.Log($"[Emergency Road] Runtime compose: {scene.name}, {catalog.playerVehicles.Count} vehicles, Road_1={(catalog.roadPrefabs.Count > 0 ? "ready" : "missing")}");
-            if(!isMenu){foreach (var camera in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)) Object.Destroy(camera.gameObject);foreach (var light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None)) Object.Destroy(light.gameObject);}
             if (isMenu) EmergencyRoadMenu.Create(catalog,menuView);
-            else EmergencyRoadGame.Create(catalog,gameView,authoring != null ? authoring.LaneWidth : catalog.laneWidth, catalog.roadLength > 1f ? catalog.roadLength : (authoring != null ? authoring.ChunkSpacing : 28f));
+            else EmergencyRoadGame.Create(catalog,gameView,authoring != null ? authoring.LaneWidth : catalog.laneWidth, catalog.roadLength > 1f ? catalog.roadLength : (authoring != null ? authoring.ChunkSpacing : 28f),authoring!=null?authoring.PreviewRoot:null);
         }
     }
 }

@@ -38,6 +38,8 @@ namespace EmergencyRoad
         private bool ended;
         private EmergencyCameraJuice cameraJuice;
         private EmergencyRoadGameView sceneView;
+        private Transform authoredPreviewRoot;
+        private Transform worldRoot;
         internal EmergencyRoadGameplaySettings Settings=>catalog!=null?catalog.gameplaySettings:null;
         internal EmergencyRoadCatalog Catalog=>catalog;
         public EmergencyVehicleController Player=>player;
@@ -45,16 +47,19 @@ namespace EmergencyRoad
         public float Distance=>distance;
         public float CurrentSpeed=>speed;
 
-        public static void Create(EmergencyRoadCatalog data, EmergencyRoadGameView sceneView, float laneWidth = 5.18f, float chunkSpacing = 28f)
+        public static void Create(EmergencyRoadCatalog data, EmergencyRoadGameView sceneView, float laneWidth = 5.18f, float chunkSpacing = 28f,Transform authoredRoot=null)
         {
             LaneWidth = laneWidth;
             ChunkSpacing = chunkSpacing;
-            var go = new GameObject("Emergency Road Game");
-            var game = go.AddComponent<EmergencyRoadGame>();
+            var controllerRoot=FindAuthoredChild(authoredRoot,"Gameplay Systems (runtime controller)");var go=controllerRoot!=null?controllerRoot.gameObject:new GameObject("Emergency Road Game");
+            var game = go.GetComponent<EmergencyRoadGame>()??go.AddComponent<EmergencyRoadGame>();
             game.catalog = data;
             game.sceneView = sceneView;
+            game.authoredPreviewRoot=authoredRoot;
             game.Build();
         }
+
+        private static Transform FindAuthoredChild(Transform root,string objectName){if(root==null)return null;foreach(var item in root.GetComponentsInChildren<Transform>(true))if(item.name==objectName)return item;return null;}
 
         private void Build()
         {
@@ -69,6 +74,7 @@ namespace EmergencyRoad
 
         private void BuildLightingAndCamera()
         {
+            var authoredCamera=authoredPreviewRoot!=null?authoredPreviewRoot.GetComponentInChildren<Camera>(true):null;if(authoredCamera!=null){authoredCamera.gameObject.SetActive(true);authoredCamera.enabled=true;authoredCamera.tag="MainCamera";return;}
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(.68f,.78f,.9f);
             RenderSettings.ambientEquatorColor = new Color(.48f,.57f,.62f);
@@ -86,6 +92,7 @@ namespace EmergencyRoad
 
         private void BuildRoad()
         {
+            worldRoot=FindAuthoredChild(authoredPreviewRoot,"Endless World Preview");if(worldRoot==null){worldRoot=new GameObject("Endless World Runtime").transform;worldRoot.SetParent(transform,false);}else foreach(Transform child in worldRoot){child.gameObject.SetActive(false);Destroy(child.gameObject);}
             CreatePhysicsRoadSurface();
             nextObstacleDistance=Mathf.Max(20f,catalog.startingSafeDistance);
             var tuning=Settings;nextCrossroadSequence=Random.Range(tuning!=null?tuning.minStraightChunksBetweenIntersections:10,(tuning!=null?tuning.maxStraightChunksBetweenIntersections:14)+1);nextCrossroadRadius=CrossroadRadius(nextCrossroadSequence);
@@ -93,7 +100,7 @@ namespace EmergencyRoad
             for (int i = 0; i < chunkCount; i++)
             {
                 bool cross=ShouldSpawnCrossroad(i);
-                var chunk = RoadChunk.Create(transform, catalog, i * ChunkSpacing, cross, i, this);
+                var chunk = RoadChunk.Create(worldRoot, catalog, i * ChunkSpacing, cross, i, this);
                 chunks.Add(chunk);
             }
             nextChunkSequence=chunkCount;
@@ -101,20 +108,20 @@ namespace EmergencyRoad
 
         private void CreatePhysicsRoadSurface()
         {
-            var ground=new GameObject("Mặt Đường Vật Lý",typeof(BoxCollider));ground.transform.SetParent(transform,false);ground.transform.localPosition=new Vector3(0,-.16f,80f);var collider=ground.GetComponent<BoxCollider>();collider.center=Vector3.zero;collider.size=new Vector3(Mathf.Max(40f,catalog.roadHalfWidth*4f),.3f,240f);collider.isTrigger=false;
+            var ground=new GameObject("Mặt Đường Vật Lý",typeof(BoxCollider));ground.transform.SetParent(worldRoot,false);ground.transform.localPosition=new Vector3(0,-.16f,80f);var collider=ground.GetComponent<BoxCollider>();collider.center=Vector3.zero;collider.size=new Vector3(Mathf.Max(40f,catalog.roadHalfWidth*4f),.3f,240f);collider.isTrigger=false;
         }
 
         private void BuildPlayer()
         {
             int selected = Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle, 0, Mathf.Max(0,catalog.playerVehicles.Count-1));
+            var authoredPlayer=FindAuthoredChild(authoredPreviewRoot,"Player Vehicle Preview");var root=authoredPlayer!=null?authoredPlayer.gameObject:new GameObject("Player");if(authoredPlayer==null)root.transform.position=new Vector3(0,.55f,0);else{root.SetActive(true);foreach(Transform child in root.transform){child.gameObject.SetActive(false);Destroy(child.gameObject);}}
             GameObject visual = catalog.playerVehicles.Count > 0 ? Instantiate(catalog.playerVehicles[selected]) : GameObject.CreatePrimitive(PrimitiveType.Cube);
             visual.name = "Player Emergency Vehicle";
-            var root = new GameObject("Player"); root.transform.position = new Vector3(0,.55f,0);
             visual.transform.SetParent(root.transform, false); FitVehicle(visual, 2.2f, 4.2f);
-            var collider = root.AddComponent<BoxCollider>(); collider.size = new Vector3(2.05f,1.5f,3.6f); collider.center = new Vector3(0,.65f,0); collider.isTrigger = true;
-            var body = root.AddComponent<Rigidbody>(); body.isKinematic = true; body.useGravity = false;
-            player = root.AddComponent<EmergencyVehicleController>(); player.Initialize(visual.transform, this,catalog.HornForVehicle(selected),selected);
-            cameraJuice=Camera.main!=null?Camera.main.gameObject.AddComponent<EmergencyCameraJuice>():null;if(cameraJuice!=null)cameraJuice.Initialize(root.transform);
+            var collider = root.GetComponent<BoxCollider>()??root.AddComponent<BoxCollider>(); collider.size = new Vector3(2.05f,1.5f,3.6f); collider.center = new Vector3(0,.65f,0); collider.isTrigger = true;
+            var body = root.GetComponent<Rigidbody>()??root.AddComponent<Rigidbody>(); body.isKinematic = true; body.useGravity = false;
+            player = root.GetComponent<EmergencyVehicleController>()??root.AddComponent<EmergencyVehicleController>(); player.Initialize(visual.transform, this,catalog.HornForVehicle(selected),selected);
+            cameraJuice=Camera.main!=null?(Camera.main.GetComponent<EmergencyCameraJuice>()??Camera.main.gameObject.AddComponent<EmergencyCameraJuice>()):null;if(cameraJuice!=null)cameraJuice.Initialize(root.transform);
             CreateRoadDust(root.transform,catalog.vfxParticleMaterial);
         }
 
@@ -311,13 +318,13 @@ namespace EmergencyRoad
     internal sealed class RoadChunk
     {
         private readonly GameObject root; private readonly EmergencyRoadCatalog catalog; private readonly EmergencyRoadGame owner; private readonly List<GameObject> spawned=new();
-        public float PositionZ=>root.transform.position.z;
+        public float PositionZ=>root.transform.localPosition.z;
         private RoadChunk(GameObject go,EmergencyRoadCatalog data,EmergencyRoadGame game){root=go;catalog=data;owner=game;}
         public static RoadChunk Create(Transform parent,EmergencyRoadCatalog data,float z,bool cross,int sequence,EmergencyRoadGame game=null){var chunk=new RoadChunk(new GameObject("Road Chunk"),data,game);chunk.root.transform.SetParent(parent);chunk.Recycle(z,cross,sequence);return chunk;}
-        public void Move(float dz){root.transform.position+=Vector3.forward*dz;foreach(var go in spawned)if(go!=null&&go.TryGetComponent<SideCrossingHazard>(out var crossing))crossing.Tick(dz);}
+        public void Move(float dz){root.transform.localPosition+=Vector3.forward*dz;foreach(var go in spawned)if(go!=null&&go.TryGetComponent<SideCrossingHazard>(out var crossing))crossing.Tick(dz);}
         public void Recycle(float z,bool cross,int sequence)
         {
-            foreach(var go in spawned)if(go!=null)Object.Destroy(go);spawned.Clear();root.transform.position=new Vector3(0,0,z);bool meshCovered=!cross&&owner!=null&&owner.IsCrossroadMeshCovered(sequence);root.name=cross?"Crossroad Chunk":meshCovered?"Crossroad Footprint Spacer":"Road_1 Chunk";
+            foreach(var go in spawned)if(go!=null)Object.Destroy(go);spawned.Clear();root.transform.localPosition=new Vector3(0,0,z);bool meshCovered=!cross&&owner!=null&&owner.IsCrossroadMeshCovered(sequence);root.name=cross?"Crossroad Chunk":meshCovered?"Crossroad Footprint Spacer":"Road_1 Chunk";
             GameObject roadPrefab=null;
             if(cross&&catalog.crossroadPrefabs.Count>0)roadPrefab=catalog.crossroadPrefabs[sequence%catalog.crossroadPrefabs.Count];
             else if(!meshCovered&&catalog.roadPrefabs.Count>0)roadPrefab=catalog.roadPrefabs[0];
