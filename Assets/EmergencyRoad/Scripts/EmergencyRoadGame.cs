@@ -219,7 +219,7 @@ namespace EmergencyRoad
 
     public sealed class EmergencyVehicleController : MonoBehaviour
     {
-        private Transform visual; private EmergencyRoadGame game; private int lane; private float targetX; private float bump; private bool crashed; private Coroutine edgeEffect;private Coroutine hornEffect; private Vector3 baseScale;private Vector3 baseLocalPosition;
+        private Transform visual; private EmergencyRoadGame game; private int lane;private int previousLane; private float targetX; private float bump; private bool crashed; private Coroutine edgeEffect;private Coroutine hornEffect; private Vector3 baseScale;private Vector3 baseLocalPosition;
         public void Initialize(Transform view, EmergencyRoadGame owner) { visual=view; game=owner; targetX=0; baseScale=visual.localScale;baseLocalPosition=visual.localPosition; }
         private void Update()
         {
@@ -235,7 +235,7 @@ namespace EmergencyRoad
             int next=Mathf.Clamp(lane+dir,-1,1);
             if(next==lane) { StartEdgeSqueeze(dir); return; }
             if(EmergencyRoadProfile.Current.sideCollisionEnabled&&IsLaneBlockedBesidePlayer(next)){StartEdgeSqueeze(dir);return;}
-            lane=next; targetX=lane*EmergencyRoadGame.LaneWidth;
+            previousLane=lane;lane=next; targetX=lane*EmergencyRoadGame.LaneWidth;
         }
         private bool IsLaneBlockedBesidePlayer(int targetLane)
         {
@@ -257,7 +257,10 @@ namespace EmergencyRoad
         }
         private void Honk(){EmergencyRoadAudio.Instance.Horn();if(hornEffect!=null)StopCoroutine(hornEffect);if(edgeEffect!=null){StopCoroutine(edgeEffect);edgeEffect=null;}visual.localPosition=baseLocalPosition;visual.localScale=baseScale;hornEffect=StartCoroutine(HonkBounce());}
         private IEnumerator HonkBounce(){float t=0;while(t<.38f){t+=Time.deltaTime;float s=Mathf.Sin(t/.38f*Mathf.PI);visual.localScale=Vector3.Scale(baseScale,new Vector3(1f-.08f*s,1f+.32f*s,1f-.08f*s));yield return null;}visual.localScale=baseScale;hornEffect=null;}
-        private void OnTriggerEnter(Collider other){var pickup=other.GetComponentInParent<RoadPickup>();if(pickup!=null){game.AddCoin();pickup.Collect();}else if(other.GetComponentInParent<RoadHazard>()!=null)game.Crash(other.bounds.center-transform.position);}
+        private void OnTriggerEnter(Collider other)
+        {
+            var pickup=other.GetComponentInParent<RoadPickup>();if(pickup!=null){game.AddCoin();pickup.Collect();return;}if(other.GetComponentInParent<RoadHazard>()==null)return;var impact=other.bounds.center-transform.position;bool sideContact=Mathf.Abs(impact.x)>1.15f&&Mathf.Abs(impact.z)<1.65f;if(sideContact){if(EmergencyRoadProfile.Current.sideCollisionEnabled){int side=impact.x>=0f?1:-1;lane=previousLane;targetX=lane*EmergencyRoadGame.LaneWidth;StartEdgeSqueeze(side);}return;}game.Crash(impact);
+        }
         private void OnCollisionEnter(Collision collision){if(collision.gameObject.GetComponentInParent<RoadHazard>()!=null)game.Crash(collision.collider.bounds.center-transform.position);}
         public void CrashVisual(Vector3 impactDirection){crashed=true;DeformMeshes(impactDirection);var localImpact=transform.InverseTransformDirection(impactDirection.normalized);EmergencyImpactVfx.Attach(transform,new Vector3(Mathf.Clamp(localImpact.x,-1f,1f)*.8f,.72f,Mathf.Clamp(localImpact.z,-1f,1f)*1.35f));StartCoroutine(Crumple(impactDirection));}
         private void DeformMeshes(Vector3 impactDirection)
