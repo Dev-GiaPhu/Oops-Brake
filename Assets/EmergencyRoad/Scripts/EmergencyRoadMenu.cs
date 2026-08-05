@@ -38,7 +38,8 @@ namespace EmergencyRoad
             EmergencyRoadUI.SetFont(catalog.uiFont);
             SetupWorld();
             BindSceneUI();
-            index = Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle, 0, catalog.playerVehicles.Count - 1);
+            index = ResolveOwnedSelection();
+            if(EmergencyRoadProfile.Current.selectedVehicle!=index){EmergencyRoadProfile.Current.selectedVehicle=index;EmergencyRoadProfile.Save();}
             Select(index);
         }
 
@@ -136,8 +137,8 @@ namespace EmergencyRoad
         }
 
         private void Update() { if (previewRoot != null) previewRoot.Rotate(0, 24f * Time.unscaledDeltaTime, 0); }
-        private void OpenGarage(){sceneView.mainMenuPanel.SetActive(false);sceneView.garagePanel.SetActive(true);}
-        private void CloseGarage(){sceneView.garagePanel.SetActive(false);sceneView.mainMenuPanel.SetActive(true);}
+        private void OpenGarage(){Select(ResolveOwnedSelection());sceneView.mainMenuPanel.SetActive(false);sceneView.garagePanel.SetActive(true);}
+        private void CloseGarage(){Select(ResolveOwnedSelection());sceneView.garagePanel.SetActive(false);sceneView.mainMenuPanel.SetActive(true);}
         private void ToggleSettings() { settings.SetActive(!settings.activeSelf); controls.SetActive(false); }
         private void ToggleSideCollision(){EmergencyRoadProfile.Current.sideCollisionEnabled=!EmergencyRoadProfile.Current.sideCollisionEnabled;EmergencyRoadProfile.Save();RefreshSideCollisionLabel();}
         private void RefreshSideCollisionLabel(){if(sideCollisionButton!=null)sideCollisionButton.GetComponentInChildren<TMP_Text>().text=EmergencyRoadProfile.Current.sideCollisionEnabled?"BẬT":"TẮT";}
@@ -154,8 +155,16 @@ namespace EmergencyRoad
             wallet.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
             bool unlocked = EmergencyRoadProfile.IsUnlocked(index);
             int price = Prices[Mathf.Min(index, Prices.Length-1)];
-            priceText.text = unlocked ? "ĐÃ MỞ • CÙNG HIỆU NĂNG" : $"GIÁ  ● {price:N0}";
-            actionButton.GetComponentInChildren<TMP_Text>().text = unlocked ? (EmergencyRoadProfile.Current.selectedVehicle == index ? "ĐANG DÙNG" : "CHỌN") : "MỞ KHÓA";
+            bool selected=unlocked&&EmergencyRoadProfile.Current.selectedVehicle==index;
+            priceText.text = unlocked ? (selected?"ĐÃ SỞ HỮU • ĐANG DÙNG":"ĐÃ SỞ HỮU • SẴN SÀNG") : $"CHƯA SỞ HỮU • GIÁ  ● {price:N0}";
+            actionButton.GetComponentInChildren<TMP_Text>().text = unlocked ? (selected?"ĐANG DÙNG":"CHỌN XE") : "MỞ KHÓA";
+        }
+
+        private int ResolveOwnedSelection()
+        {
+            if(catalog.playerVehicles.Count==0)return 0;int requested=Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle,0,catalog.playerVehicles.Count-1);if(EmergencyRoadProfile.IsUnlocked(requested))return requested;
+            for(int candidate=0;candidate<catalog.playerVehicles.Count;candidate++)if(EmergencyRoadProfile.IsUnlocked(candidate))return candidate;
+            return 0;
         }
 
         private static void NormalizePreview(GameObject go)
@@ -181,8 +190,7 @@ namespace EmergencyRoad
 
         private void Play()
         {
-            if (!EmergencyRoadProfile.IsUnlocked(index)) return;
-            EmergencyRoadProfile.Current.selectedVehicle = index; EmergencyRoadProfile.Save();
+            int selected=ResolveOwnedSelection();EmergencyRoadProfile.Current.selectedVehicle=selected;EmergencyRoadProfile.Save();
             SceneManager.LoadScene("Game");
         }
     }
