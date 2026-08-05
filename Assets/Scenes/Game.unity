@@ -1843,8 +1843,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.035, g: 0.06, b: 0.12, a: 0.96}
   m_RaycastTarget: 1
@@ -12482,19 +12482,6 @@ MonoBehaviour:
   - {fileID: 350030901}
   gameplaySettingsComponent: {fileID: 816916524}
   legacyGameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
---- !u!114 &816916524
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 816916521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3a1a6a0419cdd946baf8cde80a1c4b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  settings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
 --- !u!4 &816916523
 Transform:
   m_ObjectHideFlags: 0
@@ -12513,6 +12500,19 @@ Transform:
   - {fileID: 2100000002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &816916524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816916521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3a1a6a0419cdd946baf8cde80a1c4b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
 --- !u!1001 &822037360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29624,12 +29624,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2100000001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8ef10cb591246d4ab20bc8e3a92fd11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runOnPlay: 1
+  runOnPlay: 0
   repeatCount: -1
   mode: 2
   secondsPerRun: 30
@@ -29638,6 +29638,7 @@ MonoBehaviour:
   recordErrorsOnly: 1
   requestRepairAfterFinalRun: 1
   reportFileName: EmergencyRoadAutoTestReport.json
+  maxUniqueConsoleIssues: 250
 --- !u!1 &2104954307
 GameObject:
   m_ObjectHideFlags: 0

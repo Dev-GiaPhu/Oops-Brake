@@ -10,8 +10,8 @@ namespace EmergencyRoad
         [Min(1)] public float maxSpeed=45f;
         [Min(10)] public float distanceToMaxSpeed=800f;
         [Header("Obstacle Density")]
-        [Min(8.4f)] public float gapAtStart=36f;
-        [Min(8.4f)] public float gapAtMaxSpeed=50f;
+        public float gapAtStart=36f;
+        public float gapAtMaxSpeed=50f;
         [Min(.25f)] public float minimumObstacleReactionTime=.75f;
         [Range(0,1)] public float twoLaneBlockChanceAtStart=.58f;
         [Range(0,1)] public float twoLaneBlockChanceAtMaxSpeed=.32f;

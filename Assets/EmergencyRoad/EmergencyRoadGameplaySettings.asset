@@ -15,7 +15,7 @@ MonoBehaviour:
   startSpeed: 18
   maxSpeed: 45
   distanceToMaxSpeed: 800
-  gapAtStart: 36
+  gapAtStart: 8.4
   gapAtMaxSpeed: 50
   minimumObstacleReactionTime: 0.75
   twoLaneBlockChanceAtStart: 0.58
@@ -45,3 +45,5 @@ MonoBehaviour:
   motorMaxLateralSpeed: 3.5
   motorWarningTrackTime: 2.2
   motorLockedWarningTime: 0.55
+  motorDebrisImpactHoldTime: 0.35
+  motorDebrisMapFollowSharpness: 2.2

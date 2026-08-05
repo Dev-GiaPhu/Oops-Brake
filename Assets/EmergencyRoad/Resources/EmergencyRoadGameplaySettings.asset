@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: EmergencyRoadGameplaySettings
   m_EditorClassIdentifier: 
   startSpeed: 18
-  maxSpeed: 45
-  distanceToMaxSpeed: 800
-  gapAtStart: 36
-  gapAtMaxSpeed: 50
+  maxSpeed: 100
+  distanceToMaxSpeed: 1000
+  gapAtStart: 1
+  gapAtMaxSpeed: 4
   minimumObstacleReactionTime: 0.75
   twoLaneBlockChanceAtStart: 0.58
   twoLaneBlockChanceAtMaxSpeed: 0.32
@@ -28,6 +28,16 @@ MonoBehaviour:
   obstacleLaneWidth: 0.86
   stoppedVehicleSize: {x: 2.18, y: 4.05}
   stoppedVehicleHitbox: {x: 2.54, y: 1.45, z: 3.55}
+  sameDirectionTrafficChance: 0.28
+  trafficMinimumRoadSpeed: 8
+  trafficMaximumRoadSpeed: 14
+  trafficLaneChangeChance: 0.38
+  trafficLaneDecisionInterval: 2.2
+  trafficBrakingDistance: 11
+  trafficBrakingStrength: 10
+  crossTrafficSpeed: 11.5
+  crossTrafficStartDistance: 44
+  crossTrafficRouteLookDistance: 24
   sideCheckHalfLength: 0.68
   releaseBehindPlayer: 0.32
   motorSpeed: 34
