@@ -90,6 +90,17 @@ namespace EmergencyRoad
             if(authoredVehicle!=null){previewRoot.SetPositionAndRotation(authoredVehicle.position,authoredVehicle.rotation);Destroy(authoredVehicle.gameObject);}
             else if(podium!=null){var renderer=podium.GetComponent<Renderer>();var top=renderer!=null?renderer.bounds.max.y:podium.position.y;previewRoot.position=new Vector3(podium.position.x,top,podium.position.z);previewRoot.rotation=podium.rotation;}
             else{Debug.LogError("Menu scene is missing Garage Podium. The runtime will not create a replacement.");previewRoot.position=Vector3.zero;}
+            FrameSceneCamera(Camera.main,previewRoot.position,sceneView!=null?sceneView.worldContentCenterX:.375f);
+        }
+
+        private static void FrameSceneCamera(Camera sceneCamera,Vector3 worldCenter,float targetViewportX)
+        {
+            if(sceneCamera==null)return;
+            sceneCamera.ResetProjectionMatrix();
+            float currentViewportX=sceneCamera.WorldToViewportPoint(worldCenter).x;
+            var projection=sceneCamera.projectionMatrix;
+            projection.m02+=2f*(currentViewportX-Mathf.Clamp(targetViewportX,.25f,.5f));
+            sceneCamera.projectionMatrix=projection;
         }
 
         private static Transform FindSceneTransform(string objectName)
