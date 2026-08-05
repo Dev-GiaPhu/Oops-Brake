@@ -14,7 +14,7 @@ namespace EmergencyRoad
         public static readonly Color Yellow = new(1f, .75f, .08f, 1f);
         private static TMP_FontAsset configuredFont;
         private static Sprite panelSprite,buttonSprite,sliderBackgroundSprite,sliderFillSprite,sliderHandleSprite;
-        public static TMP_FontAsset Font => configuredFont != null ? configuredFont : TMP_Settings.defaultFontAsset;
+        public static TMP_FontAsset Font => configuredFont;
 
         public static void SetFont(TMP_FontAsset font)
         {

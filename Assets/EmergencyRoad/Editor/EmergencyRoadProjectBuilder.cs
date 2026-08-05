@@ -107,7 +107,7 @@ namespace EmergencyRoad.Editor
 
         private static TMP_FontAsset CreateTmpFontAsset()
         {
-            var asset=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(TmpFontPath);if(asset!=null)return asset;var source=AssetDatabase.LoadAssetAtPath<Font>(UiFontPath);if(source==null)return null;asset=TMP_FontAsset.CreateFontAsset(source);asset.name="Baloo 2 Vietnamese TMP";AssetDatabase.CreateAsset(asset,TmpFontPath);return asset;
+            var asset=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(TmpFontPath);if(asset!=null&&AssetDatabase.LoadAllAssetsAtPath(TmpFontPath).Length>=3)return asset;if(asset!=null)AssetDatabase.DeleteAsset(TmpFontPath);var source=AssetDatabase.LoadAssetAtPath<Font>(UiFontPath);if(source==null)return null;asset=TMP_FontAsset.CreateFontAsset(source,90,9,UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,1024,1024,AtlasPopulationMode.Dynamic,true);asset.name="Baloo 2 Vietnamese TMP";AssetDatabase.CreateAsset(asset,TmpFontPath);if(asset.material!=null&&!AssetDatabase.Contains(asset.material)){asset.material.name="Baloo 2 Vietnamese Material";AssetDatabase.AddObjectToAsset(asset.material,asset);}foreach(var texture in asset.atlasTextures)if(texture!=null&&!AssetDatabase.Contains(texture)){texture.name="Baloo 2 Vietnamese Atlas";AssetDatabase.AddObjectToAsset(texture,asset);}EditorUtility.SetDirty(asset);AssetDatabase.SaveAssets();return asset;
         }
 
         private static void CreateDefaultGameplayPrefabs(EmergencyRoadCatalog catalog)

@@ -91,7 +91,14 @@ MonoBehaviour:
   soilMaterial: {fileID: 2100000, guid: 99ab44ee527722a43a5e70868050dedf, type: 2}
   vfxParticleMaterial: {fileID: 2100000, guid: a4986c20ede3cfa47ace15e2ded20739, type: 2}
   postProcessProfile: {fileID: 11400000, guid: bfbb4584db5366a43aa9eb6b341261f0, type: 2}
-  uiFont: {fileID: 12800000, guid: 2fa612120a7c1eb49ac66c4916bda816, type: 3}
+  coinPrefab: {fileID: 4579309226957050845, guid: ba544797a652aa448b71e51499e09f94, type: 3}
+  motorcyclePrefab: {fileID: 8421186050361847512, guid: 95eac6bea15613e40b4a4d0f582c2114, type: 3}
+  uiFont: {fileID: 11400000, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
+  panelSprite: {fileID: 0}
+  buttonSprite: {fileID: 0}
+  sliderBackgroundSprite: {fileID: 0}
+  sliderFillSprite: {fileID: 0}
+  sliderHandleSprite: {fileID: 0}
   musicClip: {fileID: 0}
   uiClickClip: {fileID: 0}
   coinClip: {fileID: 0}
@@ -100,3 +107,4 @@ MonoBehaviour:
   roadLength: 7.4645844
   roadHalfWidth: 11.03214
   laneWidth: 5.185106
+  startingSafeDistance: 48
