@@ -68,7 +68,7 @@ namespace EmergencyRoad
         public int highScore;
         public float musicVolume = 0.75f;
         public float sfxVolume = 0.9f;
-        public bool sideCollisionEnabled = true;
+        public bool sideCollisionEnabled = false;
         public List<int> unlockedVehicles = new() { 0 };
     }
 
@@ -90,6 +90,7 @@ namespace EmergencyRoad
                 if (!value.unlockedVehicles.Contains(0)) value.unlockedVehicles.Add(0);
                 value.musicVolume = Mathf.Clamp01(value.musicVolume);
                 value.sfxVolume = Mathf.Clamp01(value.sfxVolume);
+                value.sideCollisionEnabled = false;
                 return value;
             }
             catch { return new EmergencyRoadSave(); }
