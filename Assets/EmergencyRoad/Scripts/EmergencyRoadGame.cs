@@ -306,6 +306,7 @@ namespace EmergencyRoad
 
     public sealed class RoadPickup : MonoBehaviour { public void Collect(){gameObject.SetActive(false);} }
     public sealed class RoadHazard : MonoBehaviour { }
+    public sealed class RoadRouteMarker:MonoBehaviour { public int SoleOpenLane{get;private set;} public void Configure(int lane){SoleOpenLane=Mathf.Clamp(lane,-1,1);} }
 
     internal sealed class RoadChunk
     {
@@ -386,10 +387,11 @@ namespace EmergencyRoad
             float movingTrafficChance=tuning!=null?tuning.sameDirectionTrafficChance:.28f;
             if(owner!=null&&catalog.trafficVehicles.Count>0&&Random.value<movingTrafficChance){int trafficLane=openLane;while(trafficLane==openLane)trafficLane=Random.Range(-1,2);owner.SpawnSameDirectionTraffic(trafficLane,root.transform.position.z+obstacleZ);for(int i=0;i<4;i++)SpawnCoin(openLane,-EmergencyRoadGame.ChunkSpacing*.38f+i*(EmergencyRoadGame.ChunkSpacing*.76f/3f));return;}
             bool doubleBlock=Random.value<doubleBlockChance;
-            if(doubleBlock){for(int lane=-1;lane<=1;lane++)if(lane!=openLane)SpawnObstacle(lane,obstacleZ);}
+            if(doubleBlock){SpawnRouteMarker(openLane,obstacleZ);for(int lane=-1;lane<=1;lane++)if(lane!=openLane)SpawnObstacle(lane,obstacleZ);}
             else{int blockedLane=openLane;while(blockedLane==openLane)blockedLane=Random.Range(-1,2);SpawnObstacle(blockedLane,obstacleZ);}
             for(int i=0;i<4;i++)SpawnCoin(openLane,-EmergencyRoadGame.ChunkSpacing*.38f+i*(EmergencyRoadGame.ChunkSpacing*.76f/3f));
         }
+        private void SpawnRouteMarker(int soleOpenLane,float localZ){var marker=new GameObject($"Route Reservation - Lane {soleOpenLane}");marker.transform.SetParent(root.transform);marker.transform.localPosition=new Vector3(0,0,localZ);marker.AddComponent<RoadRouteMarker>().Configure(soleOpenLane);spawned.Add(marker);}
         private void SpawnObstacle(int lane,float localZ)
         {
             float roll=Random.value;
@@ -418,7 +420,7 @@ namespace EmergencyRoad
         private void SpawnCrossing()
         {
             int lane=FindSafeLane(root.transform.position.z+8f);bool left=Random.value<.5f;GameObject prefab=catalog.trafficVehicles.Count>0?catalog.trafficVehicles[Random.Range(0,catalog.trafficVehicles.Count)]:null;
-            var go=prefab?Object.Instantiate(prefab,root.transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name="Cross Traffic Hazard";go.transform.localPosition=new Vector3(left?-12f:12f,.45f,8f);go.transform.localRotation=Quaternion.Euler(0,left?90:-90,0);EmergencyRoadGame.FitVehicle(go,2.1f,4f);go.AddComponent<RoadHazard>();var c=go.GetComponentInChildren<Collider>()??go.AddComponent<BoxCollider>();var body=go.AddComponent<Rigidbody>();body.isKinematic=true;var mover=go.AddComponent<SideCrossingHazard>();mover.Configure(lane*EmergencyRoadGame.LaneWidth,left);spawned.Add(go);
+            var go=prefab?Object.Instantiate(prefab,root.transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name="Cross Traffic Hazard";go.transform.localPosition=new Vector3(left?-12f:12f,.45f,8f);go.transform.localRotation=Quaternion.identity;var tuning=owner!=null?owner.Settings:null;var size=tuning!=null?tuning.stoppedVehicleSize:new Vector2(2.18f,4.05f);EmergencyRoadGame.FitVehicle(go,size.x,size.y);go.transform.localRotation=Quaternion.Euler(0,left?90:-90,0);foreach(var oldCollider in go.GetComponentsInChildren<Collider>())Object.Destroy(oldCollider);go.AddComponent<RoadHazard>();var c=go.AddComponent<BoxCollider>();c.isTrigger=true;c.center=new Vector3(0,.72f,0);c.size=tuning!=null?tuning.stoppedVehicleHitbox:new Vector3(2.54f,1.45f,3.55f);var body=go.AddComponent<Rigidbody>();body.isKinematic=true;body.useGravity=false;var mover=go.AddComponent<SideCrossingHazard>();mover.Configure(lane*EmergencyRoadGame.LaneWidth,left);spawned.Add(go);
         }
         private static int FindSafeLane(float worldZ)
         {
@@ -443,16 +445,25 @@ namespace EmergencyRoad
 
     public sealed class SameDirectionTraffic:MonoBehaviour
     {
-        private EmergencyRoadGame game;private int lane;private float targetX;private float roadSpeed;private float cruiseSpeed;private float laneChangeChance;private float decisionInterval;private float brakingDistance;private float brakingStrength;private float nextDecision;private float xVelocity;
+        private EmergencyRoadGame game;private int lane;private float targetX;private float roadSpeed;private float cruiseSpeed;private float laneChangeChance;private float decisionInterval;private float brakingDistance;private float brakingStrength;private float nextDecision;private float nextSafetyDecision;private float xVelocity;private bool occupyingReservedEscape;
         public void Initialize(EmergencyRoadGame owner,int startLane,float speed,float changeChance,float interval,float brakeDistance,float brakeStrength){game=owner;lane=Mathf.Clamp(startLane,-1,1);targetX=lane*EmergencyRoadGame.LaneWidth;roadSpeed=cruiseSpeed=speed;laneChangeChance=changeChance;decisionInterval=Mathf.Max(.25f,interval);brakingDistance=Mathf.Max(4f,brakeDistance);brakingStrength=Mathf.Max(1f,brakeStrength);nextDecision=Time.time+Random.Range(decisionInterval*.65f,decisionInterval*1.35f);}
         private void Update()
         {
-            if(game==null||game.Ended)return;float clearance=ForwardClearance(lane,brakingDistance+4f);float desiredSpeed=clearance<brakingDistance?0f:cruiseSpeed;roadSpeed=Mathf.MoveTowards(roadSpeed,desiredSpeed,(desiredSpeed<roadSpeed?brakingStrength:brakingStrength*.35f)*Time.deltaTime);var position=transform.position;position.z+=(roadSpeed-game.CurrentSpeed)*Time.deltaTime;position.x=Mathf.SmoothDamp(position.x,targetX,ref xVelocity,.42f,EmergencyRoadGame.LaneWidth*1.65f);transform.position=position;
+            if(game==null||game.Ended)return;if(Time.time>=nextSafetyDecision){nextSafetyDecision=Time.time+.16f;occupyingReservedEscape=LaneIsReservedEscape(lane);if(occupyingReservedEscape)EvacuateReservedEscapeLane();}float clearance=ForwardClearance(lane,brakingDistance+4f);float desiredSpeed=clearance<brakingDistance&&!occupyingReservedEscape?0f:cruiseSpeed;roadSpeed=Mathf.MoveTowards(roadSpeed,desiredSpeed,(desiredSpeed<roadSpeed?brakingStrength:brakingStrength*.35f)*Time.deltaTime);var position=transform.position;position.z+=(roadSpeed-game.CurrentSpeed)*Time.deltaTime;position.x=Mathf.SmoothDamp(position.x,targetX,ref xVelocity,.42f,EmergencyRoadGame.LaneWidth*1.65f);transform.position=position;
             if(position.z<-32f||position.z>165f){Destroy(gameObject);return;}if(Time.time<nextDecision||position.z<9f)return;nextDecision=Time.time+Random.Range(decisionInterval*.75f,decisionInterval*1.35f);int soleRoute=FindSoleOpenRoute();if(soleRoute>=-1){if(lane==soleRoute)LeaveSoleEscapeLane();return;}if(Random.value>laneChangeChance)return;
-            int direction=Random.value<.5f?-1:1;int candidate=Mathf.Clamp(lane+direction,-1,1);if(candidate==lane)candidate=Mathf.Clamp(lane-direction,-1,1);if(candidate!=lane&&LaneIsClear(candidate)){lane=candidate;targetX=lane*EmergencyRoadGame.LaneWidth;}
+            int direction=Random.value<.5f?-1:1;int candidate=Mathf.Clamp(lane+direction,-1,1);if(candidate==lane)candidate=Mathf.Clamp(lane-direction,-1,1);if(candidate!=lane&&!LaneIsReservedEscape(candidate)&&LaneIsClear(candidate)){lane=candidate;targetX=lane*EmergencyRoadGame.LaneWidth;}
         }
         private int FindSoleOpenRoute(){int count=0,last=-2;for(int candidate=-1;candidate<=1;candidate++)if(ForwardClearance(candidate,brakingDistance+7f)>=brakingDistance){count++;last=candidate;}return count==1?last:-2;}
-        private void LeaveSoleEscapeLane(){int left=lane-1,right=lane+1;if(left>=-1&&LaneIsClear(left)){lane=left;targetX=lane*EmergencyRoadGame.LaneWidth;return;}if(right<=1&&LaneIsClear(right)){lane=right;targetX=lane*EmergencyRoadGame.LaneWidth;}}
+        private void LeaveSoleEscapeLane(){int left=lane-1,right=lane+1;if(left>=-1&&!LaneIsReservedEscape(left)&&LaneIsClear(left)){lane=left;targetX=lane*EmergencyRoadGame.LaneWidth;return;}if(right<=1&&!LaneIsReservedEscape(right)&&LaneIsClear(right)){lane=right;targetX=lane*EmergencyRoadGame.LaneWidth;}}
+        private bool LaneIsReservedEscape(int candidate)
+        {
+            float back=transform.position.z-5f,front=transform.position.z+brakingDistance+EmergencyRoadGame.ChunkSpacing*1.6f;foreach(var marker in Object.FindObjectsByType<RoadRouteMarker>(FindObjectsSortMode.None))if(marker!=null&&marker.transform.position.z>=back&&marker.transform.position.z<=front&&marker.SoleOpenLane==candidate)return true;return false;
+        }
+        private void EvacuateReservedEscapeLane()
+        {
+            bool[] forbidden=new bool[3];float back=transform.position.z-5f,front=transform.position.z+brakingDistance+EmergencyRoadGame.ChunkSpacing*1.6f;foreach(var marker in Object.FindObjectsByType<RoadRouteMarker>(FindObjectsSortMode.None))if(marker!=null&&marker.transform.position.z>=back&&marker.transform.position.z<=front)forbidden[marker.SoleOpenLane+1]=true;
+            int best=-99;for(int candidate=-1;candidate<=1;candidate++)if(!forbidden[candidate+1]&&LaneIsClear(candidate)&&(best==-99||Mathf.Abs(candidate-lane)<Mathf.Abs(best-lane)))best=candidate;if(best==-99||best==lane)return;int step=lane+System.Math.Sign(best-lane);if(LaneIsClear(step)){lane=step;targetX=lane*EmergencyRoadGame.LaneWidth;occupyingReservedEscape=LaneIsReservedEscape(lane);}
+        }
         private float ForwardClearance(int candidate,float distance)
         {
             Physics.SyncTransforms();float nearest=float.PositiveInfinity;var center=new Vector3(candidate*EmergencyRoadGame.LaneWidth,.9f,transform.position.z+distance*.5f);var hits=Physics.OverlapBox(center,new Vector3(1.25f,.9f,distance*.5f),Quaternion.identity,~0,QueryTriggerInteraction.Collide);foreach(var hit in hits){if(hit.transform.IsChildOf(transform)||transform.IsChildOf(hit.transform))continue;if(hit.GetComponentInParent<RoadHazard>()==null)continue;float gap=hit.bounds.min.z-(transform.position.z+1.78f);if(gap>=-.1f)nearest=Mathf.Min(nearest,gap);}return nearest;
