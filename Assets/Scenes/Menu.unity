@@ -4023,7 +4023,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u25CF 0"
+  m_text: "\u0110\u1ED3ng xu: 0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
   m_sharedMaterial: {fileID: -6010686438677791696, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
@@ -4160,7 +4160,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "BI\u1EC6T \u0110\u1ED8I KH\u1EA8N C\u1EA4P"
+  m_text: "CHUY\u1EBEN XE KH\u1EA8N C\u1EA4P"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
   m_sharedMaterial: {fileID: -6010686438677791696, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
@@ -5900,7 +5900,7 @@ Transform:
   m_GameObject: {fileID: 1788322769}
   serializedVersion: 2
   m_LocalRotation: {x: 0.14096834, y: -0.2974028, z: 0.044447146, w: 0.9432412}
-  m_LocalPosition: {x: 8, y: 5.2, z: -9}
+  m_LocalPosition: {x: 11.13, y: 4.31, z: -7.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
