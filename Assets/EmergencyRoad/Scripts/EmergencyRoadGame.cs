@@ -224,8 +224,8 @@ namespace EmergencyRoad
         internal bool ShouldSpawnObstacle(int sequence,bool crossroad)
         {
             float generationDistance=sequence*ChunkSpacing;if(generationDistance<nextObstacleDistance)return false;
-            // Spacing is exactly current speed times one progressive multiplier; no reaction-time or additive gap is applied.
-            float safetyGap=VehicleLength*2f;float minimumMultiplier=Settings!=null?Settings.minimumSpeedGapMultiplier:1f;float maximumMultiplier=Settings!=null?Settings.maximumSpeedGapMultiplier:2f;float progressiveMultiplier=Mathf.Lerp(minimumMultiplier,maximumMultiplier,Difficulty01);float speedGap=speed*progressiveMultiplier;nextObstacleDistance=generationDistance+Mathf.Max(safetyGap,speedGap);
+            // Min/max are authored distances at min/max speed. The current gap is a direct linear interpolation with no random or additive spacing.
+            float safetyGap=VehicleLength*2f;float minimumGap=Settings!=null?Settings.obstacleGapAtMinimumSpeed:28f;float maximumGap=Settings!=null?Settings.obstacleGapAtMaximumSpeed:70f;float speedScaledGap=Mathf.Lerp(minimumGap,maximumGap,Difficulty01);nextObstacleDistance=generationDistance+Mathf.Max(safetyGap,speedScaledGap);
             return true;
         }
         public void SetHazardAlert(string message){if(hazardAlertText!=null)hazardAlertText.text=message;}
