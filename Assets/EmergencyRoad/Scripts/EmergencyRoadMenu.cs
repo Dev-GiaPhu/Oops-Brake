@@ -84,21 +84,18 @@ namespace EmergencyRoad
         private void SetupWorld()
         {
             RenderSettings.ambientMode=AmbientMode.Trilight;RenderSettings.ambientSkyColor=new Color(.42f,.56f,.72f);RenderSettings.ambientEquatorColor=new Color(.2f,.28f,.36f);RenderSettings.ambientGroundColor=new Color(.08f,.1f,.12f);RenderSettings.fog=true;RenderSettings.fogMode=FogMode.Linear;RenderSettings.fogColor=new Color(.1f,.2f,.28f);RenderSettings.fogStartDistance=25f;RenderSettings.fogEndDistance=75f;
-            var cameraGo = new GameObject("Garage Camera", typeof(Camera), typeof(AudioListener));
-            cameraGo.tag = "MainCamera";
-            cameraGo.transform.SetPositionAndRotation(new Vector3(8, 5.2f, -9), Quaternion.Euler(17,-35,0));
-            cameraGo.GetComponent<Camera>().backgroundColor = new Color(.08f,.16f,.25f);cameraGo.GetComponent<Camera>().allowHDR=true;var cameraData=cameraGo.AddComponent<UniversalAdditionalCameraData>();cameraData.renderPostProcessing=true;cameraData.antialiasing=AntialiasingMode.FastApproximateAntialiasing;
-            var light = new GameObject("Key Light", typeof(Light));
-            light.transform.rotation = Quaternion.Euler(45,-35,0);
-            light.GetComponent<Light>().type = LightType.Directional;
-            light.GetComponent<Light>().intensity = 1.35f;
-            light.GetComponent<Light>().shadows=LightShadows.Soft;light.GetComponent<Light>().color=new Color(1f,.88f,.72f);
-            if(catalog.postProcessProfile!=null){var volumeGo=new GameObject("Garage Post Processing",typeof(Volume));var volume=volumeGo.GetComponent<Volume>();volume.isGlobal=true;volume.profile=catalog.postProcessProfile;}
-            previewRoot = new GameObject("Vehicle Preview").transform;
-            previewRoot.position = new Vector3(3.4f,.2f,0);
-            var floor = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            floor.name = "Garage Podium"; floor.transform.position = new Vector3(3.4f,-.25f,0); floor.transform.localScale = new Vector3(3.5f,.15f,3.5f);
-            floor.GetComponent<Renderer>().material.color = new Color(.08f,.14f,.2f);
+            var authoredVehicle=FindSceneTransform("Selected Vehicle Preview (Ambulance)");
+            var podium=FindSceneTransform("Garage Podium");
+            previewRoot = new GameObject("Vehicle Preview Runtime Slot - Uses Scene Position").transform;
+            if(authoredVehicle!=null){previewRoot.SetPositionAndRotation(authoredVehicle.position,authoredVehicle.rotation);Destroy(authoredVehicle.gameObject);}
+            else if(podium!=null){var renderer=podium.GetComponent<Renderer>();var top=renderer!=null?renderer.bounds.max.y:podium.position.y;previewRoot.position=new Vector3(podium.position.x,top,podium.position.z);previewRoot.rotation=podium.rotation;}
+            else{Debug.LogError("Menu scene is missing Garage Podium. The runtime will not create a replacement.");previewRoot.position=Vector3.zero;}
+        }
+
+        private static Transform FindSceneTransform(string objectName)
+        {
+            foreach(var item in Object.FindObjectsByType<Transform>(FindObjectsInactive.Include,FindObjectsSortMode.None))if(item.name==objectName)return item;
+            return null;
         }
 
         private GameObject BuildSettings(Transform canvas)
