@@ -12398,7 +12398,6 @@ MonoBehaviour:
   crossroadPrefabs:
   - {fileID: 4623501346566010854, guid: 1c2f649bb73f3c64e8f0bd6c2efb3cf5, type: 3}
   - {fileID: 2322147598828099468, guid: 64041ef4284998d49aad1687a96d40b6, type: 3}
-  - {fileID: 8050748024107887483, guid: c74f0a74f29605d4da88a3dc0585a604, type: 3}
   - {fileID: 5668982391212175364, guid: 4eeb20c070914254b90c9d79c08ef5e4, type: 3}
   crossroadMetrics:
   - prefab: {fileID: 4623501346566010854, guid: 1c2f649bb73f3c64e8f0bd6c2efb3cf5, type: 3}
