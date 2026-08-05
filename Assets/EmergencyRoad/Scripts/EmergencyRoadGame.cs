@@ -257,7 +257,7 @@ namespace EmergencyRoad
         }
         private void Honk(){EmergencyRoadAudio.Instance.Horn();if(hornEffect!=null)StopCoroutine(hornEffect);if(edgeEffect!=null){StopCoroutine(edgeEffect);edgeEffect=null;}visual.localPosition=baseLocalPosition;visual.localScale=baseScale;hornEffect=StartCoroutine(HonkBounce());}
         private IEnumerator HonkBounce(){float t=0;while(t<.38f){t+=Time.deltaTime;float s=Mathf.Sin(t/.38f*Mathf.PI);visual.localScale=Vector3.Scale(baseScale,new Vector3(1f-.08f*s,1f+.32f*s,1f-.08f*s));yield return null;}visual.localScale=baseScale;hornEffect=null;}
-        private void OnTriggerEnter(Collider other){if(other.TryGetComponent<RoadPickup>(out var pickup)){game.AddCoin();pickup.Collect();}else if(other.GetComponentInParent<RoadHazard>()!=null)game.Crash(other.bounds.center-transform.position);}
+        private void OnTriggerEnter(Collider other){var pickup=other.GetComponentInParent<RoadPickup>();if(pickup!=null){game.AddCoin();pickup.Collect();}else if(other.GetComponentInParent<RoadHazard>()!=null)game.Crash(other.bounds.center-transform.position);}
         private void OnCollisionEnter(Collision collision){if(collision.gameObject.GetComponentInParent<RoadHazard>()!=null)game.Crash(collision.collider.bounds.center-transform.position);}
         public void CrashVisual(Vector3 impactDirection){crashed=true;DeformMeshes(impactDirection);var localImpact=transform.InverseTransformDirection(impactDirection.normalized);EmergencyImpactVfx.Attach(transform,new Vector3(Mathf.Clamp(localImpact.x,-1f,1f)*.8f,.72f,Mathf.Clamp(localImpact.z,-1f,1f)*1.35f));StartCoroutine(Crumple(impactDirection));}
         private void DeformMeshes(Vector3 impactDirection)
