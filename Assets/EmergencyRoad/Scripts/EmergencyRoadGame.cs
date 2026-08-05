@@ -43,6 +43,7 @@ namespace EmergencyRoad
         public EmergencyVehicleController Player=>player;
         public bool Ended=>ended;
         public float Distance=>distance;
+        public float CurrentSpeed=>speed;
 
         public static void Create(EmergencyRoadCatalog data, EmergencyRoadGameView sceneView, float laneWidth = 5.18f, float chunkSpacing = 28f)
         {
@@ -236,7 +237,7 @@ namespace EmergencyRoad
     {
         private Transform visual; private EmergencyRoadGame game;private AudioClip vehicleHorn;private int vehicleIndex; private int lane;private int previousLane; private float targetX; private float bump; private bool crashed; private Coroutine edgeEffect;private Coroutine hornEffect; private Vector3 baseScale;private Vector3 baseLocalPosition;
         public int CurrentLane=>lane;
-        public void AutomationMoveTowardLane(int desiredLane){desiredLane=Mathf.Clamp(desiredLane,-1,1);if(desiredLane!=lane)Shift(desiredLane>lane?1:-1);}
+        public void AutomationMoveTowardLane(int desiredLane,bool bypassSideSafety=false){desiredLane=Mathf.Clamp(desiredLane,-1,1);if(bypassSideSafety){lane=desiredLane;targetX=lane*EmergencyRoadGame.LaneWidth;return;}if(desiredLane!=lane)Shift(desiredLane>lane?1:-1);}
         public void Initialize(Transform view, EmergencyRoadGame owner,AudioClip horn,int selectedVehicleIndex) { visual=view; game=owner;vehicleHorn=horn;vehicleIndex=selectedVehicleIndex; targetX=0; baseScale=visual.localScale;baseLocalPosition=visual.localPosition; }
         private void Update()
         {
@@ -446,7 +447,7 @@ namespace EmergencyRoad
     public sealed class MotorRushHazard:MonoBehaviour
     {
         private static Material warningMaterial;private static Material bodyMaterial;private static Material darkMaterial;
-        private EmergencyRoadGame game;private Transform player;private float speed=34f;private bool exploded;private bool pathLocked;private bool hasBeenInsideCamera;private float lockedTargetX;private float lateralVelocity;private float trackingVelocity;private Camera trackingCamera;private Renderer[] visualRenderers;private readonly Plane[] frustumPlanes=new Plane[6];
+        private EmergencyRoadGame game;private Transform player;private float speed=34f;private bool exploded;private bool pathLocked;private bool hasBeenInsideCamera;private float lockedTargetX;private float lateralVelocity;private float trackingVelocity;private Camera trackingCamera;private Renderer[] visualRenderers;private readonly Plane[] frustumPlanes=new Plane[6];private Rigidbody explodedBody;private bool compensateMapScroll;private float compensatedMapSpeed;
         public static Material WarningMaterial=>warningMaterial??=CreateMaterial(new Color(1f,.015f,.005f),true);
         public static MotorRushHazard Create(float x,EmergencyRoadGame owner,Transform playerTransform)
         {
@@ -468,6 +469,7 @@ namespace EmergencyRoad
         private static void Primitive(Transform parent,string name,PrimitiveType type,Vector3 position,Vector3 scale,Material material,Quaternion rotation){var go=GameObject.CreatePrimitive(type);go.name=name;go.transform.SetParent(parent);go.transform.localPosition=position;go.transform.localScale=scale;go.transform.localRotation=rotation;go.GetComponent<Renderer>().sharedMaterial=material;Object.Destroy(go.GetComponent<Collider>());}
         private static Material CreateMaterial(Color color,bool emission){var material=new Material(Shader.Find("Universal Render Pipeline/Lit"));material.color=color;if(emission){material.EnableKeyword("_EMISSION");material.SetColor("_EmissionColor",color*4f);}return material;}
         private void Update(){if(exploded)return;var p=transform.position;p.z+=speed*Time.deltaTime;if(!pathLocked&&player!=null){lockedTargetX=Mathf.SmoothDamp(lockedTargetX,player.position.x,ref trackingVelocity,.65f,3.5f);if(p.z>=-4f)pathLocked=true;}float desiredX=lockedTargetX+Mathf.Sin(p.z*.28f)*.5f;float previousX=p.x;p.x=Mathf.SmoothDamp(p.x,desiredX,ref lateralVelocity,.18f,7f);transform.position=p;float lateral=(p.x-previousX)/Mathf.Max(.001f,Time.deltaTime);float yaw=Mathf.Atan2(lateral,speed)*Mathf.Rad2Deg;float lean=Mathf.Clamp(-lateral*2f,-13f,13f);transform.rotation=Quaternion.Slerp(transform.rotation,Quaternion.Euler(0,yaw,lean),1f-Mathf.Exp(-8f*Time.deltaTime));UpdateCameraLifetime();}
+        private void FixedUpdate(){if(!exploded||!compensateMapScroll||explodedBody==null||game==null)return;float current=game.CurrentSpeed;float delta=current-compensatedMapSpeed;if(Mathf.Abs(delta)>.001f){var velocity=explodedBody.linearVelocity;velocity.z-=delta;explodedBody.linearVelocity=velocity;compensatedMapSpeed=current;}}
         private void UpdateCameraLifetime()
         {
             if(IsInsideCameraView()){hasBeenInsideCamera=true;return;}if(hasBeenInsideCamera)Destroy(gameObject);
@@ -482,7 +484,7 @@ namespace EmergencyRoad
         }
         private IEnumerator Explode(bool preserveAfterPlayerHit)
         {
-            exploded=true;var physicsCollider=GetComponent<BoxCollider>();foreach(var c in GetComponentsInChildren<Collider>())if(c!=physicsCollider)c.enabled=false;if(physicsCollider!=null){physicsCollider.enabled=true;physicsCollider.isTrigger=false;physicsCollider.size=new Vector3(.9f,1.15f,1.9f);physicsCollider.center=new Vector3(0,.58f,0);}var body=GetComponent<Rigidbody>();if(body!=null){body.isKinematic=false;body.useGravity=true;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.interpolation=RigidbodyInterpolation.Interpolate;body.linearVelocity=new Vector3(Random.Range(-2.5f,2.5f),7.5f,12f);body.angularVelocity=new Vector3(Random.Range(7f,12f),Random.Range(-7f,7f),Random.Range(-12f,12f));}
+            exploded=true;var physicsCollider=GetComponent<BoxCollider>();foreach(var c in GetComponentsInChildren<Collider>())if(c!=physicsCollider)c.enabled=false;if(physicsCollider!=null){physicsCollider.enabled=true;physicsCollider.isTrigger=false;physicsCollider.size=new Vector3(.9f,1.15f,1.9f);physicsCollider.center=new Vector3(0,.58f,0);}var body=GetComponent<Rigidbody>();if(body!=null){body.isKinematic=false;body.useGravity=true;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.interpolation=RigidbodyInterpolation.Interpolate;compensateMapScroll=!preserveAfterPlayerHit&&game!=null;compensatedMapSpeed=compensateMapScroll?game.CurrentSpeed:0f;body.linearVelocity=new Vector3(Random.Range(-2.5f,2.5f),7.5f,12f-compensatedMapSpeed);body.angularVelocity=new Vector3(Random.Range(7f,12f),Random.Range(-7f,7f),Random.Range(-12f,12f));explodedBody=body;}
             EmergencyImpactVfx.Attach(transform,new Vector3(0,.7f,0));
             var psGo=new GameObject("Motor Impact Burst",typeof(ParticleSystem));psGo.transform.position=transform.position;var ps=psGo.GetComponent<ParticleSystem>();ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);var main=ps.main;main.duration=.45f;main.loop=false;main.startLifetime=new ParticleSystem.MinMaxCurve(.55f,1.05f);main.startSpeed=new ParticleSystem.MinMaxCurve(5f,9f);main.startSize=new ParticleSystem.MinMaxCurve(.25f,.55f);main.startColor=new ParticleSystem.MinMaxGradient(new Color(1f,.08f,.01f),new Color(1f,.85f,.08f));main.maxParticles=36;var emission=ps.emission;emission.rateOverTime=0;emission.SetBursts(new[]{new ParticleSystem.Burst(0,26)});var vfxMaterial=Resources.Load<Material>("EmergencyRoadVFX");if(vfxMaterial!=null)psGo.GetComponent<ParticleSystemRenderer>().sharedMaterial=vfxMaterial;ps.Play();var flash=new GameObject("Motor Explosion Flash",typeof(Light));flash.transform.position=transform.position;var light=flash.GetComponent<Light>();light.type=LightType.Point;light.range=9f;light.intensity=5f;light.color=new Color(1f,.28f,.03f);Destroy(flash,.18f);Destroy(psGo,1.5f);
             if(preserveAfterPlayerHit)yield break;

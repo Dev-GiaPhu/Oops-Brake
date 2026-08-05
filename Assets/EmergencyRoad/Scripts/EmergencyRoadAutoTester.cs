@@ -71,10 +71,11 @@ namespace EmergencyRoad
             {
                 if(hazard==null)continue;float z=hazard.transform.position.z-driver.transform.position.z;if(z<-.5f||z>scanDistance)continue;int lane=Mathf.Clamp(Mathf.RoundToInt(hazard.transform.position.x/EmergencyRoadGame.LaneWidth),-1,1);nearest[lane+1]=Mathf.Min(nearest[lane+1],z);
             }
+            if(!seekCollision)foreach(var motor in UnityEngine.Object.FindObjectsByType<MotorRushHazard>(FindObjectsSortMode.None)){if(motor==null)continue;float z=motor.transform.position.z-driver.transform.position.z;if(z<-30f||z>scanDistance)continue;int lane=Mathf.Clamp(Mathf.RoundToInt(motor.transform.position.x/EmergencyRoadGame.LaneWidth),-1,1);nearest[lane+1]=Mathf.Min(nearest[lane+1],Mathf.Max(0,z));}
             int target=driver.CurrentLane;
             if(seekCollision){float best=float.PositiveInfinity;for(int i=0;i<3;i++)if(nearest[i]<best){best=nearest[i];target=i-1;}}
             else{float safest=-1;for(int i=0;i<3;i++)if(nearest[i]>safest){safest=nearest[i];target=i-1;}}
-            driver.AutomationMoveTowardLane(target);
+            driver.AutomationMoveTowardLane(target,seekCollision);
         }
 
         private void FinishRun(bool passed,string test,string failureMessage)
