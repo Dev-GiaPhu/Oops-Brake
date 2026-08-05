@@ -15,8 +15,9 @@ MonoBehaviour:
   startSpeed: 18
   maxSpeed: 45
   distanceToMaxSpeed: 800
-  gapAtStart: 11.5
-  gapAtMaxSpeed: 17.5
+  gapAtStart: 36
+  gapAtMaxSpeed: 50
+  minimumObstacleReactionTime: 0.75
   twoLaneBlockChanceAtStart: 0.58
   twoLaneBlockChanceAtMaxSpeed: 0.32
   minStraightChunksBetweenIntersections: 10

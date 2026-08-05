@@ -223,9 +223,9 @@ namespace EmergencyRoad
         internal bool IsCrossroadMeshCovered(int sequence){return Mathf.Abs(sequence-lastCrossroadSequence)<=lastCrossroadRadius||Mathf.Abs(sequence-nextCrossroadSequence)<=nextCrossroadRadius;}
         internal bool ShouldSpawnObstacle(int sequence,bool crossroad)
         {
-            float generationDistance=sequence*ChunkSpacing;if(generationDistance+ChunkSpacing*.5f<nextObstacleDistance)return false;
+            float generationDistance=sequence*ChunkSpacing;if(generationDistance<nextObstacleDistance)return false;
             // The opening is intentionally busy, then gains a little more breathing room as speed rises.
-            float minimumGap=VehicleLength*2f;float plannedGap=Mathf.Lerp(Settings!=null?Settings.gapAtStart:11.5f,Settings!=null?Settings.gapAtMaxSpeed:17.5f,Difficulty01);plannedGap=Mathf.Max(minimumGap,plannedGap);nextObstacleDistance=generationDistance+plannedGap;
+            float minimumGap=VehicleLength*2f;float reactionTime=Settings!=null?Settings.minimumObstacleReactionTime:.75f;float reactionGap=speed*reactionTime+VehicleLength;float plannedGap=Mathf.Lerp(Settings!=null?Settings.gapAtStart:36f,Settings!=null?Settings.gapAtMaxSpeed:50f,Difficulty01);plannedGap=Mathf.Max(minimumGap,reactionGap,plannedGap);nextObstacleDistance=generationDistance+plannedGap;
             return true;
         }
         public void SetHazardAlert(string message){if(hazardAlertText!=null)hazardAlertText.text=message;}
@@ -419,13 +419,18 @@ namespace EmergencyRoad
         }
         private void SpawnCrossing()
         {
-            int lane=FindSafeLane(root.transform.position.z+8f);bool left=Random.value<.5f;GameObject prefab=catalog.trafficVehicles.Count>0?catalog.trafficVehicles[Random.Range(0,catalog.trafficVehicles.Count)]:null;
-            var go=prefab?Object.Instantiate(prefab,root.transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name="Cross Traffic Hazard";go.transform.localPosition=new Vector3(left?-12f:12f,.45f,8f);go.transform.localRotation=Quaternion.identity;var tuning=owner!=null?owner.Settings:null;var size=tuning!=null?tuning.stoppedVehicleSize:new Vector2(2.18f,4.05f);EmergencyRoadGame.FitVehicle(go,size.x,size.y);go.transform.localRotation=Quaternion.Euler(0,left?90:-90,0);foreach(var oldCollider in go.GetComponentsInChildren<Collider>())Object.Destroy(oldCollider);go.AddComponent<RoadHazard>();var c=go.AddComponent<BoxCollider>();c.isTrigger=true;c.center=new Vector3(0,.72f,0);c.size=tuning!=null?tuning.stoppedVehicleHitbox:new Vector3(2.54f,1.45f,3.55f);var body=go.AddComponent<Rigidbody>();body.isKinematic=true;body.useGravity=false;var mover=go.AddComponent<SideCrossingHazard>();mover.Configure(lane*EmergencyRoadGame.LaneWidth,left);spawned.Add(go);
+            bool left=Random.value<.5f;var tuning=owner!=null?owner.Settings:null;float worldZ=root.transform.position.z+8f;int lane=FindCrossTrafficBlockLane(worldZ,left,tuning!=null?tuning.crossTrafficRouteLookDistance:24f);GameObject prefab=catalog.trafficVehicles.Count>0?catalog.trafficVehicles[Random.Range(0,catalog.trafficVehicles.Count)]:null;
+            var go=prefab?Object.Instantiate(prefab,root.transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name="Cross Traffic Hazard";go.transform.localPosition=new Vector3(left?-12f:12f,.45f,8f);go.transform.localRotation=Quaternion.identity;var size=tuning!=null?tuning.stoppedVehicleSize:new Vector2(2.18f,4.05f);EmergencyRoadGame.FitVehicle(go,size.x,size.y);go.transform.localRotation=Quaternion.Euler(0,left?90:-90,0);foreach(var oldCollider in go.GetComponentsInChildren<Collider>())Object.Destroy(oldCollider);go.AddComponent<RoadHazard>();var c=go.AddComponent<BoxCollider>();c.isTrigger=true;c.center=new Vector3(0,.72f,0);c.size=tuning!=null?tuning.stoppedVehicleHitbox:new Vector3(2.54f,1.45f,3.55f);var body=go.AddComponent<Rigidbody>();body.isKinematic=true;body.useGravity=false;var mover=go.AddComponent<SideCrossingHazard>();mover.Configure(lane*EmergencyRoadGame.LaneWidth,left,tuning!=null?tuning.crossTrafficSpeed:11.5f,tuning!=null?tuning.crossTrafficStartDistance:44f);spawned.Add(go);
         }
-        private static int FindSafeLane(float worldZ)
+        private static int FindCrossTrafficBlockLane(float worldZ,bool fromLeft,float routeLookDistance)
         {
-            int start=Random.Range(0,3);Physics.SyncTransforms();for(int i=0;i<3;i++){int lane=((start+i)%3)-1;var hits=Physics.OverlapBox(new Vector3(lane*EmergencyRoadGame.LaneWidth,.9f,worldZ),new Vector3(1.15f,.9f,2.3f),Quaternion.identity,~0,QueryTriggerInteraction.Collide);bool occupied=false;foreach(var hit in hits)if(hit.GetComponentInParent<RoadHazard>()!=null){occupied=true;break;}if(!occupied)return lane;}return Random.Range(-1,2);
+            int[] priority=fromLeft?new[]{-1,0,1}:new[]{1,0,-1};Physics.SyncTransforms();
+            foreach(int lane in priority)if(!IsReservedEscapeLane(lane,worldZ,routeLookDistance)&&!IsHazardLaneOccupied(lane,worldZ))return lane;
+            foreach(int lane in priority)if(!IsReservedEscapeLane(lane,worldZ,routeLookDistance))return lane;
+            return priority[0];
         }
+        private static bool IsHazardLaneOccupied(int lane,float worldZ){var hits=Physics.OverlapBox(new Vector3(lane*EmergencyRoadGame.LaneWidth,.9f,worldZ),new Vector3(1.15f,.9f,2.3f),Quaternion.identity,~0,QueryTriggerInteraction.Collide);foreach(var hit in hits)if(hit.GetComponentInParent<RoadHazard>()!=null)return true;return false;}
+        private static bool IsReservedEscapeLane(int lane,float worldZ,float lookDistance){foreach(var marker in Object.FindObjectsByType<RoadRouteMarker>(FindObjectsSortMode.None))if(marker.SoleOpenLane==lane&&Mathf.Abs(marker.transform.position.z-worldZ)<=lookDistance)return true;return false;}
     }
     public sealed class CoinSpinner:MonoBehaviour{private float baseY;private float phase;private void Awake(){baseY=transform.localPosition.y;phase=Random.value*6.28f;}private void Update(){transform.Rotate(0,180f*Time.deltaTime,0,Space.Self);var p=transform.localPosition;p.y=baseY+Mathf.Sin(Time.time*3.2f+phase)*.13f;transform.localPosition=p;}}
     public sealed class EmergencyCameraJuice:MonoBehaviour
@@ -438,9 +443,9 @@ namespace EmergencyRoad
     }
     public sealed class SideCrossingHazard:MonoBehaviour
     {
-        private float targetX;private bool fromLeft;private bool moving;
-        public void Configure(float x,bool left){targetX=x;fromLeft=left;}
-        public void Tick(float roadDelta){if(!moving&&transform.position.z<36f)moving=true;if(!moving)return;var p=transform.localPosition;p.x=Mathf.MoveTowards(p.x,targetX,8f*Time.deltaTime);transform.localPosition=p;}
+        private float targetX;private bool fromLeft;private bool moving;private float moveSpeed=11.5f;private float startDistance=44f;
+        public void Configure(float x,bool left,float speed,float activationDistance){targetX=x;fromLeft=left;moveSpeed=Mathf.Max(4f,speed);startDistance=Mathf.Max(20f,activationDistance);}
+        public void Tick(float roadDelta){if(!moving&&transform.position.z<startDistance)moving=true;if(!moving)return;var p=transform.localPosition;p.x=Mathf.MoveTowards(p.x,targetX,moveSpeed*Time.deltaTime);transform.localPosition=p;}
     }
 
     public sealed class SameDirectionTraffic:MonoBehaviour

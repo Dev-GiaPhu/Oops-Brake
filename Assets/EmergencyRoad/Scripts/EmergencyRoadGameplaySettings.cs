@@ -10,8 +10,9 @@ namespace EmergencyRoad
         [Min(1)] public float maxSpeed=45f;
         [Min(10)] public float distanceToMaxSpeed=800f;
         [Header("Obstacle Density")]
-        [Min(8.4f)] public float gapAtStart=11.5f;
-        [Min(8.4f)] public float gapAtMaxSpeed=17.5f;
+        [Min(8.4f)] public float gapAtStart=36f;
+        [Min(8.4f)] public float gapAtMaxSpeed=50f;
+        [Min(.25f)] public float minimumObstacleReactionTime=.75f;
         [Range(0,1)] public float twoLaneBlockChanceAtStart=.58f;
         [Range(0,1)] public float twoLaneBlockChanceAtMaxSpeed=.32f;
         [Header("Intersection Spacing")]
@@ -32,6 +33,10 @@ namespace EmergencyRoad
         [Min(.25f)] public float trafficLaneDecisionInterval=2.2f;
         [Min(4f)] public float trafficBrakingDistance=11f;
         [Min(1f)] public float trafficBrakingStrength=10f;
+        [Header("Cross Traffic")]
+        [Min(4f)] public float crossTrafficSpeed=11.5f;
+        [Min(20f)] public float crossTrafficStartDistance=44f;
+        [Min(8f)] public float crossTrafficRouteLookDistance=24f;
         [Header("Side Collision")]
         [Min(.2f)] public float sideCheckHalfLength=.68f;
         public float releaseBehindPlayer=.32f;
