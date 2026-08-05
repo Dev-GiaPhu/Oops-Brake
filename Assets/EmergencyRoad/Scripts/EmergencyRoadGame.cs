@@ -118,10 +118,10 @@ namespace EmergencyRoad
             GameObject visual = catalog.playerVehicles.Count > 0 ? Instantiate(catalog.playerVehicles[selected]) : GameObject.CreatePrimitive(PrimitiveType.Cube);
             visual.name = "Player Emergency Vehicle";
             visual.transform.SetParent(root.transform, false); FitVehicle(visual, 2.2f, 4.2f);
-            var collider = root.GetComponent<BoxCollider>()??root.AddComponent<BoxCollider>(); collider.size = new Vector3(2.05f,1.5f,3.6f); collider.center = new Vector3(0,.65f,0); collider.isTrigger = true;
-            var body = root.GetComponent<Rigidbody>()??root.AddComponent<Rigidbody>(); body.isKinematic = true; body.useGravity = false;
-            player = root.GetComponent<EmergencyVehicleController>()??root.AddComponent<EmergencyVehicleController>(); player.Initialize(visual.transform, this,catalog.HornForVehicle(selected),selected);
-            cameraJuice=Camera.main!=null?(Camera.main.GetComponent<EmergencyCameraJuice>()??Camera.main.gameObject.AddComponent<EmergencyCameraJuice>()):null;if(cameraJuice!=null)cameraJuice.Initialize(root.transform);
+            var collider = root.GetComponent<BoxCollider>();if(collider==null)collider=root.AddComponent<BoxCollider>();collider.size = new Vector3(2.05f,1.5f,3.6f); collider.center = new Vector3(0,.65f,0); collider.isTrigger = true;
+            var body = root.GetComponent<Rigidbody>();if(body==null)body=root.AddComponent<Rigidbody>();body.isKinematic = true; body.useGravity = false;
+            player = root.GetComponent<EmergencyVehicleController>();if(player==null)player=root.AddComponent<EmergencyVehicleController>();player.Initialize(visual.transform, this,catalog.HornForVehicle(selected),selected);
+            if(Camera.main!=null){cameraJuice=Camera.main.GetComponent<EmergencyCameraJuice>();if(cameraJuice==null)cameraJuice=Camera.main.gameObject.AddComponent<EmergencyCameraJuice>();}if(cameraJuice!=null)cameraJuice.Initialize(root.transform);
             CreateRoadDust(root.transform,catalog.vfxParticleMaterial);
         }
 
