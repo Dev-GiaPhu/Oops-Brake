@@ -30,6 +30,8 @@ namespace EmergencyRoad
         [Min(1)] public float trafficMaximumRoadSpeed=14f;
         [Range(0,1)] public float trafficLaneChangeChance=.38f;
         [Min(.25f)] public float trafficLaneDecisionInterval=2.2f;
+        [Min(4f)] public float trafficBrakingDistance=11f;
+        [Min(1f)] public float trafficBrakingStrength=10f;
         [Header("Side Collision")]
         [Min(.2f)] public float sideCheckHalfLength=.68f;
         public float releaseBehindPlayer=.32f;
