@@ -40,6 +40,9 @@ namespace EmergencyRoad
         private EmergencyRoadGameView sceneView;
         internal EmergencyRoadGameplaySettings Settings=>catalog!=null?catalog.gameplaySettings:null;
         internal EmergencyRoadCatalog Catalog=>catalog;
+        public EmergencyVehicleController Player=>player;
+        public bool Ended=>ended;
+        public float Distance=>distance;
 
         public static void Create(EmergencyRoadCatalog data, EmergencyRoadGameView sceneView, float laneWidth = 5.18f, float chunkSpacing = 28f)
         {
@@ -232,6 +235,8 @@ namespace EmergencyRoad
     public sealed class EmergencyVehicleController : MonoBehaviour
     {
         private Transform visual; private EmergencyRoadGame game;private AudioClip vehicleHorn;private int vehicleIndex; private int lane;private int previousLane; private float targetX; private float bump; private bool crashed; private Coroutine edgeEffect;private Coroutine hornEffect; private Vector3 baseScale;private Vector3 baseLocalPosition;
+        public int CurrentLane=>lane;
+        public void AutomationMoveTowardLane(int desiredLane){desiredLane=Mathf.Clamp(desiredLane,-1,1);if(desiredLane!=lane)Shift(desiredLane>lane?1:-1);}
         public void Initialize(Transform view, EmergencyRoadGame owner,AudioClip horn,int selectedVehicleIndex) { visual=view; game=owner;vehicleHorn=horn;vehicleIndex=selectedVehicleIndex; targetX=0; baseScale=visual.localScale;baseLocalPosition=visual.localPosition; }
         private void Update()
         {
@@ -265,7 +270,7 @@ namespace EmergencyRoad
         private void StartEdgeSqueeze(int dir){if(edgeEffect!=null)StopCoroutine(edgeEffect);if(hornEffect!=null){StopCoroutine(hornEffect);hornEffect=null;}visual.localScale=baseScale;visual.localPosition=baseLocalPosition;edgeEffect=StartCoroutine(EdgeSqueeze(dir));}
         private IEnumerator EdgeSqueeze(int dir)
         {
-            float t=0;while(t<.34f){t+=Time.deltaTime;float s=Mathf.Sin(Mathf.Clamp01(t/.34f)*Mathf.PI);visual.localPosition=baseLocalPosition+Vector3.right*(dir*.2f*s);visual.localScale=Vector3.Scale(baseScale,new Vector3(1f-.38f*s,1f+.04f*s,1f+.1f*s));yield return null;}visual.localPosition=baseLocalPosition;visual.localScale=baseScale;edgeEffect=null;
+            const float duration=.14f;float t=0;while(t<duration){t+=Time.deltaTime;float s=Mathf.Sin(Mathf.Clamp01(t/duration)*Mathf.PI);visual.localPosition=baseLocalPosition+Vector3.right*(dir*.16f*s);visual.localScale=Vector3.Scale(baseScale,new Vector3(1f-.34f*s,1f+.035f*s,1f+.08f*s));yield return null;}visual.localPosition=baseLocalPosition;visual.localScale=baseScale;edgeEffect=null;
         }
         private void Honk(){EmergencyRoadAudio.Instance.Horn(vehicleHorn,vehicleIndex);if(hornEffect!=null)StopCoroutine(hornEffect);if(edgeEffect!=null){StopCoroutine(edgeEffect);edgeEffect=null;}visual.localPosition=baseLocalPosition;visual.localScale=baseScale;hornEffect=StartCoroutine(HonkBounce());}
         private IEnumerator HonkBounce(){float t=0;while(t<.38f){t+=Time.deltaTime;float s=Mathf.Sin(t/.38f*Mathf.PI);visual.localScale=Vector3.Scale(baseScale,new Vector3(1f-.08f*s,1f+.32f*s,1f-.08f*s));yield return null;}visual.localScale=baseScale;hornEffect=null;}

@@ -238,6 +238,7 @@ namespace EmergencyRoad.Editor
             new GameObject("Horn - Space").transform.SetParent(gameplay);
             new GameObject("Road Recycling and Spawners").transform.SetParent(gameplay);
             new GameObject("Cross Traffic Spawner").transform.SetParent(gameplay);
+            var autoTest=new GameObject("AUTO TEST DRIVER",typeof(EmergencyRoadAutoTester));autoTest.transform.SetParent(root.transform);
             EmergencyRoadUI.Configure(catalog);
             EmergencyRoadSceneUIFactory.CreateGame(preview);
             root.AddComponent<EmergencyRoadSceneAuthoring>().Configure(EmergencyRoadSceneKind.Game,catalog,preview,catalog.laneWidth,catalog.roadLength);
