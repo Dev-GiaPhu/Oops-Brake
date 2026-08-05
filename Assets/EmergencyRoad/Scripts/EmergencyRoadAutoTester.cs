@@ -24,6 +24,7 @@ namespace EmergencyRoad
         [SerializeField, Tooltip("Suppress passing-run messages and retain only detected failures.")] private bool recordErrorsOnly=true;
         [SerializeField, Tooltip("On the final run, write a Codex repair-request JSON beside the report. Runtime does not rewrite C# source files.")] private bool requestRepairAfterFinalRun=true;
         [SerializeField] private string reportFileName="EmergencyRoadAutoTestReport.json";
+        [SerializeField, Min(20)] private int maxUniqueConsoleIssues=250;
 
         private static Session session;
         private EmergencyRoadGame game;
@@ -32,11 +33,17 @@ namespace EmergencyRoad
         private bool reloading;
 
         [Serializable] private sealed class Failure { public int run; public string test; public string message; public float distance; }
-        [Serializable] private sealed class Report { public int completedRuns; public int passedRuns; public int failedRuns; public bool infinite; public List<Failure> failures=new(); }
-        private sealed class Session { public bool active; public int completed; public int passed; public readonly List<Failure> failures=new(); }
+        [Serializable] private sealed class ConsoleIssue { public int firstRun; public string severity; public string message; public string stackTrace; public int occurrences=1; }
+        [Serializable] private sealed class Report { public int completedRuns; public int passedRuns; public int failedRuns; public int warningCount; public int errorCount; public bool infinite; public List<Failure> failures=new(); public List<ConsoleIssue> consoleIssues=new(); }
+        private sealed class Session { public bool active; public int completed; public int passed; public readonly List<Failure> failures=new(); public readonly List<ConsoleIssue> consoleIssues=new(); }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetSession()=>session=null;
+
+        private void Awake()
+        {
+            if(!runOnPlay||!enabled)return;session??=new Session{active=true};Application.logMessageReceived-=CaptureConsoleIssue;Application.logMessageReceived+=CaptureConsoleIssue;
+        }
 
         private IEnumerator Start()
         {
@@ -91,10 +98,27 @@ namespace EmergencyRoad
 
         private void OnDisable()
         {
+            Application.logMessageReceived-=CaptureConsoleIssue;
             if(!reloading&&session!=null)session.active=false;
         }
 
+        private void CaptureConsoleIssue(string condition,string stackTrace,LogType type)
+        {
+            if(session==null||condition.StartsWith("[AUTO TEST]",StringComparison.Ordinal)||type==LogType.Log)return;string severity=type==LogType.Warning?"Warning":type.ToString();
+            foreach(var issue in session.consoleIssues)if(issue.severity==severity&&issue.message==condition&&issue.stackTrace==stackTrace){issue.occurrences++;return;}
+            if(session.consoleIssues.Count>=Mathf.Max(20,maxUniqueConsoleIssues))return;session.consoleIssues.Add(new ConsoleIssue{firstRun=session.completed+1,severity=severity,message=condition,stackTrace=stackTrace});
+        }
+
         private void WriteReport(bool final)
+        {
+            int warnings=0,errors=0;foreach(var issue in session.consoleIssues){if(issue.severity=="Warning")warnings+=issue.occurrences;else errors+=issue.occurrences;}
+            var report=new Report{completedRuns=session.completed,passedRuns=session.passed,failedRuns=session.failures.Count,warningCount=warnings,errorCount=errors,infinite=repeatCount<0,failures=new List<Failure>(session.failures),consoleIssues=new List<ConsoleIssue>(session.consoleIssues)};
+            string directory=Application.persistentDataPath;string reportPath=Path.Combine(directory,string.IsNullOrWhiteSpace(reportFileName)?"EmergencyRoadAutoTestReport.json":reportFileName);File.WriteAllText(reportPath,JsonUtility.ToJson(report,true));
+            if(final&&requestRepairAfterFinalRun&&(session.failures.Count>0||session.consoleIssues.Count>0)){string requestPath=Path.Combine(directory,"EmergencyRoadAutoTest_REPAIR_REQUEST.json");File.WriteAllText(requestPath,JsonUtility.ToJson(report,true));Debug.LogError($"[AUTO TEST] Completed {session.completed} runs: {session.failures.Count} gameplay failures, {warnings} warnings, {errors} errors/exceptions. Repair request: {requestPath}");}
+            else if(final)Debug.Log($"[AUTO TEST] Completed {session.completed} runs. Report: {reportPath}");
+        }
+
+        private void LegacyWriteReport(bool final)
         {
             var report=new Report{completedRuns=session.completed,passedRuns=session.passed,failedRuns=session.failures.Count,infinite=repeatCount<0,failures=new List<Failure>(session.failures)};
             string directory=Application.persistentDataPath;string reportPath=Path.Combine(directory,string.IsNullOrWhiteSpace(reportFileName)?"EmergencyRoadAutoTestReport.json":reportFileName);File.WriteAllText(reportPath,JsonUtility.ToJson(report,true));
