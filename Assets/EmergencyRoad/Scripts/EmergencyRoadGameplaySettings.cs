@@ -46,5 +46,8 @@ namespace EmergencyRoad
         [Min(.1f)] public float motorMaxLateralSpeed=3.5f;
         [Min(.5f)] public float motorWarningTrackTime=2.2f;
         [Min(.1f)] public float motorLockedWarningTime=.55f;
+        [Header("Motorcycle Debris Physics")]
+        [Min(0)] public float motorDebrisImpactHoldTime=.35f;
+        [Min(.25f)] public float motorDebrisMapFollowSharpness=2.2f;
     }
 }

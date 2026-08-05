@@ -35,3 +35,5 @@ MonoBehaviour:
   motorMaxLateralSpeed: 3.5
   motorWarningTrackTime: 2.2
   motorLockedWarningTime: 0.55
+  motorDebrisImpactHoldTime: 0.35
+  motorDebrisMapFollowSharpness: 2.2
