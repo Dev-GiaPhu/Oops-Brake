@@ -43,8 +43,8 @@ namespace EmergencyRoad
             if(!runOnPlay||!enabled)yield break;
             if(session!=null&&!session.active)yield break;
             session??=new Session{active=true};
-            yield return new WaitUntil(()=>Object.FindFirstObjectByType<EmergencyRoadGame>()!=null);
-            game=Object.FindFirstObjectByType<EmergencyRoadGame>();driver=game!=null?game.Player:null;
+            yield return new WaitUntil(()=>UnityEngine.Object.FindFirstObjectByType<EmergencyRoadGame>()!=null);
+            game=UnityEngine.Object.FindFirstObjectByType<EmergencyRoadGame>();driver=game!=null?game.Player:null;
             if(game==null||driver==null){FinishRun(false,"Khởi tạo","Không tìm thấy EmergencyRoadGame hoặc Player.");yield break;}
             yield return RunOneTest();
         }
@@ -66,7 +66,7 @@ namespace EmergencyRoad
 
         private void Drive(bool seekCollision)
         {
-            var hazards=Object.FindObjectsByType<RoadHazard>(FindObjectsSortMode.None);float[] nearest={float.PositiveInfinity,float.PositiveInfinity,float.PositiveInfinity};
+            var hazards=UnityEngine.Object.FindObjectsByType<RoadHazard>(FindObjectsSortMode.None);float[] nearest={float.PositiveInfinity,float.PositiveInfinity,float.PositiveInfinity};
             foreach(var hazard in hazards)
             {
                 if(hazard==null)continue;float z=hazard.transform.position.z-driver.transform.position.z;if(z<-.5f||z>scanDistance)continue;int lane=Mathf.Clamp(Mathf.RoundToInt(hazard.transform.position.x/EmergencyRoadGame.LaneWidth),-1,1);nearest[lane+1]=Mathf.Min(nearest[lane+1],z);
