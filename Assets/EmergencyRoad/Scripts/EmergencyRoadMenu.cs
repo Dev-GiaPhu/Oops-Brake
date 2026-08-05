@@ -47,10 +47,11 @@ namespace EmergencyRoad
             if(sceneView==null){Debug.LogError("Menu scene is missing EmergencyRoadMenuView. Rebuild the authored scenes.");return;}
             wallet=sceneView.wallet;vehicleName=sceneView.vehicleName;priceText=sceneView.price;actionButton=sceneView.vehicleAction;sideCollisionButton=sceneView.sideCollision;settings=sceneView.settingsPanel;controls=sceneView.controlsPanel;
             Bind(sceneView.previous,()=>Select(index-1));Bind(sceneView.next,()=>Select(index+1));Bind(sceneView.vehicleAction,VehicleAction);Bind(sceneView.play,Play);Bind(sceneView.settingsOpen,ToggleSettings);Bind(sceneView.quit,Application.Quit);Bind(sceneView.sideCollision,ToggleSideCollision);
+            Bind(sceneView.selectVehicle,OpenGarage);Bind(sceneView.garageBack,CloseGarage);
             Bind(sceneView.controlsOpen,()=>{settings.SetActive(false);controls.SetActive(true);});Bind(sceneView.settingsClose,ToggleSettings);Bind(sceneView.controlsBack,()=>{controls.SetActive(false);settings.SetActive(true);});
             Bind(sceneView.music,v=>{EmergencyRoadProfile.Current.musicVolume=v;EmergencyRoadAudio.Instance.ApplyVolumes();EmergencyRoadProfile.Save();},EmergencyRoadProfile.Current.musicVolume);
             Bind(sceneView.sfx,v=>{EmergencyRoadProfile.Current.sfxVolume=v;EmergencyRoadAudio.Instance.ApplyVolumes();EmergencyRoadProfile.Save();},EmergencyRoadProfile.Current.sfxVolume);
-            settings.SetActive(false);controls.SetActive(false);RefreshSideCollisionLabel();
+            sceneView.mainMenuPanel.SetActive(true);sceneView.garagePanel.SetActive(false);settings.SetActive(false);controls.SetActive(false);RefreshSideCollisionLabel();
         }
 
         private static void Bind(Button button,UnityEngine.Events.UnityAction action){if(button==null)return;button.onClick.RemoveAllListeners();button.onClick.AddListener(()=>{EmergencyRoadAudio.Instance?.Click();action();});}
@@ -127,6 +128,8 @@ namespace EmergencyRoad
         }
 
         private void Update() { if (previewRoot != null) previewRoot.Rotate(0, 24f * Time.unscaledDeltaTime, 0); }
+        private void OpenGarage(){sceneView.mainMenuPanel.SetActive(false);sceneView.garagePanel.SetActive(true);}
+        private void CloseGarage(){sceneView.garagePanel.SetActive(false);sceneView.mainMenuPanel.SetActive(true);}
         private void ToggleSettings() { settings.SetActive(!settings.activeSelf); controls.SetActive(false); }
         private void ToggleSideCollision(){EmergencyRoadProfile.Current.sideCollisionEnabled=!EmergencyRoadProfile.Current.sideCollisionEnabled;EmergencyRoadProfile.Save();RefreshSideCollisionLabel();}
         private void RefreshSideCollisionLabel(){if(sideCollisionButton!=null)sideCollisionButton.GetComponentInChildren<TMP_Text>().text=EmergencyRoadProfile.Current.sideCollisionEnabled?"BẬT":"TẮT";}
@@ -153,9 +156,12 @@ namespace EmergencyRoad
             if (renderers.Length == 0) return;
             var bounds = renderers[0].bounds;
             foreach (var r in renderers) bounds.Encapsulate(r.bounds);
-            float scale = 4.5f / Mathf.Max(bounds.size.x, bounds.size.z);
+            float scale = 6f / Mathf.Max(bounds.size.x, bounds.size.z);
             go.transform.localScale = Vector3.one * scale;
-            go.transform.position -= new Vector3(bounds.center.x, bounds.min.y, bounds.center.z) * scale;
+            bounds = renderers[0].bounds;
+            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
+            Vector3 target = go.transform.parent.position;
+            go.transform.position += new Vector3(target.x-bounds.center.x,target.y-bounds.min.y,target.z-bounds.center.z);
         }
 
         private void VehicleAction()

@@ -44,8 +44,8 @@ namespace EmergencyRoad.Editor
             if (EditorApplication.isCompiling) { EditorApplication.delayCall += AutoBuild; return; }
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             if(!EnsureTmpEssentialResources()){EditorApplication.delayCall+=AutoBuild;return;}
-            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 21 - Serialized Scene UI Views") ||
-                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 21 - Serialized Scene UI Views");
+            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 22 - Split Main Menu And Garage") ||
+                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 22 - Split Main Menu And Garage");
             if (authoredScenesMissing || AssetDatabase.LoadAssetAtPath<EmergencyRoadCatalog>(CatalogPath) == null || AssetDatabase.LoadAssetAtPath<EmergencyRoadGameplaySettings>(GameplaySettingsPath)==null) BuildGame();
         }
 
@@ -190,7 +190,7 @@ namespace EmergencyRoad.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("MENU SCENE AUTHORING");
-            new GameObject("Authoring Version 21 - Serialized Scene UI Views").transform.SetParent(root.transform);
+            new GameObject("Authoring Version 22 - Split Main Menu And Garage").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform;
             preview.SetParent(root.transform);
             CreateCamera(preview, "Garage Camera", new Vector3(8, 5.2f, -9), new Vector3(17,-35,0));
@@ -211,7 +211,7 @@ namespace EmergencyRoad.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("GAME SCENE AUTHORING");
-            new GameObject("Authoring Version 21 - Serialized Scene UI Views").transform.SetParent(root.transform);
+            new GameObject("Authoring Version 22 - Split Main Menu And Garage").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform; preview.SetParent(root.transform);
             CreateCamera(preview,"Chase Camera",new Vector3(0,7.6f,-10.5f),new Vector3(22,0,0));
             CreateLight(preview,"Sun",Vector3.zero);

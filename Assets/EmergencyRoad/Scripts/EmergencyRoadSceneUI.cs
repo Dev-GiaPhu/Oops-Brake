@@ -15,18 +15,22 @@ namespace EmergencyRoad
             EmergencyRoadUI.Label(top, "BIỆT ĐỘI KHẨN CẤP", 64, Color.white, TextAnchor.MiddleLeft, new(.05f,0), new(.65f,1), Vector2.zero, Vector2.zero);
             view.wallet = EmergencyRoadUI.Label(top, "● 0", 38, EmergencyRoadUI.Yellow, TextAnchor.MiddleRight, new(.7f,0), new(.95f,1), Vector2.zero, Vector2.zero);
 
-            var garage = EmergencyRoadUI.Panel(canvas.transform, "Garage", new(.02f,.035f,.075f,.88f), new(.05f,.08f), new(.42f,.8f), Vector2.zero, Vector2.zero);
+            var garage = EmergencyRoadUI.Panel(canvas.transform, "Garage Selector Panel", new(.02f,.035f,.075f,.92f), new(.75f,.06f), new(.98f,.82f), Vector2.zero, Vector2.zero);
+            view.garagePanel=garage.gameObject;
             EmergencyRoadUI.Label(garage, "NHÀ XE", 40, EmergencyRoadUI.Cyan, TextAnchor.MiddleCenter, new(.1f,.82f), new(.9f,.96f), Vector2.zero, Vector2.zero);
             view.vehicleName = EmergencyRoadUI.Label(garage, "XE CỨU THƯƠNG", 44, Color.white, TextAnchor.MiddleCenter, new(.08f,.62f), new(.92f,.8f), Vector2.zero, Vector2.zero);
             view.price = EmergencyRoadUI.Label(garage, "ĐÃ MỞ • CÙNG HIỆU NĂNG", 28, EmergencyRoadUI.Yellow, TextAnchor.MiddleCenter, new(.08f,.51f), new(.92f,.63f), Vector2.zero, Vector2.zero);
             view.previous = EmergencyRoadUI.Button(garage, "‹", EmergencyRoadUI.Cyan, new(.08f,.34f), new(.27f,.48f), Vector2.zero, Vector2.zero, null);
             view.next = EmergencyRoadUI.Button(garage, "›", EmergencyRoadUI.Cyan, new(.73f,.34f), new(.92f,.48f), Vector2.zero, Vector2.zero, null);
-            view.vehicleAction = EmergencyRoadUI.Button(garage, "CHỌN", EmergencyRoadUI.Yellow, new(.16f,.14f), new(.84f,.3f), Vector2.zero, Vector2.zero, null);
+            view.vehicleAction = EmergencyRoadUI.Button(garage, "CHỌN", EmergencyRoadUI.Yellow, new(.12f,.16f), new(.88f,.3f), Vector2.zero, Vector2.zero, null);
+            view.garageBack = EmergencyRoadUI.Button(garage, "QUAY LẠI", new(.08f,.45f,.65f,1), new(.12f,.03f), new(.88f,.13f), Vector2.zero, Vector2.zero, null);
 
-            var actions = EmergencyRoadUI.Panel(canvas.transform, "Actions", Color.clear, new(.66f,.13f), new(.95f,.68f), Vector2.zero, Vector2.zero);
-            view.play = EmergencyRoadUI.Button(actions, "CHƠI", EmergencyRoadUI.Yellow, new(0,.66f), Vector2.one, Vector2.zero, Vector2.zero, null);
-            view.settingsOpen = EmergencyRoadUI.Button(actions, "CÀI ĐẶT", new(.08f,.45f,.65f,1), new(0,.35f), new(1,.61f), Vector2.zero, Vector2.zero, null);
-            view.quit = EmergencyRoadUI.Button(actions, "THOÁT", new(.75f,.16f,.2f,1), new(0,.04f), new(1,.3f), Vector2.zero, Vector2.zero, null);
+            var actions = EmergencyRoadUI.Panel(canvas.transform, "Main Menu - Right 25 Percent", new(.02f,.035f,.075f,.78f), new(.75f,.06f), new(.98f,.82f), Vector2.zero, Vector2.zero);
+            view.mainMenuPanel=actions.gameObject;
+            view.play = EmergencyRoadUI.Button(actions, "CHƠI", EmergencyRoadUI.Yellow, new(.08f,.7f), new(.92f,.88f), Vector2.zero, Vector2.zero, null);
+            view.selectVehicle = EmergencyRoadUI.Button(actions, "CHỌN XE", EmergencyRoadUI.Cyan, new(.08f,.49f), new(.92f,.67f), Vector2.zero, Vector2.zero, null);
+            view.settingsOpen = EmergencyRoadUI.Button(actions, "CÀI ĐẶT", new(.08f,.45f,.65f,1), new(.08f,.28f), new(.92f,.46f), Vector2.zero, Vector2.zero, null);
+            view.quit = EmergencyRoadUI.Button(actions, "THOÁT", new(.75f,.16f,.2f,1), new(.08f,.07f), new(.92f,.25f), Vector2.zero, Vector2.zero, null);
 
             view.settingsPanel = EmergencyRoadUI.Panel(canvas.transform, "Settings Modal", EmergencyRoadUI.Navy, new(.28f,.2f), new(.72f,.8f), Vector2.zero, Vector2.zero).gameObject;
             var sp = view.settingsPanel.transform;
@@ -45,7 +49,7 @@ namespace EmergencyRoad
             EmergencyRoadUI.Label(cp, "ĐIỀU KHIỂN", 52, EmergencyRoadUI.Cyan, TextAnchor.MiddleCenter, new(.1f,.8f), new(.9f,.96f), Vector2.zero, Vector2.zero);
             EmergencyRoadUI.Label(cp, "A / D\nCHUYỂN LÀN\n\nSPACE\nBÓP CÒI VUI NHỘN\n\nESC\nTẠM DỪNG", 34, Color.white, TextAnchor.MiddleCenter, new(.08f,.25f), new(.92f,.78f), Vector2.zero, Vector2.zero);
             view.controlsBack = EmergencyRoadUI.Button(cp, "QUAY LẠI", EmergencyRoadUI.Yellow, new(.28f,.08f), new(.72f,.2f), Vector2.zero, Vector2.zero, null);
-            view.settingsPanel.SetActive(false); view.controlsPanel.SetActive(false);
+            view.garagePanel.SetActive(false);view.settingsPanel.SetActive(false); view.controlsPanel.SetActive(false);
             return view;
         }
 
