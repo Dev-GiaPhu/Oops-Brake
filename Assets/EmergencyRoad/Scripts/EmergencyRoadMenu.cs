@@ -86,22 +86,15 @@ namespace EmergencyRoad
         {
             RenderSettings.ambientMode=AmbientMode.Trilight;RenderSettings.ambientSkyColor=new Color(.42f,.56f,.72f);RenderSettings.ambientEquatorColor=new Color(.2f,.28f,.36f);RenderSettings.ambientGroundColor=new Color(.08f,.1f,.12f);RenderSettings.fog=true;RenderSettings.fogMode=FogMode.Linear;RenderSettings.fogColor=new Color(.1f,.2f,.28f);RenderSettings.fogStartDistance=25f;RenderSettings.fogEndDistance=75f;
             var authoredVehicle=FindSceneTransform("Selected Vehicle Preview (Ambulance)");
-            var podium=FindSceneTransform("Garage Podium");
-            previewRoot = new GameObject("Vehicle Preview Runtime Slot - Uses Scene Position").transform;
-            if(authoredVehicle!=null){previewRoot.SetPositionAndRotation(authoredVehicle.position,authoredVehicle.rotation);Destroy(authoredVehicle.gameObject);}
-            else if(podium!=null){var renderer=podium.GetComponent<Renderer>();var top=renderer!=null?renderer.bounds.max.y:podium.position.y;previewRoot.position=new Vector3(podium.position.x,top,podium.position.z);previewRoot.rotation=podium.rotation;}
-            else{Debug.LogError("Menu scene is missing Garage Podium. The runtime will not create a replacement.");previewRoot.position=Vector3.zero;}
-            FrameSceneCamera(Camera.main,previewRoot.position,sceneView!=null?sceneView.worldContentCenterX:.375f);
+            if(authoredVehicle!=null){previewRoot=authoredVehicle;PrepareAuthoredPreviewAnchor(previewRoot);}
+            else Debug.LogError("Menu scene is missing Selected Vehicle Preview (Ambulance). Runtime will not create or replace the authored preview root.");
         }
 
-        private static void FrameSceneCamera(Camera sceneCamera,Vector3 worldCenter,float targetViewportX)
+        private static void PrepareAuthoredPreviewAnchor(Transform anchor)
         {
-            if(sceneCamera==null)return;
-            sceneCamera.ResetProjectionMatrix();
-            float currentViewportX=sceneCamera.WorldToViewportPoint(worldCenter).x;
-            var projection=sceneCamera.projectionMatrix;
-            projection.m02+=2f*(currentViewportX-Mathf.Clamp(targetViewportX,.25f,.5f));
-            sceneCamera.projectionMatrix=projection;
+            foreach(var renderer in anchor.GetComponentsInChildren<Renderer>(true))renderer.enabled=false;
+            foreach(var collider in anchor.GetComponentsInChildren<Collider>(true))collider.enabled=false;
+            foreach(var particles in anchor.GetComponentsInChildren<ParticleSystem>(true))particles.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         private static Transform FindSceneTransform(string objectName)
@@ -147,10 +140,8 @@ namespace EmergencyRoad
         {
             if (catalog.playerVehicles.Count == 0) return;
             index = (next + catalog.playerVehicles.Count) % catalog.playerVehicles.Count;
-            if (preview != null) Destroy(preview);
-            preview = Instantiate(catalog.playerVehicles[index], previewRoot);
-            preview.transform.localPosition = Vector3.zero; preview.transform.localRotation = Quaternion.identity;
-            NormalizePreview(preview);
+            if (preview != null){preview.SetActive(false);Destroy(preview);}
+            if(previewRoot!=null){preview = Instantiate(catalog.playerVehicles[index], previewRoot);preview.transform.localPosition = Vector3.zero;preview.transform.localRotation = Quaternion.identity;NormalizePreview(preview);}
             vehicleName.text = index < VehicleNames.Length ? VehicleNames[index] : $"XE ĐẶC BIỆT {index + 1}";
             wallet.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
             bool unlocked = EmergencyRoadProfile.IsUnlocked(index);
