@@ -19,15 +19,17 @@ namespace EmergencyRoad
         private Button sideCollisionButton;
         private GameObject settings;
         private GameObject controls;
+        private EmergencyRoadMenuView sceneView;
         private int index;
         private static readonly int[] Prices = { 0, 350, 700, 1100, 1600, 2200, 3000 };
         private static readonly string[] VehicleNames = { "XE CỨU THƯƠNG", "XE CẢNH SÁT", "XE CỨU HỎA", "TAXI", "XE BỒN", "XE ỦI", "XE XÚC" };
 
-        public static void Create(EmergencyRoadCatalog data)
+        public static void Create(EmergencyRoadCatalog data, EmergencyRoadMenuView sceneView)
         {
             var root = new GameObject("Menu Controller");
             var menu = root.AddComponent<EmergencyRoadMenu>();
             menu.catalog = data;
+            menu.sceneView = sceneView;
             menu.Build();
         }
 
@@ -35,6 +37,27 @@ namespace EmergencyRoad
         {
             EmergencyRoadUI.SetFont(catalog.uiFont);
             SetupWorld();
+            BindSceneUI();
+            index = Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle, 0, catalog.playerVehicles.Count - 1);
+            Select(index);
+        }
+
+        private void BindSceneUI()
+        {
+            if(sceneView==null){Debug.LogError("Menu scene is missing EmergencyRoadMenuView. Rebuild the authored scenes.");return;}
+            wallet=sceneView.wallet;vehicleName=sceneView.vehicleName;priceText=sceneView.price;actionButton=sceneView.vehicleAction;sideCollisionButton=sceneView.sideCollision;settings=sceneView.settingsPanel;controls=sceneView.controlsPanel;
+            Bind(sceneView.previous,()=>Select(index-1));Bind(sceneView.next,()=>Select(index+1));Bind(sceneView.vehicleAction,VehicleAction);Bind(sceneView.play,Play);Bind(sceneView.settingsOpen,ToggleSettings);Bind(sceneView.quit,Application.Quit);Bind(sceneView.sideCollision,ToggleSideCollision);
+            Bind(sceneView.controlsOpen,()=>{settings.SetActive(false);controls.SetActive(true);});Bind(sceneView.settingsClose,ToggleSettings);Bind(sceneView.controlsBack,()=>{controls.SetActive(false);settings.SetActive(true);});
+            Bind(sceneView.music,v=>{EmergencyRoadProfile.Current.musicVolume=v;EmergencyRoadAudio.Instance.ApplyVolumes();EmergencyRoadProfile.Save();},EmergencyRoadProfile.Current.musicVolume);
+            Bind(sceneView.sfx,v=>{EmergencyRoadProfile.Current.sfxVolume=v;EmergencyRoadAudio.Instance.ApplyVolumes();EmergencyRoadProfile.Save();},EmergencyRoadProfile.Current.sfxVolume);
+            settings.SetActive(false);controls.SetActive(false);RefreshSideCollisionLabel();
+        }
+
+        private static void Bind(Button button,UnityEngine.Events.UnityAction action){if(button==null)return;button.onClick.RemoveAllListeners();button.onClick.AddListener(()=>{EmergencyRoadAudio.Instance?.Click();action();});}
+        private static void Bind(Slider slider,UnityEngine.Events.UnityAction<float> action,float value){if(slider==null)return;slider.onValueChanged.RemoveAllListeners();slider.SetValueWithoutNotify(value);slider.onValueChanged.AddListener(action);}
+
+        private void LegacyRuntimeUiIsNoLongerUsed()
+        {
             var canvas = EmergencyRoadUI.Canvas("Main Menu UI");
             var top = EmergencyRoadUI.Panel(canvas.transform, "Top Bar", EmergencyRoadUI.Navy, new Vector2(0, .86f), Vector2.one, Vector2.zero, Vector2.zero);
             EmergencyRoadUI.Label(top, "BIỆT ĐỘI KHẨN CẤP", 64, Color.white, TextAnchor.MiddleLeft, new Vector2(.05f,0), new Vector2(.65f,1), Vector2.zero, Vector2.zero);
@@ -55,8 +78,6 @@ namespace EmergencyRoad
 
             settings = BuildSettings(canvas.transform);
             controls = BuildControls(canvas.transform);
-            index = Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle, 0, catalog.playerVehicles.Count - 1);
-            Select(index);
         }
 
         private void SetupWorld()

@@ -36,12 +36,15 @@ namespace EmergencyRoad
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = .5f;
-            if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() == null)
-            {
-                var eventGo = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-                UnityEngine.Object.DontDestroyOnLoad(eventGo);
-            }
+            EnsureEventSystem();
             return canvas;
+        }
+
+        public static void EnsureEventSystem()
+        {
+            if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() != null) return;
+            var eventGo = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
+            if(Application.isPlaying)UnityEngine.Object.DontDestroyOnLoad(eventGo);
         }
 
         public static RectTransform Panel(Transform parent, string name, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)

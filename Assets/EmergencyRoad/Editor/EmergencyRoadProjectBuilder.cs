@@ -44,8 +44,8 @@ namespace EmergencyRoad.Editor
             if (EditorApplication.isCompiling) { EditorApplication.delayCall += AutoBuild; return; }
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             if(!EnsureTmpEssentialResources()){EditorApplication.delayCall+=AutoBuild;return;}
-            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 19 - Per Vehicle Horns") ||
-                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 19 - Per Vehicle Horns");
+            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 21 - Serialized Scene UI Views") ||
+                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 21 - Serialized Scene UI Views");
             if (authoredScenesMissing || AssetDatabase.LoadAssetAtPath<EmergencyRoadCatalog>(CatalogPath) == null || AssetDatabase.LoadAssetAtPath<EmergencyRoadGameplaySettings>(GameplaySettingsPath)==null) BuildGame();
         }
 
@@ -190,7 +190,7 @@ namespace EmergencyRoad.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("MENU SCENE AUTHORING");
-            new GameObject("Authoring Version 19 - Per Vehicle Horns").transform.SetParent(root.transform);
+            new GameObject("Authoring Version 21 - Serialized Scene UI Views").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform;
             preview.SetParent(root.transform);
             CreateCamera(preview, "Garage Camera", new Vector3(8, 5.2f, -9), new Vector3(17,-35,0));
@@ -201,7 +201,8 @@ namespace EmergencyRoad.Editor
             {
                 var car=(GameObject)PrefabUtility.InstantiatePrefab(catalog.playerVehicles[0],scene); car.name="Selected Vehicle Preview (Ambulance)"; car.transform.SetParent(preview); car.transform.position=new Vector3(3.4f,.2f,0);
             }
-            CreateCanvasPreview(preview,"Main Menu Canvas",new[]{"Top Bar - BIỆT ĐỘI KHẨN CẤP","Nhà Xe Panel","Tên Xe và Giá","Xe Trước Button","Xe Sau Button","Mở Khóa hoặc Chọn Button","Chơi Button","Cài Đặt Button","Thoát Button","Cài Đặt Modal","Âm Nhạc Slider","Hiệu Ứng Slider","Va Chạm Bên Hông Toggle","Điều Khiển Modal"});
+            EmergencyRoadUI.Configure(catalog);
+            EmergencyRoadSceneUIFactory.CreateMenu(preview);
             root.AddComponent<EmergencyRoadSceneAuthoring>().Configure(EmergencyRoadSceneKind.Menu,catalog,preview);
             EditorSceneManager.SaveScene(scene,MenuPath);
         }
@@ -210,7 +211,7 @@ namespace EmergencyRoad.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("GAME SCENE AUTHORING");
-            new GameObject("Authoring Version 19 - Per Vehicle Horns").transform.SetParent(root.transform);
+            new GameObject("Authoring Version 21 - Serialized Scene UI Views").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform; preview.SetParent(root.transform);
             CreateCamera(preview,"Chase Camera",new Vector3(0,7.6f,-10.5f),new Vector3(22,0,0));
             CreateLight(preview,"Sun",Vector3.zero);
@@ -237,7 +238,8 @@ namespace EmergencyRoad.Editor
             new GameObject("Horn - Space").transform.SetParent(gameplay);
             new GameObject("Road Recycling and Spawners").transform.SetParent(gameplay);
             new GameObject("Cross Traffic Spawner").transform.SetParent(gameplay);
-            CreateCanvasPreview(preview,"Game HUD Canvas",new[]{"Quãng Đường Text","Tiền Counter","Tạm Dừng Button","Gợi Ý Điều Khiển","Tạm Dừng Panel","Hết Lượt Panel","Chơi Lại Button","Về Nhà Xe Button"});
+            EmergencyRoadUI.Configure(catalog);
+            EmergencyRoadSceneUIFactory.CreateGame(preview);
             root.AddComponent<EmergencyRoadSceneAuthoring>().Configure(EmergencyRoadSceneKind.Game,catalog,preview,catalog.laneWidth,catalog.roadLength);
             EditorSceneManager.SaveScene(scene,"Assets/Scenes/Game.unity");
         }

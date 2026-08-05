@@ -37,16 +37,18 @@ namespace EmergencyRoad
         private bool paused;
         private bool ended;
         private EmergencyCameraJuice cameraJuice;
+        private EmergencyRoadGameView sceneView;
         internal EmergencyRoadGameplaySettings Settings=>catalog!=null?catalog.gameplaySettings:null;
         internal EmergencyRoadCatalog Catalog=>catalog;
 
-        public static void Create(EmergencyRoadCatalog data, float laneWidth = 5.18f, float chunkSpacing = 28f)
+        public static void Create(EmergencyRoadCatalog data, EmergencyRoadGameView sceneView, float laneWidth = 5.18f, float chunkSpacing = 28f)
         {
             LaneWidth = laneWidth;
             ChunkSpacing = chunkSpacing;
             var go = new GameObject("Emergency Road Game");
             var game = go.AddComponent<EmergencyRoadGame>();
             game.catalog = data;
+            game.sceneView = sceneView;
             game.Build();
         }
 
@@ -141,6 +143,16 @@ namespace EmergencyRoad
         }
 
         private void BuildHud()
+        {
+            if(sceneView==null){Debug.LogError("Game scene is missing EmergencyRoadGameView. Rebuild the authored scenes.");return;}
+            scoreText=sceneView.score;coinText=sceneView.coins;hazardAlertText=sceneView.hazardAlert;pausePanel=sceneView.pausePanel;gameOverPanel=sceneView.gameOverPanel;gameOverScore=sceneView.gameOverScore;
+            Bind(sceneView.pause,TogglePause);Bind(sceneView.resume,TogglePause);Bind(sceneView.restartFromPause,Restart);Bind(sceneView.menuFromPause,Menu);Bind(sceneView.retry,Restart);Bind(sceneView.garage,Menu);
+            pausePanel.SetActive(false);gameOverPanel.SetActive(false);
+        }
+
+        private static void Bind(Button button,UnityEngine.Events.UnityAction action){if(button==null)return;button.onClick.RemoveAllListeners();button.onClick.AddListener(()=>{EmergencyRoadAudio.Instance?.Click();action();});}
+
+        private void LegacyRuntimeHudIsNoLongerUsed()
         {
             var canvas = EmergencyRoadUI.Canvas("Game HUD");
             var bar = EmergencyRoadUI.Panel(canvas.transform,"HUD Bar",EmergencyRoadUI.Navy,new Vector2(0,.88f),Vector2.one,Vector2.zero,Vector2.zero);
