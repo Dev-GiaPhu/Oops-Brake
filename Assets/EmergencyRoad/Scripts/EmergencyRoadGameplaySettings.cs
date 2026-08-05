@@ -24,6 +24,12 @@ namespace EmergencyRoad
         [Range(.7f,.9f)] public float obstacleLaneWidth=.86f;
         public Vector2 stoppedVehicleSize=new(2.18f,4.05f);
         public Vector3 stoppedVehicleHitbox=new(2.54f,1.45f,3.55f);
+        [Header("Same Direction Traffic")]
+        [Range(0,1)] public float sameDirectionTrafficChance=.28f;
+        [Min(1)] public float trafficMinimumRoadSpeed=8f;
+        [Min(1)] public float trafficMaximumRoadSpeed=14f;
+        [Range(0,1)] public float trafficLaneChangeChance=.38f;
+        [Min(.25f)] public float trafficLaneDecisionInterval=2.2f;
         [Header("Side Collision")]
         [Min(.2f)] public float sideCheckHalfLength=.68f;
         public float releaseBehindPlayer=.32f;

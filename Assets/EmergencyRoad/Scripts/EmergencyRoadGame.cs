@@ -203,6 +203,13 @@ namespace EmergencyRoad
         }
 
         public void AddCoin() { EmergencyRoadProfile.Current.coins++; EmergencyRoadProfile.Save(); EmergencyRoadAudio.Instance.Coin(); }
+        internal void SpawnSameDirectionTraffic(int lane,float worldZ)
+        {
+            if(catalog==null||catalog.trafficVehicles.Count==0)return;var holder=new GameObject("Road Hazard - Same Direction Traffic");holder.transform.SetParent(transform);holder.transform.position=new Vector3(lane*LaneWidth,.05f,worldZ);holder.AddComponent<RoadHazard>();
+            var prefab=catalog.trafficVehicles[Random.Range(0,catalog.trafficVehicles.Count)];var visual=Instantiate(prefab,holder.transform);visual.name=$"Moving {prefab.name}";visual.transform.localPosition=Vector3.zero;visual.transform.localRotation=Quaternion.identity;FitVehicle(visual,2.12f,4.05f);foreach(var oldCollider in visual.GetComponentsInChildren<Collider>())Destroy(oldCollider);
+            var collider=holder.AddComponent<BoxCollider>();collider.isTrigger=true;collider.center=new Vector3(0,.72f,0);collider.size=new Vector3(2.35f,1.45f,3.55f);var body=holder.AddComponent<Rigidbody>();body.isKinematic=true;body.useGravity=false;
+            var tuning=Settings;float minimum=tuning!=null?tuning.trafficMinimumRoadSpeed:8f;float maximum=Mathf.Max(minimum,tuning!=null?tuning.trafficMaximumRoadSpeed:14f);holder.AddComponent<SameDirectionTraffic>().Initialize(this,lane,Random.Range(minimum,maximum),tuning!=null?tuning.trafficLaneChangeChance:.38f,tuning!=null?tuning.trafficLaneDecisionInterval:2.2f);
+        }
         internal float Difficulty01=>Mathf.InverseLerp(Settings!=null?Settings.startSpeed:StartSpeed,Settings!=null?Settings.maxSpeed:MaxSpeed,speed);
         private bool ShouldSpawnCrossroad(int sequence)
         {
@@ -376,6 +383,8 @@ namespace EmergencyRoad
             int openLane=Random.Range(-1,2);float obstacleZ=Random.Range(-EmergencyRoadGame.ChunkSpacing*.22f,EmergencyRoadGame.ChunkSpacing*.22f);
             // Every row leaves one or two usable lanes. Two-lane blocks are common early and ease off later.
             var tuning=owner!=null?owner.Settings:null;float doubleBlockChance=owner==null?.45f:Mathf.Lerp(tuning!=null?tuning.twoLaneBlockChanceAtStart:.58f,tuning!=null?tuning.twoLaneBlockChanceAtMaxSpeed:.32f,owner.Difficulty01);
+            float movingTrafficChance=tuning!=null?tuning.sameDirectionTrafficChance:.28f;
+            if(owner!=null&&catalog.trafficVehicles.Count>0&&Random.value<movingTrafficChance){int trafficLane=openLane;while(trafficLane==openLane)trafficLane=Random.Range(-1,2);owner.SpawnSameDirectionTraffic(trafficLane,root.transform.position.z+obstacleZ);for(int i=0;i<4;i++)SpawnCoin(openLane,-EmergencyRoadGame.ChunkSpacing*.38f+i*(EmergencyRoadGame.ChunkSpacing*.76f/3f));return;}
             bool doubleBlock=Random.value<doubleBlockChance;
             if(doubleBlock){for(int lane=-1;lane<=1;lane++)if(lane!=openLane)SpawnObstacle(lane,obstacleZ);}
             else{int blockedLane=openLane;while(blockedLane==openLane)blockedLane=Random.Range(-1,2);SpawnObstacle(blockedLane,obstacleZ);}
@@ -430,6 +439,22 @@ namespace EmergencyRoad
         private float targetX;private bool fromLeft;private bool moving;
         public void Configure(float x,bool left){targetX=x;fromLeft=left;}
         public void Tick(float roadDelta){if(!moving&&transform.position.z<36f)moving=true;if(!moving)return;var p=transform.localPosition;p.x=Mathf.MoveTowards(p.x,targetX,8f*Time.deltaTime);transform.localPosition=p;}
+    }
+
+    public sealed class SameDirectionTraffic:MonoBehaviour
+    {
+        private EmergencyRoadGame game;private int lane;private float targetX;private float roadSpeed;private float laneChangeChance;private float decisionInterval;private float nextDecision;private float xVelocity;
+        public void Initialize(EmergencyRoadGame owner,int startLane,float speed,float changeChance,float interval){game=owner;lane=Mathf.Clamp(startLane,-1,1);targetX=lane*EmergencyRoadGame.LaneWidth;roadSpeed=speed;laneChangeChance=changeChance;decisionInterval=Mathf.Max(.25f,interval);nextDecision=Time.time+Random.Range(decisionInterval*.65f,decisionInterval*1.35f);}
+        private void Update()
+        {
+            if(game==null||game.Ended)return;var position=transform.position;position.z+=(roadSpeed-game.CurrentSpeed)*Time.deltaTime;position.x=Mathf.SmoothDamp(position.x,targetX,ref xVelocity,.42f,EmergencyRoadGame.LaneWidth*1.65f);transform.position=position;
+            if(position.z<-32f||position.z>165f){Destroy(gameObject);return;}if(Time.time<nextDecision||position.z<9f)return;nextDecision=Time.time+Random.Range(decisionInterval*.75f,decisionInterval*1.35f);if(Random.value>laneChangeChance)return;
+            int direction=Random.value<.5f?-1:1;int candidate=Mathf.Clamp(lane+direction,-1,1);if(candidate==lane)candidate=Mathf.Clamp(lane-direction,-1,1);if(candidate!=lane&&LaneIsClear(candidate)){lane=candidate;targetX=lane*EmergencyRoadGame.LaneWidth;}
+        }
+        private bool LaneIsClear(int candidate)
+        {
+            Physics.SyncTransforms();var center=new Vector3(candidate*EmergencyRoadGame.LaneWidth,.9f,transform.position.z);var hits=Physics.OverlapBox(center,new Vector3(1.3f,.9f,5.5f),Quaternion.identity,~0,QueryTriggerInteraction.Collide);foreach(var hit in hits){if(hit.transform.IsChildOf(transform)||transform.IsChildOf(hit.transform))continue;if(hit.GetComponentInParent<RoadHazard>()!=null||hit.GetComponentInParent<EmergencyVehicleController>()!=null)return false;}return true;
+        }
     }
 
     public sealed class MotorRushDirector:MonoBehaviour
