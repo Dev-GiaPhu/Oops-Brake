@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eed04aa4129d8f45bd5ee5c00bfb6f6, type: 3}
+  m_Name: EmergencyRoadCatalog
+  m_EditorClassIdentifier: 
+  gameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
+  playerVehicles:
+  - {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
+  - {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
+  - {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
+  - {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
+  - {fileID: 2915879132325717256, guid: 87f15e00bc7d0a54d851c964bd63b8ef, type: 3}
+  - {fileID: 1646028154367701847, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+  - {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
+  trafficVehicles:
+  - {fileID: 1220109061593607075, guid: e1d32747d09c9db4ebaeb409cbf1a9d1, type: 3}
+  - {fileID: 3592177867728365202, guid: fc9e91eb22879f84eac056473c581b5b, type: 3}
+  - {fileID: 800097039903430001, guid: 8b8dfbf784f51fe488952ff9b6004d4a, type: 3}
+  - {fileID: 6721311052883881255, guid: f59b89dd3a405be4f8c5d373aa147948, type: 3}
+  - {fileID: 816428196210802057, guid: 5f791b112f181e74784456343b4aa5ec, type: 3}
+  - {fileID: 2035264757950506384, guid: 88de85f09c1e22846aea38938bc9fabf, type: 3}
+  - {fileID: 4304101046722780987, guid: e19078d0cac14bf47a4b41dd8b21442d, type: 3}
+  - {fileID: 4122504736164611588, guid: 9dce1e39a16300c449250e82a5c0de0e, type: 3}
+  - {fileID: 4919208424876126901, guid: 435ae831f8edd784ebf701f5cfb58d60, type: 3}
+  - {fileID: 4760081433214567601, guid: d754c2ea8f00ac642b74fa7820389a10, type: 3}
+  - {fileID: 6533565179557477978, guid: e763c94fdee57994b8cd4b404275e989, type: 3}
+  - {fileID: 4123202338888435575, guid: ac4290ca0d7a0974ca41070b9891b77f, type: 3}
+  roadPrefabs:
+  - {fileID: 6526753181723513302, guid: 1be2c87a457f9e044a0d468f0d07147c, type: 3}
+  crossroadPrefabs:
+  - {fileID: 4623501346566010854, guid: 1c2f649bb73f3c64e8f0bd6c2efb3cf5, type: 3}
+  - {fileID: 2322147598828099468, guid: 64041ef4284998d49aad1687a96d40b6, type: 3}
+  - {fileID: 8050748024107887483, guid: c74f0a74f29605d4da88a3dc0585a604, type: 3}
+  - {fileID: 5668982391212175364, guid: 4eeb20c070914254b90c9d79c08ef5e4, type: 3}
+  crossroadMetrics:
+  - prefab: {fileID: 4623501346566010854, guid: 1c2f649bb73f3c64e8f0bd6c2efb3cf5, type: 3}
+    rendererSize: {x: 31.51927, y: 0.1462188, z: 31.51927}
+    rendererCenter: {x: 0, y: 0.0731094, z: 0}
+  - prefab: {fileID: 2322147598828099468, guid: 64041ef4284998d49aad1687a96d40b6, type: 3}
+    rendererSize: {x: 31.51927, y: 0.1462188, z: 31.51927}
+    rendererCenter: {x: 0, y: 0.0731094, z: 0}
+  - prefab: {fileID: 8050748024107887483, guid: c74f0a74f29605d4da88a3dc0585a604, type: 3}
+    rendererSize: {x: 31.51927, y: 0.1462188, z: 31.51927}
+    rendererCenter: {x: 0, y: 0.0731094, z: 0}
+  - prefab: {fileID: 5668982391212175364, guid: 4eeb20c070914254b90c9d79c08ef5e4, type: 3}
+    rendererSize: {x: 31.51927, y: 0.18144026, z: 31.51927}
+    rendererCenter: {x: 0, y: 0.055469245, z: 0}
+  obstaclePrefabs:
+  - {fileID: 3359409797177715914, guid: d18e3c639d13e2d498416a3c5009462c, type: 3}
+  - {fileID: 8080713936756012783, guid: 580d7f4570047ff4a83bd6e83df50ab4, type: 3}
+  - {fileID: 5416186344305875156, guid: f518858be349926409b88c0c06af8b57, type: 3}
+  - {fileID: 483345761760550714, guid: c413cd1b07bdfdf46b5089f9e6e2c188, type: 3}
+  - {fileID: 7769282103224168044, guid: 1567cd1857ec2e243b6f7ca126522873, type: 3}
+  - {fileID: 774150586620734464, guid: 31f228c1024f8da4581961e96457b4b4, type: 3}
+  - {fileID: 5427522932507016689, guid: 88434706d6ff5e243868b378b33cd8b1, type: 3}
+  - {fileID: 5280000169877883316, guid: d90aae874bef7074eac4ba2f7fa1097d, type: 3}
+  decorationPrefabs:
+  - {fileID: 5337369454485653850, guid: 360d5822e57359447b9ce3d8a3b37532, type: 3}
+  - {fileID: 8614566769928799913, guid: 407cec0499750964c87373d454cba99e, type: 3}
+  - {fileID: 575874035240156402, guid: 7497d6b5522b3ef4c975da4d035b26ae, type: 3}
+  - {fileID: 2352241880792767473, guid: 0ff0f5c3302eee844945115bfe13f943, type: 3}
+  - {fileID: 7446242150086142362, guid: 99420a4e47be02047983a8de78548f17, type: 3}
+  - {fileID: 5150551461221631457, guid: 0fdb1dadc44702f499b648f9f11bcf9b, type: 3}
+  - {fileID: 2731906361354674701, guid: 7204a8d4c276a2744a178cde0344b774, type: 3}
+  - {fileID: 1097506586273857988, guid: 8bd38d3f078dafe41b6d7699c405ac4c, type: 3}
+  - {fileID: 7695119763558581554, guid: a824f9a62caf9c54a9458419d6dcbbe8, type: 3}
+  naturePrefabs:
+  - {fileID: 9102875994649005946, guid: 8adadfa643c87f74bb2402c31a4e577c, type: 3}
+  - {fileID: 7227667129424070513, guid: d7b05eca61aae2d41a54f37e25c50dc9, type: 3}
+  streetDecorationPrefabs:
+  - {fileID: 840234040158172142, guid: 03f358efa0d17c64da70da4586677108, type: 3}
+  - {fileID: 3738078055998318524, guid: afe45cbd4e2c80847b699dded3cbda43, type: 3}
+  - {fileID: 3566633951122676924, guid: fe742e248ee01324fbcdc9dfc3d0683c, type: 3}
+  - {fileID: 2111220532833401765, guid: 0ae0c3250b5b86948a77e13b230ed3ed, type: 3}
+  - {fileID: 4659854618957641345, guid: 1688346fb92ab3842acdafc72798ccd6, type: 3}
+  - {fileID: 8189149140023422328, guid: 96177791b98f2884480a5a193d7fa11a, type: 3}
+  - {fileID: 890457808666209721, guid: 4092a8e17937d2f409e7ffd20366a544, type: 3}
+  - {fileID: 2018924952596129451, guid: 2f876f6cd0a34174097ea007af3ce96b, type: 3}
+  - {fileID: 5204295545613483482, guid: 57a93038be5b57f469fb91ffc9735108, type: 3}
+  - {fileID: 5746990765676646356, guid: 7bd3818199f8af2469e2b0fc31550d2a, type: 3}
+  grassMaterial: {fileID: 2100000, guid: 17885bdc69363b34497a558c679c70d4, type: 2}
+  soilMaterial: {fileID: 2100000, guid: 99ab44ee527722a43a5e70868050dedf, type: 2}
+  vfxParticleMaterial: {fileID: 2100000, guid: a4986c20ede3cfa47ace15e2ded20739, type: 2}
+  postProcessProfile: {fileID: 11400000, guid: bfbb4584db5366a43aa9eb6b341261f0, type: 2}
+  uiFont: {fileID: 12800000, guid: 2fa612120a7c1eb49ac66c4916bda816, type: 3}
+  musicClip: {fileID: 0}
+  uiClickClip: {fileID: 0}
+  coinClip: {fileID: 0}
+  hornClip: {fileID: 0}
+  crashClip: {fileID: 0}
+  roadLength: 7.4645844
+  roadHalfWidth: 11.03214
+  laneWidth: 5.185106
