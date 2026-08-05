@@ -15,8 +15,8 @@ MonoBehaviour:
   startSpeed: 18
   maxSpeed: 100
   distanceToMaxSpeed: 1000
-  minimumObstacleGap: 1
-  maximumObstacleGap: 2
+  minimumSpeedGapMultiplier: 1
+  maximumSpeedGapMultiplier: 2
   minimumObstacleReactionTime: 0.75
   twoLaneBlockChanceAtStart: 0.58
   twoLaneBlockChanceAtMaxSpeed: 0.32

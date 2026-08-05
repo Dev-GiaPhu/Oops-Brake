@@ -11,8 +11,8 @@ namespace EmergencyRoad
         [Min(1)] public float maxSpeed=45f;
         [Min(10)] public float distanceToMaxSpeed=800f;
         [Header("Obstacle Density")]
-        [FormerlySerializedAs("gapAtStart"), Min(0)] public float minimumObstacleGap=36f;
-        [FormerlySerializedAs("gapAtMaxSpeed"), Min(0)] public float maximumObstacleGap=50f;
+        [FormerlySerializedAs("minimumObstacleGap"), FormerlySerializedAs("gapAtStart"), Min(.1f)] public float minimumSpeedGapMultiplier=1f;
+        [FormerlySerializedAs("maximumObstacleGap"), FormerlySerializedAs("gapAtMaxSpeed"), Min(.1f)] public float maximumSpeedGapMultiplier=2f;
         [HideInInspector] public float minimumObstacleReactionTime=.75f;
         [Range(0,1)] public float twoLaneBlockChanceAtStart=.58f;
         [Range(0,1)] public float twoLaneBlockChanceAtMaxSpeed=.32f;
