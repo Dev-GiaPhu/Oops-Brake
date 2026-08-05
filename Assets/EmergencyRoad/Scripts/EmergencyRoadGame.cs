@@ -162,7 +162,7 @@ namespace EmergencyRoad
             var bar = EmergencyRoadUI.Panel(canvas.transform,"HUD Bar",EmergencyRoadUI.Navy,new Vector2(0,.88f),Vector2.one,Vector2.zero,Vector2.zero);
             scoreText = EmergencyRoadUI.Label(bar,"0 m",38,Color.white,TextAnchor.MiddleLeft,new Vector2(.04f,0),new Vector2(.3f,1),Vector2.zero,Vector2.zero);
             coinText = EmergencyRoadUI.Label(bar,"● 0",38,EmergencyRoadUI.Yellow,TextAnchor.MiddleCenter,new Vector2(.37f,0),new Vector2(.63f,1),Vector2.zero,Vector2.zero);
-            EmergencyRoadUI.Button(bar,"Ⅱ",new Color(.1f,.45f,.65f,1),new Vector2(.89f,.15f),new Vector2(.96f,.85f),Vector2.zero,Vector2.zero,TogglePause);
+            EmergencyRoadUI.Button(bar,"II",new Color(.1f,.45f,.65f,1),new Vector2(.89f,.15f),new Vector2(.96f,.85f),Vector2.zero,Vector2.zero,TogglePause);
             EmergencyRoadUI.Label(canvas.transform,"A / D  CHUYỂN LÀN     SPACE  BÓP CÒI",23,new Color(1,1,1,.65f),TextAnchor.MiddleCenter,new Vector2(.28f,.02f),new Vector2(.72f,.07f),Vector2.zero,Vector2.zero);
             hazardAlertText=EmergencyRoadUI.Label(canvas.transform,"",32,new Color(1f,.18f,.12f,1f),TextAnchor.MiddleCenter,new Vector2(.3f,.76f),new Vector2(.7f,.84f),Vector2.zero,Vector2.zero);hazardAlertText.fontStyle=FontStyles.Bold;
             pausePanel = Modal(canvas.transform,"TẠM DỪNG",out _);
@@ -434,7 +434,7 @@ namespace EmergencyRoad
         private IEnumerator RunEvent()
         {
             active=true;var lineGo=new GameObject("MOTOR WARNING - Tracking Curved Red Path",typeof(LineRenderer));var line=lineGo.GetComponent<LineRenderer>();line.positionCount=22;line.useWorldSpace=true;line.widthMultiplier=.3f;line.numCapVertices=4;line.numCornerVertices=4;line.sharedMaterial=MotorRushHazard.WarningMaterial;line.startColor=new Color(1f,.02f,.01f,.8f);line.endColor=new Color(1f,.05f,.01f,.18f);
-            float targetX=player.position.x;float t=0;game.SetHazardAlert("⚠  MÔ TÔ ĐANG LAO TỚI  ⚠");
+            float targetX=player.position.x;float t=0;game.SetHazardAlert("CẢNH BÁO: MÔ TÔ ĐANG LAO TỚI");
             while(t<2.2f){t+=Time.unscaledDeltaTime;targetX=Mathf.Lerp(targetX,player.position.x,1f-Mathf.Exp(-3.2f*Time.unscaledDeltaTime));float pulse=.22f+Mathf.Sin(t*18f)*.08f;line.widthMultiplier=pulse;UpdateWarningPath(line,targetX);yield return null;}
             game.SetHazardAlert("ĐÃ KHÓA HƯỚNG — NÉ NGAY!");line.startColor=Color.red;line.endColor=new Color(1,.05f,.01f,.7f);line.widthMultiplier=.42f;yield return new WaitForSecondsRealtime(.55f);
             var motor=MotorRushHazard.Create(targetX,game,player);Object.Destroy(lineGo);game.SetHazardAlert("");

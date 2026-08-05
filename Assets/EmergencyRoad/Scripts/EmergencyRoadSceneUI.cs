@@ -60,7 +60,7 @@ namespace EmergencyRoad
             var bar = EmergencyRoadUI.Panel(canvas.transform,"HUD Bar",EmergencyRoadUI.Navy,new(0,.88f),Vector2.one,Vector2.zero,Vector2.zero);
             view.score=EmergencyRoadUI.Label(bar,"0 m",38,Color.white,TextAnchor.MiddleLeft,new(.04f,0),new(.3f,1),Vector2.zero,Vector2.zero);
             view.coins=EmergencyRoadUI.Label(bar,"● 0",38,EmergencyRoadUI.Yellow,TextAnchor.MiddleCenter,new(.37f,0),new(.63f,1),Vector2.zero,Vector2.zero);
-            view.pause=EmergencyRoadUI.Button(bar,"Ⅱ",new(.1f,.45f,.65f,1),new(.89f,.15f),new(.96f,.85f),Vector2.zero,Vector2.zero,null);
+            view.pause=EmergencyRoadUI.Button(bar,"II",new(.1f,.45f,.65f,1),new(.89f,.15f),new(.96f,.85f),Vector2.zero,Vector2.zero,null);
             EmergencyRoadUI.Label(canvas.transform,"A / D  CHUYỂN LÀN     SPACE  BÓP CÒI",23,new(1,1,1,.65f),TextAnchor.MiddleCenter,new(.28f,.02f),new(.72f,.07f),Vector2.zero,Vector2.zero);
             view.hazardAlert=EmergencyRoadUI.Label(canvas.transform,"",32,new(1f,.18f,.12f,1),TextAnchor.MiddleCenter,new(.3f,.76f),new(.7f,.84f),Vector2.zero,Vector2.zero); view.hazardAlert.fontStyle=FontStyles.Bold;
             view.pausePanel=Modal(canvas.transform,"TẠM DỪNG",out _);

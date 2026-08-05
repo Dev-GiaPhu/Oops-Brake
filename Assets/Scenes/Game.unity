@@ -24533,7 +24533,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u2161"
+  m_text: II
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
   m_sharedMaterial: {fileID: -6010686438677791696, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
@@ -25073,7 +25073,7 @@ GameObject:
   - component: {fileID: 1782441184}
   - component: {fileID: 1782441185}
   m_Layer: 0
-  m_Name: "\u2161 Button"
+  m_Name: II Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
