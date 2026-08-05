@@ -6,6 +6,13 @@
 - Font được gán bằng trường `Ui Font` trong `EmergencyRoadCatalog.asset`; có thể kéo một font Unity khác vào đây để thay toàn bộ giao diện.
 - Giấy phép OFL đi kèm tại `Assets/EmergencyRoad/Fonts/OFL.txt`.
 
+## Còi riêng cho từng xe
+
+- Chọn object `MENU SCENE AUTHORING` hoặc `GAME SCENE AUTHORING` trong Hierarchy.
+- Trong component `Emergency Road Scene Authoring`, mở danh sách `PLAYER VEHICLES - PREFAB AND HORN FOR EACH CAR`.
+- Mỗi phần tử có ô `Vehicle Prefab` và `Horn Sound`; kéo AudioClip còi tương ứng vào đúng xe.
+- Nếu `Horn Sound` để trống, game dùng một âm còi dự phòng khác nhau cho từng loại xe.
+
 File này nằm trực tiếp trong `Assets/EmergencyRoad` để có thể chọn và đọc ngay bằng Inspector của Unity.
 
 ## Asset trung tâm

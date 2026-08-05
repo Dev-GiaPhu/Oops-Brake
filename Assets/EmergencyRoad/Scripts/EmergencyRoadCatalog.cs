@@ -21,6 +21,7 @@ namespace EmergencyRoad
         public EmergencyRoadGameplaySettings gameplaySettings;
         [Header("Drag Prefabs Here")]
         public List<GameObject> playerVehicles = new();
+        public List<AudioClip> vehicleHornClips = new();
         public List<GameObject> trafficVehicles = new();
         public List<GameObject> roadPrefabs = new();
         public List<GameObject> crossroadPrefabs = new();
@@ -55,6 +56,7 @@ namespace EmergencyRoad
         [Min(20f)] public float startingSafeDistance = 48f;
 
         public EmergencyRoadPrefabMetrics MetricsFor(GameObject prefab)=>crossroadMetrics.Find(x=>x!=null&&x.prefab==prefab);
+        public AudioClip HornForVehicle(int index)=>index>=0&&index<vehicleHornClips.Count&&vehicleHornClips[index]!=null?vehicleHornClips[index]:hornClip;
     }
 
     [Serializable]

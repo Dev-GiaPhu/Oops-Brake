@@ -44,8 +44,8 @@ namespace EmergencyRoad.Editor
             if (EditorApplication.isCompiling) { EditorApplication.delayCall += AutoBuild; return; }
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             if(!EnsureTmpEssentialResources()){EditorApplication.delayCall+=AutoBuild;return;}
-            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 18 - Scene Components TMP") ||
-                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 18 - Scene Components TMP");
+            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 19 - Per Vehicle Horns") ||
+                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 19 - Per Vehicle Horns");
             if (authoredScenesMissing || AssetDatabase.LoadAssetAtPath<EmergencyRoadCatalog>(CatalogPath) == null || AssetDatabase.LoadAssetAtPath<EmergencyRoadGameplaySettings>(GameplaySettingsPath)==null) BuildGame();
         }
 
@@ -73,8 +73,10 @@ namespace EmergencyRoad.Editor
             if (catalog == null) { catalog = ScriptableObject.CreateInstance<EmergencyRoadCatalog>(); AssetDatabase.CreateAsset(catalog, CatalogPath); }
 
             var gameplay=AssetDatabase.LoadAssetAtPath<EmergencyRoadGameplaySettings>(GameplaySettingsPath);if(gameplay==null){gameplay=ScriptableObject.CreateInstance<EmergencyRoadGameplaySettings>();AssetDatabase.CreateAsset(gameplay,GameplaySettingsPath);}if(gameplay.minStraightChunksBetweenIntersections<6)gameplay.minStraightChunksBetweenIntersections=10;if(gameplay.maxStraightChunksBetweenIntersections<gameplay.minStraightChunksBetweenIntersections)gameplay.maxStraightChunksBetweenIntersections=14;if(gameplay.intersectionClearanceChunks<1)gameplay.intersectionClearanceChunks=1;catalog.gameplaySettings=gameplay;EditorUtility.SetDirty(gameplay);
+            var previousHorns=new Dictionary<GameObject,AudioClip>();for(int i=0;i<catalog.playerVehicles.Count;i++)if(catalog.playerVehicles[i]!=null&&i<catalog.vehicleHornClips.Count)previousHorns[catalog.playerVehicles[i]]=catalog.vehicleHornClips[i];
             catalog.playerVehicles = LoadPrefabs("Assets/Low Poly Simple Urban City 3D Asset Pack/Prefabs/Vehicles/Emergency_Vehicles")
                 .OrderBy(x => VehicleOrder(x.name)).ToList();
+            catalog.vehicleHornClips=catalog.playerVehicles.Select(vehicle=>previousHorns.TryGetValue(vehicle,out var horn)?horn:null).ToList();
             EnsureVehicleMeshesReadable(catalog.playerVehicles);
             catalog.trafficVehicles = LoadPrefabs("Assets/Low Poly Simple Urban City 3D Asset Pack/Prefabs/Vehicles/Cars")
                 .Concat(LoadPrefabs("Assets/Low Poly Simple Urban City 3D Asset Pack/Prefabs/Vehicles/Pickups")).ToList();
@@ -188,7 +190,7 @@ namespace EmergencyRoad.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("MENU SCENE AUTHORING");
-            new GameObject("Authoring Version 18 - Scene Components TMP").transform.SetParent(root.transform);
+            new GameObject("Authoring Version 19 - Per Vehicle Horns").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform;
             preview.SetParent(root.transform);
             CreateCamera(preview, "Garage Camera", new Vector3(8, 5.2f, -9), new Vector3(17,-35,0));
@@ -208,7 +210,7 @@ namespace EmergencyRoad.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var root = new GameObject("GAME SCENE AUTHORING");
-            new GameObject("Authoring Version 18 - Scene Components TMP").transform.SetParent(root.transform);
+            new GameObject("Authoring Version 19 - Per Vehicle Horns").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform; preview.SetParent(root.transform);
             CreateCamera(preview,"Chase Camera",new Vector3(0,7.6f,-10.5f),new Vector3(22,0,0));
             CreateLight(preview,"Sun",Vector3.zero);

@@ -11,6 +11,7 @@ namespace EmergencyRoad
         private AudioClip coinClip;
         private AudioClip hornClip;
         private AudioClip crashClip;
+        private AudioClip[] generatedVehicleHorns;
 
         public static void Ensure(EmergencyRoadCatalog catalog=null)
         {
@@ -34,6 +35,7 @@ namespace EmergencyRoad
             coinClip = catalog!=null&&catalog.coinClip!=null?catalog.coinClip:CreateTone("Coin", 880f, .12f, false);
             hornClip = catalog!=null&&catalog.hornClip!=null?catalog.hornClip:CreateTone("Horn", 260f, .28f, false);
             crashClip = catalog!=null&&catalog.crashClip!=null?catalog.crashClip:CreateTone("Crash", 75f, .45f, false);
+            generatedVehicleHorns=new[]{CreateTone("Còi Cứu Thương",420f,.24f,false),CreateTone("Còi Cảnh Sát",510f,.18f,false),CreateTone("Còi Cứu Hỏa",320f,.34f,false),CreateTone("Còi Taxi",610f,.13f,false),CreateTone("Còi Xe Bồn",230f,.38f,false),CreateTone("Còi Xe Ủi",180f,.42f,false),CreateTone("Còi Xe Xúc",275f,.3f,false)};
             ApplyVolumes();
             music.Play();
         }
@@ -51,7 +53,7 @@ namespace EmergencyRoad
 
         public void Click() => sfx.PlayOneShot(clickClip, .45f);
         public void Coin() => sfx.PlayOneShot(coinClip, .65f);
-        public void Horn() => sfx.PlayOneShot(hornClip, .85f);
+        public void Horn(AudioClip vehicleHorn=null,int vehicleIndex=-1){var clip=vehicleHorn;if(clip==null&&generatedVehicleHorns!=null&&vehicleIndex>=0&&vehicleIndex<generatedVehicleHorns.Length)clip=generatedVehicleHorns[vehicleIndex];sfx.PlayOneShot(clip!=null?clip:hornClip,.85f);}
         public void Crash() => sfx.PlayOneShot(crashClip, 1f);
 
         private static AudioClip CreateTone(string title, float frequency, float duration, bool musical)
