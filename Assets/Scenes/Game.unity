@@ -12364,6 +12364,14 @@ MonoBehaviour:
     hornSound: {fileID: 0}
   - vehiclePrefab: {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
     hornSound: {fileID: 0}
+  - vehiclePrefab: {fileID: 8126737932816066456, guid: 475054c3ae438a14c87a575c9fa44ee7, type: 3}
+    hornSound: {fileID: 0}
+  - vehiclePrefab: {fileID: 2023009331022897683, guid: 3869c69e8dac23a4682c4944ba124748, type: 3}
+    hornSound: {fileID: 0}
+  - vehiclePrefab: {fileID: 8207002681667545729, guid: ea409d27120635c428dc888c789a3371, type: 3}
+    hornSound: {fileID: 0}
+  - vehiclePrefab: {fileID: 111833268559281957, guid: 5c0b63d1c24324642b9b80fd4f76d939, type: 3}
+    hornSound: {fileID: 0}
   playerVehicles:
   - {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
   - {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}

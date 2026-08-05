@@ -16,7 +16,7 @@ MonoBehaviour:
   maxSpeed: 100
   distanceToMaxSpeed: 1000
   gapAtStart: 1
-  gapAtMaxSpeed: 4
+  gapAtMaxSpeed: 2
   minimumObstacleReactionTime: 0.75
   twoLaneBlockChanceAtStart: 0.58
   twoLaneBlockChanceAtMaxSpeed: 0.32
@@ -40,10 +40,10 @@ MonoBehaviour:
   crossTrafficRouteLookDistance: 24
   sideCheckHalfLength: 0.68
   releaseBehindPlayer: 0.32
-  motorSpeed: 34
-  motorTrackingSmoothTime: 0.65
-  motorMaxLateralSpeed: 3.5
+  motorSpeed: 30
+  motorTrackingSmoothTime: 3
+  motorMaxLateralSpeed: 5
   motorWarningTrackTime: 2.2
-  motorLockedWarningTime: 0.55
-  motorDebrisImpactHoldTime: 0.35
+  motorLockedWarningTime: 0.2
+  motorDebrisImpactHoldTime: 0.5
   motorDebrisMapFollowSharpness: 2.2
