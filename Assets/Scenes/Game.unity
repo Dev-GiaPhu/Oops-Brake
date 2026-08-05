@@ -1843,8 +1843,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   m_Material: {fileID: 0}
   m_Color: {r: 0.035, g: 0.06, b: 0.12, a: 0.96}
   m_RaycastTarget: 1
@@ -12324,6 +12324,7 @@ GameObject:
   m_Component:
   - component: {fileID: 816916523}
   - component: {fileID: 816916522}
+  - component: {fileID: 816916524}
   m_Layer: 0
   m_Name: GAME SCENE AUTHORING
   m_TagString: Untagged
@@ -12479,7 +12480,21 @@ MonoBehaviour:
   - {fileID: 1928240671}
   - {fileID: 2057436656}
   - {fileID: 350030901}
-  gameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
+  gameplaySettingsComponent: {fileID: 816916524}
+  legacyGameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
+--- !u!114 &816916524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816916521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3a1a6a0419cdd946baf8cde80a1c4b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
 --- !u!4 &816916523
 Transform:
   m_ObjectHideFlags: 0

@@ -317,8 +317,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   m_Material: {fileID: 0}
   m_Color: {r: 0.75, g: 0.16, b: 0.2, a: 1}
   m_RaycastTarget: 1
@@ -3482,6 +3482,7 @@ GameObject:
   m_Component:
   - component: {fileID: 832341315}
   - component: {fileID: 832341314}
+  - component: {fileID: 832341316}
   m_Layer: 0
   m_Name: MENU SCENE AUTHORING
   m_TagString: Untagged
@@ -3663,7 +3664,21 @@ MonoBehaviour:
   - {fileID: 1602642677}
   - {fileID: 545291248}
   - {fileID: 479402317}
-  gameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
+  gameplaySettingsComponent: {fileID: 832341316}
+  legacyGameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
+--- !u!114 &832341316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832341313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3a1a6a0419cdd946baf8cde80a1c4b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
 --- !u!4 &832341315
 Transform:
   m_ObjectHideFlags: 0
