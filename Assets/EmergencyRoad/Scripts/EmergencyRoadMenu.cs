@@ -21,8 +21,6 @@ namespace EmergencyRoad
         private GameObject controls;
         private EmergencyRoadMenuView sceneView;
         private int index;
-        private static readonly int[] Prices = { 0, 350, 700, 1100, 1600, 2200, 3000 };
-        private static readonly string[] VehicleNames = { "XE CỨU THƯƠNG", "XE CẢNH SÁT", "XE CỨU HỎA", "TAXI", "XE BỒN", "XE ỦI", "XE XÚC" };
 
         public static void Create(EmergencyRoadCatalog data, EmergencyRoadMenuView sceneView)
         {
@@ -35,6 +33,7 @@ namespace EmergencyRoad
 
         private void Build()
         {
+            catalog.SynchronizePlayerVehicleData();
             EmergencyRoadUI.SetFont(catalog.uiFont);
             SetupWorld();
             BindSceneUI();
@@ -61,22 +60,22 @@ namespace EmergencyRoad
         private void LegacyRuntimeUiIsNoLongerUsed()
         {
             var canvas = EmergencyRoadUI.Canvas("Main Menu UI");
-            var top = EmergencyRoadUI.Panel(canvas.transform, "Top Bar", EmergencyRoadUI.Navy, new Vector2(0, .86f), Vector2.one, Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Label(top, "BIỆT ĐỘI KHẨN CẤP", 64, Color.white, TextAnchor.MiddleLeft, new Vector2(.05f,0), new Vector2(.65f,1), Vector2.zero, Vector2.zero);
-            wallet = EmergencyRoadUI.Label(top, "", 38, EmergencyRoadUI.Yellow, TextAnchor.MiddleRight, new Vector2(.7f,0), new Vector2(.95f,1), Vector2.zero, Vector2.zero);
+            var top = EmergencyRoadUI.Panel(canvas.transform, "Top Bar", EmergencyRoadUI.Navy,new Vector2(0,.86f),Vector2.one,Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Label(top,"BIỆT ĐỘI KHẨN CẤP",64,Color.white,TextAnchor.MiddleLeft,new Vector2(.05f,0),new Vector2(.65f,1),Vector2.zero,Vector2.zero);
+            wallet = EmergencyRoadUI.Label(top,"",38,EmergencyRoadUI.Yellow,TextAnchor.MiddleRight,new Vector2(.7f,0),new Vector2(.95f,1),Vector2.zero,Vector2.zero);
 
-            var garage = EmergencyRoadUI.Panel(canvas.transform, "Garage", new Color(.02f,.035f,.075f,.88f), new Vector2(.05f,.08f), new Vector2(.42f,.8f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Label(garage, "NHÀ XE", 40, EmergencyRoadUI.Cyan, TextAnchor.MiddleCenter, new Vector2(.1f,.82f), new Vector2(.9f,.96f), Vector2.zero, Vector2.zero);
-            vehicleName = EmergencyRoadUI.Label(garage, "", 44, Color.white, TextAnchor.MiddleCenter, new Vector2(.08f,.62f), new Vector2(.92f,.8f), Vector2.zero, Vector2.zero);
-            priceText = EmergencyRoadUI.Label(garage, "", 28, EmergencyRoadUI.Yellow, TextAnchor.MiddleCenter, new Vector2(.08f,.51f), new Vector2(.92f,.63f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Button(garage, "‹", EmergencyRoadUI.Cyan, new Vector2(.08f,.34f), new Vector2(.27f,.48f), Vector2.zero, Vector2.zero, () => Select(index - 1));
-            EmergencyRoadUI.Button(garage, "›", EmergencyRoadUI.Cyan, new Vector2(.73f,.34f), new Vector2(.92f,.48f), Vector2.zero, Vector2.zero, () => Select(index + 1));
-            actionButton = EmergencyRoadUI.Button(garage, "CHỌN", EmergencyRoadUI.Yellow, new Vector2(.16f,.14f), new Vector2(.84f,.3f), Vector2.zero, Vector2.zero, VehicleAction);
+            var garage = EmergencyRoadUI.Panel(canvas.transform,"Garage",new Color(.02f,.035f,.075f,.88f),new Vector2(.05f,.08f),new Vector2(.42f,.8f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Label(garage,"NHÀ XE",40,EmergencyRoadUI.Cyan,TextAnchor.MiddleCenter,new Vector2(.1f,.82f),new Vector2(.9f,.96f),Vector2.zero,Vector2.zero);
+            vehicleName = EmergencyRoadUI.Label(garage,"",44,Color.white,TextAnchor.MiddleCenter,new Vector2(.08f,.62f),new Vector2(.92f,.8f),Vector2.zero,Vector2.zero);
+            priceText = EmergencyRoadUI.Label(garage,"",28,EmergencyRoadUI.Yellow,TextAnchor.MiddleCenter,new Vector2(.08f,.51f),new Vector2(.92f,.63f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Button(garage,"‹",EmergencyRoadUI.Cyan,new Vector2(.08f,.34f),new Vector2(.27f,.48f),Vector2.zero,Vector2.zero,()=>Select(index-1));
+            EmergencyRoadUI.Button(garage,"›",EmergencyRoadUI.Cyan,new Vector2(.73f,.34f),new Vector2(.92f,.48f),Vector2.zero,Vector2.zero,()=>Select(index+1));
+            actionButton = EmergencyRoadUI.Button(garage,"CHỌN",EmergencyRoadUI.Yellow,new Vector2(.16f,.14f),new Vector2(.84f,.3f),Vector2.zero,Vector2.zero,VehicleAction);
 
-            var right = EmergencyRoadUI.Panel(canvas.transform, "Actions", Color.clear, new Vector2(.66f,.13f), new Vector2(.95f,.68f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Button(right, "CHƠI", EmergencyRoadUI.Yellow, new Vector2(0,.66f), Vector2.one, Vector2.zero, Vector2.zero, Play);
-            EmergencyRoadUI.Button(right, "CÀI ĐẶT", new Color(.08f,.45f,.65f,1), new Vector2(0,.35f), new Vector2(1,.61f), Vector2.zero, Vector2.zero, ToggleSettings);
-            EmergencyRoadUI.Button(right, "THOÁT", new Color(.75f,.16f,.2f,1), new Vector2(0,.04f), new Vector2(1,.3f), Vector2.zero, Vector2.zero, () => Application.Quit());
+            var right = EmergencyRoadUI.Panel(canvas.transform,"Actions",Color.clear,new Vector2(.66f,.13f),new Vector2(.95f,.68f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Button(right,"CHƠI",EmergencyRoadUI.Yellow,new Vector2(0,.66f),Vector2.one,Vector2.zero,Vector2.zero,Play);
+            EmergencyRoadUI.Button(right,"CÀI ĐẶT",new Color(.08f,.45f,.65f,1),new Vector2(0,.35f),new Vector2(1,.61f),Vector2.zero,Vector2.zero,ToggleSettings);
+            EmergencyRoadUI.Button(right,"THOÁT",new Color(.75f,.16f,.2f,1),new Vector2(0,.04f),new Vector2(1,.3f),Vector2.zero,Vector2.zero,()=>Application.Quit());
 
             settings = BuildSettings(canvas.transform);
             controls = BuildControls(canvas.transform);
@@ -105,78 +104,95 @@ namespace EmergencyRoad
 
         private GameObject BuildSettings(Transform canvas)
         {
-            var panel = EmergencyRoadUI.Panel(canvas, "Settings Modal", EmergencyRoadUI.Navy, new Vector2(.28f,.2f), new Vector2(.72f,.8f), Vector2.zero, Vector2.zero).gameObject;
-            EmergencyRoadUI.Label(panel.transform, "CÀI ĐẶT", 52, EmergencyRoadUI.Cyan, TextAnchor.MiddleCenter, new Vector2(.1f,.8f), new Vector2(.9f,.96f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Label(panel.transform, "ÂM NHẠC", 28, Color.white, TextAnchor.MiddleLeft, new Vector2(.1f,.61f), new Vector2(.4f,.72f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Slider(panel.transform, new Vector2(.4f,.63f), new Vector2(.88f,.69f), EmergencyRoadProfile.Current.musicVolume, v => { EmergencyRoadProfile.Current.musicVolume=v; EmergencyRoadAudio.Instance.ApplyVolumes(); EmergencyRoadProfile.Save(); });
-            EmergencyRoadUI.Label(panel.transform, "HIỆU ỨNG", 28, Color.white, TextAnchor.MiddleLeft, new Vector2(.1f,.45f), new Vector2(.4f,.56f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Slider(panel.transform, new Vector2(.4f,.47f), new Vector2(.88f,.53f), EmergencyRoadProfile.Current.sfxVolume, v => { EmergencyRoadProfile.Current.sfxVolume=v; EmergencyRoadAudio.Instance.ApplyVolumes(); EmergencyRoadProfile.Save(); });
-            EmergencyRoadUI.Label(panel.transform, "VA CHẠM BÊN HÔNG", 25, Color.white, TextAnchor.MiddleLeft, new Vector2(.1f,.31f), new Vector2(.52f,.41f), Vector2.zero, Vector2.zero);
+            var panel = EmergencyRoadUI.Panel(canvas,"Settings Modal",EmergencyRoadUI.Navy,new Vector2(.28f,.2f),new Vector2(.72f,.8f),Vector2.zero,Vector2.zero).gameObject;
+            EmergencyRoadUI.Label(panel.transform,"CÀI ĐẶT",52,EmergencyRoadUI.Cyan,TextAnchor.MiddleCenter,new Vector2(.1f,.8f),new Vector2(.9f,.96f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Label(panel.transform,"ÂM NHẠC",28,Color.white,TextAnchor.MiddleLeft,new Vector2(.1f,.61f),new Vector2(.4f,.72f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Slider(panel.transform,new Vector2(.4f,.63f),new Vector2(.88f,.69f),EmergencyRoadProfile.Current.musicVolume,v=>{EmergencyRoadProfile.Current.musicVolume=v;EmergencyRoadAudio.Instance.ApplyVolumes();EmergencyRoadProfile.Save();});
+            EmergencyRoadUI.Label(panel.transform,"HIỆU ỨNG",28,Color.white,TextAnchor.MiddleLeft,new Vector2(.1f,.45f),new Vector2(.4f,.56f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Slider(panel.transform,new Vector2(.4f,.47f),new Vector2(.88f,.53f),EmergencyRoadProfile.Current.sfxVolume,v=>{EmergencyRoadProfile.Current.sfxVolume=v;EmergencyRoadAudio.Instance.ApplyVolumes();EmergencyRoadProfile.Save();});
+            EmergencyRoadUI.Label(panel.transform,"VA CHẠM BÊN HÔNG",25,Color.white,TextAnchor.MiddleLeft,new Vector2(.1f,.31f),new Vector2(.52f,.41f),Vector2.zero,Vector2.zero);
             sideCollisionButton=EmergencyRoadUI.Button(panel.transform,"",new Color(.08f,.45f,.65f,1),new Vector2(.52f,.32f),new Vector2(.88f,.41f),Vector2.zero,Vector2.zero,ToggleSideCollision);RefreshSideCollisionLabel();
-            EmergencyRoadUI.Button(panel.transform, "ĐIỀU KHIỂN", new Color(.08f,.45f,.65f,1), new Vector2(.12f,.1f), new Vector2(.58f,.24f), Vector2.zero, Vector2.zero, () => { panel.SetActive(false); controls.SetActive(true); });
-            EmergencyRoadUI.Button(panel.transform, "ĐÓNG", new Color(.65f,.18f,.22f,1), new Vector2(.62f,.1f), new Vector2(.88f,.24f), Vector2.zero, Vector2.zero, ToggleSettings);
+            EmergencyRoadUI.Button(panel.transform,"ĐIỀU KHIỂN",new Color(.08f,.45f,.65f,1),new Vector2(.12f,.1f),new Vector2(.58f,.24f),Vector2.zero,Vector2.zero,()=>{panel.SetActive(false);controls.SetActive(true);});
+            EmergencyRoadUI.Button(panel.transform,"ĐÓNG",new Color(.65f,.18f,.22f,1),new Vector2(.62f,.1f),new Vector2(.88f,.24f),Vector2.zero,Vector2.zero,ToggleSettings);
             panel.SetActive(false);
             return panel;
         }
 
         private GameObject BuildControls(Transform canvas)
         {
-            var panel = EmergencyRoadUI.Panel(canvas, "Controls Modal", EmergencyRoadUI.Navy, new Vector2(.28f,.2f), new Vector2(.72f,.8f), Vector2.zero, Vector2.zero).gameObject;
-            EmergencyRoadUI.Label(panel.transform, "ĐIỀU KHIỂN", 52, EmergencyRoadUI.Cyan, TextAnchor.MiddleCenter, new Vector2(.1f,.8f), new Vector2(.9f,.96f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Label(panel.transform, "A / D\nCHUYỂN LÀN\n\nSPACE\nBÓP CÒI VUI NHỘN\n\nESC\nTẠM DỪNG", 34, Color.white, TextAnchor.MiddleCenter, new Vector2(.08f,.25f), new Vector2(.92f,.78f), Vector2.zero, Vector2.zero);
-            EmergencyRoadUI.Button(panel.transform, "QUAY LẠI", EmergencyRoadUI.Yellow, new Vector2(.28f,.08f), new Vector2(.72f,.2f), Vector2.zero, Vector2.zero, () => { panel.SetActive(false); settings.SetActive(true); });
+            var panel = EmergencyRoadUI.Panel(canvas,"Controls Modal",EmergencyRoadUI.Navy,new Vector2(.28f,.2f),new Vector2(.72f,.8f),Vector2.zero,Vector2.zero).gameObject;
+            EmergencyRoadUI.Label(panel.transform,"ĐIỀU KHIỂN",52,EmergencyRoadUI.Cyan,TextAnchor.MiddleCenter,new Vector2(.1f,.8f),new Vector2(.9f,.96f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Label(panel.transform,"A / D\nCHUYỂN LÀN\n\nSPACE\nBÓP CÒI VUI NHỘN\n\nESC\nTẠM DỪNG",34,Color.white,TextAnchor.MiddleCenter,new Vector2(.08f,.25f),new Vector2(.92f,.78f),Vector2.zero,Vector2.zero);
+            EmergencyRoadUI.Button(panel.transform,"QUAY LẠI",EmergencyRoadUI.Yellow,new Vector2(.28f,.08f),new Vector2(.72f,.2f),Vector2.zero,Vector2.zero,()=>{panel.SetActive(false);settings.SetActive(true);});
             panel.SetActive(false);
             return panel;
         }
 
-        private void Update() { if (previewRoot != null) previewRoot.Rotate(0, 24f * Time.unscaledDeltaTime, 0); }
+        private void Update(){if(previewRoot!=null)previewRoot.Rotate(0,24f*Time.unscaledDeltaTime,0);}
         private void OpenGarage(){Select(ResolveOwnedSelection());sceneView.mainMenuPanel.SetActive(false);sceneView.garagePanel.SetActive(true);}
         private void CloseGarage(){Select(ResolveOwnedSelection());sceneView.garagePanel.SetActive(false);sceneView.mainMenuPanel.SetActive(true);}
-        private void ToggleSettings() { settings.SetActive(!settings.activeSelf); controls.SetActive(false); }
+        private void ToggleSettings(){settings.SetActive(!settings.activeSelf);controls.SetActive(false);}
         private void ToggleSideCollision(){EmergencyRoadProfile.Current.sideCollisionEnabled=!EmergencyRoadProfile.Current.sideCollisionEnabled;EmergencyRoadProfile.Save();RefreshSideCollisionLabel();}
         private void RefreshSideCollisionLabel(){if(sideCollisionButton!=null)sideCollisionButton.GetComponentInChildren<TMP_Text>().text=EmergencyRoadProfile.Current.sideCollisionEnabled?"BẬT":"TẮT";}
 
         private void Select(int next)
         {
-            if (catalog.playerVehicles.Count == 0) return;
-            index = (next + catalog.playerVehicles.Count) % catalog.playerVehicles.Count;
-            if (preview != null){preview.SetActive(false);Destroy(preview);}
-            if(previewRoot!=null){preview = Instantiate(catalog.playerVehicles[index], previewRoot);preview.transform.localPosition = Vector3.zero;preview.transform.localRotation = Quaternion.identity;NormalizePreview(preview);}
-            vehicleName.text = index < VehicleNames.Length ? VehicleNames[index] : $"XE ĐẶC BIỆT {index + 1}";
-            wallet.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
-            bool unlocked = EmergencyRoadProfile.IsUnlocked(index);
-            int price = Prices[Mathf.Min(index, Prices.Length-1)];
+            int vehicleCount = catalog.PlayerVehicleCount;
+            if(vehicleCount==0)return;
+
+            index=(next+vehicleCount)%vehicleCount;
+            if(preview!=null){preview.SetActive(false);Destroy(preview);}
+
+            GameObject vehiclePrefab=catalog.PlayerVehiclePrefab(index);
+            if(previewRoot!=null&&vehiclePrefab!=null)
+            {
+                preview=Instantiate(vehiclePrefab,previewRoot);
+                preview.transform.localPosition=Vector3.zero;
+                preview.transform.localRotation=Quaternion.identity;
+                NormalizePreview(preview);
+            }
+
+            vehicleName.text=catalog.PlayerVehicleName(index);
+            wallet.text=$"● {EmergencyRoadProfile.Current.coins:N0}";
+            bool unlocked=EmergencyRoadProfile.IsUnlocked(index);
+            int price=catalog.PlayerVehiclePrice(index);
             bool selected=unlocked&&EmergencyRoadProfile.Current.selectedVehicle==index;
-            priceText.text = unlocked ? (selected?"ĐÃ SỞ HỮU • ĐANG DÙNG":"ĐÃ SỞ HỮU • SẴN SÀNG") : $"CHƯA SỞ HỮU • GIÁ  ● {price:N0}";
-            actionButton.GetComponentInChildren<TMP_Text>().text = unlocked ? (selected?"ĐANG DÙNG":"CHỌN XE") : "MỞ KHÓA";
+            priceText.text=unlocked?(selected?"ĐÃ SỞ HỮU • ĐANG DÙNG":"ĐÃ SỞ HỮU • SẴN SÀNG"):$"CHƯA SỞ HỮU • GIÁ  ● {price:N0}";
+            actionButton.GetComponentInChildren<TMP_Text>().text=unlocked?(selected?"ĐANG DÙNG":"CHỌN XE"):"MỞ KHÓA";
+            actionButton.interactable=vehiclePrefab!=null;
         }
 
         private int ResolveOwnedSelection()
         {
-            if(catalog.playerVehicles.Count==0)return 0;int requested=Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle,0,catalog.playerVehicles.Count-1);if(EmergencyRoadProfile.IsUnlocked(requested))return requested;
-            for(int candidate=0;candidate<catalog.playerVehicles.Count;candidate++)if(EmergencyRoadProfile.IsUnlocked(candidate))return candidate;
+            int vehicleCount=catalog.PlayerVehicleCount;
+            if(vehicleCount==0)return 0;
+            int requested=Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle,0,vehicleCount-1);
+            if(EmergencyRoadProfile.IsUnlocked(requested)&&catalog.PlayerVehiclePrefab(requested)!=null)return requested;
+            for(int candidate=0;candidate<vehicleCount;candidate++)
+                if(EmergencyRoadProfile.IsUnlocked(candidate)&&catalog.PlayerVehiclePrefab(candidate)!=null)return candidate;
             return 0;
         }
 
         private static void NormalizePreview(GameObject go)
         {
-            var renderers = go.GetComponentsInChildren<Renderer>();
-            if (renderers.Length == 0) return;
-            var bounds = renderers[0].bounds;
-            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
-            float scale = 6f / Mathf.Max(bounds.size.x, bounds.size.z);
-            go.transform.localScale = Vector3.one * scale;
-            bounds = renderers[0].bounds;
-            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
-            Vector3 target = go.transform.parent.position;
-            go.transform.position += new Vector3(target.x-bounds.center.x,target.y-bounds.min.y,target.z-bounds.center.z);
+            var renderers=go.GetComponentsInChildren<Renderer>();
+            if(renderers.Length==0)return;
+            var bounds=renderers[0].bounds;
+            foreach(var r in renderers)bounds.Encapsulate(r.bounds);
+            float scale=6f/Mathf.Max(bounds.size.x,bounds.size.z);
+            go.transform.localScale=Vector3.one*scale;
+            bounds=renderers[0].bounds;
+            foreach(var r in renderers)bounds.Encapsulate(r.bounds);
+            Vector3 target=go.transform.parent.position;
+            go.transform.position+=new Vector3(target.x-bounds.center.x,target.y-bounds.min.y,target.z-bounds.center.z);
         }
 
         private void VehicleAction()
         {
-            int price = Prices[Mathf.Min(index, Prices.Length-1)];
-            if (!EmergencyRoadProfile.TryUnlock(index, price)) { priceText.text = "KHÔNG ĐỦ TIỀN"; return; }
-            EmergencyRoadProfile.Current.selectedVehicle = index; EmergencyRoadProfile.Save(); Select(index);
+            if(catalog.PlayerVehiclePrefab(index)==null){priceText.text="CHƯA GÁN PREFAB XE";return;}
+            int price=catalog.PlayerVehiclePrice(index);
+            if(!EmergencyRoadProfile.TryUnlock(index,price)){priceText.text="KHÔNG ĐỦ TIỀN";return;}
+            EmergencyRoadProfile.Current.selectedVehicle=index;EmergencyRoadProfile.Save();Select(index);
         }
 
         private void Play()
