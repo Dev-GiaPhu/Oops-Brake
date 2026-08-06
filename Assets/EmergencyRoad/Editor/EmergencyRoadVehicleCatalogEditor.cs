@@ -82,12 +82,15 @@ namespace EmergencyRoad.Editor
             if (catalog == null)
                 return;
 
-            if (!catalog.SynchronizePlayerVehicleData())
-                return;
+            bool changed = catalog.SynchronizePlayerVehicleData();
 
+            // OnEnable can migrate the values before this delayed editor callback.
+            // Marking the asset dirty here guarantees that migrated entries are persisted.
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
-            Debug.Log("[Emergency Road] Đã đồng bộ danh sách xe: Prefab, tên, giá và âm còi.");
+
+            if (changed)
+                Debug.Log("[Emergency Road] Đã đồng bộ danh sách xe: Prefab, tên, giá và âm còi.");
         }
     }
 }
