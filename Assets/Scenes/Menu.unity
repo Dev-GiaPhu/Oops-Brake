@@ -3609,11 +3609,11 @@ MonoBehaviour:
   soilMaterial: {fileID: 2100000, guid: 99ab44ee527722a43a5e70868050dedf, type: 2}
   particleMaterial: {fileID: 2100000, guid: a4986c20ede3cfa47ace15e2ded20739, type: 2}
   postProcessProfile: {fileID: 11400000, guid: bfbb4584db5366a43aa9eb6b341261f0, type: 2}
-  backgroundMusic: {fileID: 0}
-  buttonClickSound: {fileID: 0}
-  coinSound: {fileID: 0}
-  hornSound: {fileID: 0}
-  collisionSound: {fileID: 0}
+  backgroundMusic: {fileID: 8300000, guid: c341c628b95f84a6f83a72750ee37f6a, type: 3}
+  buttonClickSound: {fileID: 8300000, guid: 10b4baeb494374a8ab4d9cf01ce42b8d, type: 3}
+  coinSound: {fileID: 8300000, guid: 01d04bb1ef5fe4eee9769ca6a7f6cb41, type: 3}
+  hornSound: {fileID: 8300000, guid: 5055d0c02c79b47b484a124f3ad90c8a, type: 3}
+  collisionSound: {fileID: 8300000, guid: e63dfe43ae39944a79b4b196bec7033a, type: 3}
   uiFont: {fileID: 11400000, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
   panelSprite: {fileID: 0}
   buttonSprite: {fileID: 0}
