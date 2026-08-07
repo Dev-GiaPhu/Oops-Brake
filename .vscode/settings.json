@@ -67,6 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Oops-Brake.slnx",
+    "dotnet.defaultSolution": "Racing 3D Polygon.slnx",
     "dotnet.enableWorkspaceBasedDevelopment": false
 }
