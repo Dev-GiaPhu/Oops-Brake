@@ -12351,27 +12351,27 @@ MonoBehaviour:
   startingSafeDistance: 48
   playerVehicleSetups:
   - vehiclePrefab: {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
   - vehiclePrefab: {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
   - vehiclePrefab: {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: ba121a35deb9d4bd9a4a7ade5dc6b531, type: 3}
   - vehiclePrefab: {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 5055d0c02c79b47b484a124f3ad90c8a, type: 3}
   - vehiclePrefab: {fileID: 2915879132325717256, guid: 87f15e00bc7d0a54d851c964bd63b8ef, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 971cebf360fbd4eeb98ad75042c56ee3, type: 3}
   - vehiclePrefab: {fileID: 1646028154367701847, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 752a5216621894ce48455d45a83e0361, type: 3}
   - vehiclePrefab: {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 5e6474bfebaa14014b9738d9c6dddcda, type: 3}
   - vehiclePrefab: {fileID: 8126737932816066456, guid: 475054c3ae438a14c87a575c9fa44ee7, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 971cebf360fbd4eeb98ad75042c56ee3, type: 3}
   - vehiclePrefab: {fileID: 2023009331022897683, guid: 3869c69e8dac23a4682c4944ba124748, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 8ea2ae91daa9c4d0aa0bf494f2b92ac3, type: 3}
   - vehiclePrefab: {fileID: 8207002681667545729, guid: ea409d27120635c428dc888c789a3371, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 3dd83b7c1d40545a6991e072a7fd74db, type: 3}
   - vehiclePrefab: {fileID: 111833268559281957, guid: 5c0b63d1c24324642b9b80fd4f76d939, type: 3}
-    hornSound: {fileID: 0}
+    hornSound: {fileID: 8300000, guid: 752a5216621894ce48455d45a83e0361, type: 3}
   playerVehicles:
   - {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
   - {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
@@ -12415,10 +12415,10 @@ MonoBehaviour:
   coinPrefab: {fileID: 4579309226957050845, guid: ba544797a652aa448b71e51499e09f94, type: 3}
   motorcyclePrefab: {fileID: 8421186050361847512, guid: 95eac6bea15613e40b4a4d0f582c2114, type: 3}
   obstaclePrefabs:
-  - {fileID: 3359409797177715914, guid: d18e3c639d13e2d498416a3c5009462c, type: 3}
-  - {fileID: 8080713936756012783, guid: 580d7f4570047ff4a83bd6e83df50ab4, type: 3}
-  - {fileID: 5416186344305875156, guid: f518858be349926409b88c0c06af8b57, type: 3}
-  - {fileID: 483345761760550714, guid: c413cd1b07bdfdf46b5089f9e6e2c188, type: 3}
+  - {fileID: 5280000169877883316, guid: d90aae874bef7074eac4ba2f7fa1097d, type: 3}
+  - {fileID: 1499413424437445256, guid: a5391901c82175647a0dc80298d1724e, type: 3}
+  - {fileID: 1989318905738134537, guid: 23b3ee2b372b87943a6cbce286749574, type: 3}
+  - {fileID: 6053085787823158449, guid: abaf13a763c700b4c9759cfe2b3ede0a, type: 3}
   - {fileID: 7769282103224168044, guid: 1567cd1857ec2e243b6f7ca126522873, type: 3}
   - {fileID: 774150586620734464, guid: 31f228c1024f8da4581961e96457b4b4, type: 3}
   - {fileID: 5427522932507016689, guid: 88434706d6ff5e243868b378b33cd8b1, type: 3}
@@ -12437,7 +12437,6 @@ MonoBehaviour:
   - {fileID: 9102875994649005946, guid: 8adadfa643c87f74bb2402c31a4e577c, type: 3}
   - {fileID: 7227667129424070513, guid: d7b05eca61aae2d41a54f37e25c50dc9, type: 3}
   streetDecorationPrefabs:
-  - {fileID: 840234040158172142, guid: 03f358efa0d17c64da70da4586677108, type: 3}
   - {fileID: 3738078055998318524, guid: afe45cbd4e2c80847b699dded3cbda43, type: 3}
   - {fileID: 3566633951122676924, guid: fe742e248ee01324fbcdc9dfc3d0683c, type: 3}
   - {fileID: 2111220532833401765, guid: 0ae0c3250b5b86948a77e13b230ed3ed, type: 3}
@@ -12447,6 +12446,8 @@ MonoBehaviour:
   - {fileID: 2018924952596129451, guid: 2f876f6cd0a34174097ea007af3ce96b, type: 3}
   - {fileID: 5204295545613483482, guid: 57a93038be5b57f469fb91ffc9735108, type: 3}
   - {fileID: 5746990765676646356, guid: 7bd3818199f8af2469e2b0fc31550d2a, type: 3}
+  - {fileID: 6094472392473256284, guid: e13ae8843a97a4c49bc1bac666178364, type: 3}
+  - {fileID: 7399536352057804258, guid: 5254ce5880eba824f99be812cc060d2b, type: 3}
   grassMaterial: {fileID: 2100000, guid: 17885bdc69363b34497a558c679c70d4, type: 2}
   soilMaterial: {fileID: 2100000, guid: 99ab44ee527722a43a5e70868050dedf, type: 2}
   particleMaterial: {fileID: 2100000, guid: a4986c20ede3cfa47ace15e2ded20739, type: 2}

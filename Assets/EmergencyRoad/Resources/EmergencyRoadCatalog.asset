@@ -13,22 +13,57 @@ MonoBehaviour:
   m_Name: EmergencyRoadCatalog
   m_EditorClassIdentifier: 
   gameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
+  playerVehicleCatalog:
+  - prefab: {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
+    displayName: "XE C\u1EE8U TH\u01AF\u01A0NG"
+    price: 0
+    hornClip: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
+  - prefab: {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
+    displayName: "XE C\u1EA2NH S\xC1T"
+    price: 0
+    hornClip: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
+  - prefab: {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
+    displayName: TAXI
+    price: 60
+    hornClip: {fileID: 8300000, guid: 5055d0c02c79b47b484a124f3ad90c8a, type: 3}
+  - prefab: {fileID: 2915879132325717256, guid: 87f15e00bc7d0a54d851c964bd63b8ef, type: 3}
+    displayName: "XE B\u1ED2N"
+    price: 1600
+    hornClip: {fileID: 0}
+  - prefab: {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
+    displayName: "XE C\u1EE8U H\u1ECEA"
+    price: 150
+    hornClip: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
+  - prefab: {fileID: 1646028154367701847, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+    displayName: "XE \u1EE6I"
+    price: 200
+    hornClip: {fileID: 8300000, guid: ba121a35deb9d4bd9a4a7ade5dc6b531, type: 3}
+  - prefab: {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
+    displayName: "XE X\xDAC"
+    price: 3000
+    hornClip: {fileID: 8300000, guid: 971cebf360fbd4eeb98ad75042c56ee3, type: 3}
+  - prefab: {fileID: 8126737932816066456, guid: 475054c3ae438a14c87a575c9fa44ee7, type: 3}
+    displayName: "Xe T\u1EA3i 1"
+    price: 3000
+    hornClip: {fileID: 8300000, guid: 8ea2ae91daa9c4d0aa0bf494f2b92ac3, type: 3}
   playerVehicles:
   - {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
   - {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
-  - {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
   - {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
   - {fileID: 2915879132325717256, guid: 87f15e00bc7d0a54d851c964bd63b8ef, type: 3}
+  - {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
   - {fileID: 1646028154367701847, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
   - {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
+  - {fileID: 8126737932816066456, guid: 475054c3ae438a14c87a575c9fa44ee7, type: 3}
   vehicleHornClips:
+  - {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
+  - {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
+  - {fileID: 8300000, guid: 5055d0c02c79b47b484a124f3ad90c8a, type: 3}
   - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
+  - {fileID: 8300000, guid: ba121a35deb9d4bd9a4a7ade5dc6b531, type: 3}
+  - {fileID: 8300000, guid: 971cebf360fbd4eeb98ad75042c56ee3, type: 3}
+  - {fileID: 8300000, guid: 8ea2ae91daa9c4d0aa0bf494f2b92ac3, type: 3}
   trafficVehicles:
   - {fileID: 1220109061593607075, guid: e1d32747d09c9db4ebaeb409cbf1a9d1, type: 3}
   - {fileID: 3592177867728365202, guid: fc9e91eb22879f84eac056473c581b5b, type: 3}
@@ -47,7 +82,6 @@ MonoBehaviour:
   crossroadPrefabs:
   - {fileID: 4623501346566010854, guid: 1c2f649bb73f3c64e8f0bd6c2efb3cf5, type: 3}
   - {fileID: 2322147598828099468, guid: 64041ef4284998d49aad1687a96d40b6, type: 3}
-  - {fileID: 8050748024107887483, guid: c74f0a74f29605d4da88a3dc0585a604, type: 3}
   - {fileID: 5668982391212175364, guid: 4eeb20c070914254b90c9d79c08ef5e4, type: 3}
   crossroadMetrics:
   - prefab: {fileID: 4623501346566010854, guid: 1c2f649bb73f3c64e8f0bd6c2efb3cf5, type: 3}
@@ -107,11 +141,11 @@ MonoBehaviour:
   sliderBackgroundSprite: {fileID: 0}
   sliderFillSprite: {fileID: 0}
   sliderHandleSprite: {fileID: 0}
-  musicClip: {fileID: 0}
-  uiClickClip: {fileID: 0}
-  coinClip: {fileID: 0}
-  hornClip: {fileID: 0}
-  crashClip: {fileID: 0}
+  musicClip: {fileID: 8300000, guid: e86a32d0ba45049ff8934485475cb9f0, type: 3}
+  uiClickClip: {fileID: 8300000, guid: 10b4baeb494374a8ab4d9cf01ce42b8d, type: 3}
+  coinClip: {fileID: 8300000, guid: 01d04bb1ef5fe4eee9769ca6a7f6cb41, type: 3}
+  hornClip: {fileID: 8300000, guid: 5055d0c02c79b47b484a124f3ad90c8a, type: 3}
+  crashClip: {fileID: 8300000, guid: e63dfe43ae39944a79b4b196bec7033a, type: 3}
   roadLength: 7.4645844
   roadHalfWidth: 11.03214
   laneWidth: 5.185106

@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: EmergencyRoadGameplaySettings
   m_EditorClassIdentifier: 
   startSpeed: 20
-  maxSpeed: 80
-  distanceToMaxSpeed: 1000
-  obstacleGapAtMinimumSpeed: 15
-  obstacleGapAtMaximumSpeed: 50
+  maxSpeed: 110
+  distanceToMaxSpeed: 5000
+  obstacleGapAtMinimumSpeed: 30
+  obstacleGapAtMaximumSpeed: 40
   minimumObstacleReactionTime: 0.75
-  twoLaneBlockChanceAtStart: 0.58
+  twoLaneBlockChanceAtStart: 0.75
   twoLaneBlockChanceAtMaxSpeed: 0.32
   minStraightChunksBetweenIntersections: 10
   maxStraightChunksBetweenIntersections: 14
