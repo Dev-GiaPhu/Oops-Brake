@@ -122,15 +122,15 @@ namespace EmergencyRoad
             var body = root.GetComponent<Rigidbody>();if(body==null)body=root.AddComponent<Rigidbody>();body.isKinematic = true; body.useGravity = false;
             player = root.GetComponent<EmergencyVehicleController>();if(player==null)player=root.AddComponent<EmergencyVehicleController>();player.Initialize(visual.transform, this,catalog.HornForVehicle(selected),selected);
             if(Camera.main!=null){cameraJuice=Camera.main.GetComponent<EmergencyCameraJuice>();if(cameraJuice==null)cameraJuice=Camera.main.gameObject.AddComponent<EmergencyCameraJuice>();}if(cameraJuice!=null)cameraJuice.Initialize(root.transform);
-            CreateRoadDust(root.transform,catalog.vfxParticleMaterial);
+            AttachRoadDustPrefab(root.transform);
         }
 
-        private static void CreateRoadDust(Transform playerRoot,Material particleMaterial)
+        private static void AttachRoadDustPrefab(Transform playerRoot)
         {
-            var go=new GameObject("Subtle Road Dust Trail",typeof(ParticleSystem));go.transform.SetParent(playerRoot);go.transform.localPosition=new Vector3(0,.1f,-1.8f);go.transform.localRotation=Quaternion.Euler(-90,0,0);
-            var ps=go.GetComponent<ParticleSystem>();var main=ps.main;main.startLifetime=.45f;main.startSpeed=.35f;main.startSize=.24f;main.startColor=new Color(.7f,.72f,.68f,.18f);main.maxParticles=32;main.simulationSpace=ParticleSystemSimulationSpace.World;
-            var emission=ps.emission;emission.rateOverTime=14f;var shape=ps.shape;shape.shapeType=ParticleSystemShapeType.Box;shape.scale=new Vector3(1.25f,.05f,.2f);
-            if(particleMaterial!=null)go.GetComponent<ParticleSystemRenderer>().sharedMaterial=particleMaterial;
+            var prefab=Resources.Load<GameObject>("PlayerRoadDust");
+            if(prefab==null){Debug.LogError("[Emergency Road] Thiếu prefab Assets/EmergencyRoad/Resources/PlayerRoadDust.prefab. Không tạo khói bằng code runtime.");return;}
+            var instance=Object.Instantiate(prefab,playerRoot,false);
+            instance.name="Player Road Dust";
         }
 
         public static void FitVehicle(GameObject visual, float targetWidth, float targetLength)
@@ -231,7 +231,6 @@ namespace EmergencyRoad
         internal bool ShouldSpawnObstacle(int sequence,bool crossroad)
         {
             float generationDistance=sequence*ChunkSpacing;if(generationDistance<nextObstacleDistance)return false;
-            // Min/max are authored distances at min/max speed. The current gap is a direct linear interpolation with no random or additive spacing.
             float safetyGap=VehicleLength*2f;float minimumGap=Settings!=null?Settings.obstacleGapAtMinimumSpeed:28f;float maximumGap=Settings!=null?Settings.obstacleGapAtMaximumSpeed:70f;float speedScaledGap=Mathf.Lerp(minimumGap,maximumGap,Difficulty01);nextObstacleDistance=generationDistance+Mathf.Max(safetyGap,speedScaledGap);
             return true;
         }
@@ -271,8 +270,6 @@ namespace EmergencyRoad
         }
         private bool IsLaneBlockedBesidePlayer(int targetLane)
         {
-            // Only protect the part of the adjacent lane that is genuinely beside the player's body.
-            // A hazard whose front edge has cleared the player's rear is no longer allowed to block a lane change.
             float playerZ=transform.position.z;var center=new Vector3(targetLane*EmergencyRoadGame.LaneWidth,1f,playerZ+.15f);var tuning=game.Settings;float halfLength=tuning!=null?tuning.sideCheckHalfLength:.68f;float release=tuning!=null?tuning.releaseBehindPlayer:.32f;
             var hits=Physics.OverlapBox(center,new Vector3(EmergencyRoadGame.LaneWidth*.36f,.85f,halfLength),Quaternion.identity,~0,QueryTriggerInteraction.Collide);
             foreach(var hit in hits)
@@ -305,7 +302,7 @@ namespace EmergencyRoad
         {
             foreach(var filter in visual.GetComponentsInChildren<MeshFilter>())
             {
-                try{var source=filter.sharedMesh;if(source==null)continue;var mesh=Object.Instantiate(source);mesh.name=source.name+" - Runtime Crash Deformed";var vertices=mesh.vertices;var bounds=mesh.bounds;var localImpact=filter.transform.InverseTransformDirection(impactDirection).normalized;var ext=bounds.extents;float impactExtent=Mathf.Abs(localImpact.x)*ext.x+Mathf.Abs(localImpact.y)*ext.y+Mathf.Abs(localImpact.z)*ext.z;float dentDepth=Mathf.Max(.08f,impactExtent*.42f);var sideways=Vector3.Cross(Vector3.up,localImpact).normalized;for(int i=0;i<vertices.Length;i++){var offset=vertices[i]-bounds.center;var normalized=new Vector3(offset.x/Mathf.Max(.01f,ext.x),offset.y/Mathf.Max(.01f,ext.y),offset.z/Mathf.Max(.01f,ext.z));float facing=Vector3.Dot(normalized,localImpact);float influence=Mathf.Pow(Mathf.SmoothStep(0,1,Mathf.InverseLerp(-.05f,.88f,facing)),1.25f);float crease=Mathf.Sin(i*12.9898f+offset.y*17f);vertices[i]+=-localImpact*(dentDepth*influence*(.78f+.16f*crease));vertices[i]+=sideways*(dentDepth*.12f*influence*crease);vertices[i].y-=ext.y*.22f*influence*(.65f+.2f*Mathf.Abs(crease));}mesh.vertices=vertices;mesh.RecalculateBounds();mesh.RecalculateNormals();filter.sharedMesh=mesh;}catch(UnityException){/* Read/Write is enabled by the project builder for player vehicle FBX files. */}
+                try{var source=filter.sharedMesh;if(source==null)continue;var mesh=Object.Instantiate(source);mesh.name=source.name+" - Runtime Crash Deformed";var vertices=mesh.vertices;var bounds=mesh.bounds;var localImpact=filter.transform.InverseTransformDirection(impactDirection).normalized;var ext=bounds.extents;float impactExtent=Mathf.Abs(localImpact.x)*ext.x+Mathf.Abs(localImpact.y)*ext.y+Mathf.Abs(localImpact.z)*ext.z;float dentDepth=Mathf.Max(.08f,impactExtent*.42f);var sideways=Vector3.Cross(Vector3.up,localImpact).normalized;for(int i=0;i<vertices.Length;i++){var offset=vertices[i]-bounds.center;var normalized=new Vector3(offset.x/Mathf.Max(.01f,ext.x),offset.y/Mathf.Max(.01f,ext.y),offset.z/Mathf.Max(.01f,ext.z));float facing=Vector3.Dot(normalized,localImpact);float influence=Mathf.Pow(Mathf.SmoothStep(0,1,Mathf.InverseLerp(-.05f,.88f,facing)),1.25f);float crease=Mathf.Sin(i*12.9898f+offset.y*17f);vertices[i]+=-localImpact*(dentDepth*influence*(.78f+.16f*crease));vertices[i]+=sideways*(dentDepth*.12f*influence*crease);vertices[i].y-=ext.y*.22f*influence*(.65f+.2f*Mathf.Abs(crease));}mesh.vertices=vertices;mesh.RecalculateBounds();mesh.RecalculateNormals();filter.sharedMesh=mesh;}catch(UnityException){}
             }
         }
         private IEnumerator Crumple(Vector3 impactDirection){float t=0;var localImpact=visual.parent!=null?visual.parent.InverseTransformDirection(impactDirection).normalized:impactDirection.normalized;while(t<.55f){t+=Time.unscaledDeltaTime;float s=Mathf.SmoothStep(0,1,Mathf.Clamp01(t/.42f));float recoil=Mathf.Sin(Mathf.Clamp01(t/.55f)*Mathf.PI)*.06f;visual.localPosition=baseLocalPosition-localImpact*(.2f*s+recoil);visual.localRotation=Quaternion.Euler((5f+Mathf.Abs(localImpact.z)*7f)*s,localImpact.x*11f*s,-localImpact.x*18f*s);yield return null;}}
@@ -389,7 +386,6 @@ namespace EmergencyRoad
         {
             if(cross){SpawnCrossing();return;}
             int openLane=Random.Range(-1,2);float obstacleZ=Random.Range(-EmergencyRoadGame.ChunkSpacing*.22f,EmergencyRoadGame.ChunkSpacing*.22f);
-            // Every row leaves one or two usable lanes. Two-lane blocks are common early and ease off later.
             var tuning=owner!=null?owner.Settings:null;float doubleBlockChance=owner==null?.45f:Mathf.Lerp(tuning!=null?tuning.twoLaneBlockChanceAtStart:.58f,tuning!=null?tuning.twoLaneBlockChanceAtMaxSpeed:.32f,owner.Difficulty01);
             float movingTrafficChance=tuning!=null?tuning.sameDirectionTrafficChance:.28f;
             if(owner!=null&&catalog.trafficVehicles.Count>0&&Random.value<movingTrafficChance){int trafficLane=openLane;while(trafficLane==openLane)trafficLane=Random.Range(-1,2);owner.SpawnSameDirectionTraffic(trafficLane,root.transform.position.z+obstacleZ);for(int i=0;i<4;i++)SpawnCoin(openLane,-EmergencyRoadGame.ChunkSpacing*.38f+i*(EmergencyRoadGame.ChunkSpacing*.76f/3f));return;}
@@ -403,7 +399,6 @@ namespace EmergencyRoad
         {
             float roll=Random.value;
             var tuning=owner!=null?owner.Settings:null;float vehicleChance=tuning!=null?tuning.stoppedVehicleChance:.68f;float barrierChance=tuning!=null?tuning.barrierChance:.24f;if(roll<vehicleChance&&catalog.trafficVehicles.Count>0){SpawnParkedVehicle(lane,localZ);return;}
-
             var barriers=catalog.obstaclePrefabs.FindAll(x=>x!=null&&x.name.ToLowerInvariant().Contains("barrier"));
             GameObject prefab=roll<vehicleChance+barrierChance&&barriers.Count>0?barriers[Random.Range(0,barriers.Count)]:(catalog.obstaclePrefabs.Count>0?catalog.obstaclePrefabs[Random.Range(0,catalog.obstaclePrefabs.Count)]:null);
             string sourceName=prefab!=null?prefab.name:"fallback barrier";var go=prefab?Object.Instantiate(prefab,root.transform):GameObject.CreatePrimitive(PrimitiveType.Cube);go.name=$"Road Hazard - {sourceName}";go.transform.localPosition=new Vector3(lane*EmergencyRoadGame.LaneWidth,.05f,localZ);go.transform.localRotation=Quaternion.identity;go.AddComponent<RoadHazard>();FitObstacleToLane(go,EmergencyRoadGame.LaneWidth*(tuning!=null?tuning.obstacleLaneWidth:.86f),sourceName);spawned.Add(go);
@@ -530,18 +525,9 @@ namespace EmergencyRoad
         private static Material CreateMaterial(Color color,bool emission){var material=new Material(Shader.Find("Universal Render Pipeline/Lit"));material.color=color;if(emission){material.EnableKeyword("_EMISSION");material.SetColor("_EmissionColor",color*4f);}return material;}
         private void Update(){if(exploded)return;var p=transform.position;p.z+=speed*Time.deltaTime;if(!pathLocked&&player!=null){lockedTargetX=Mathf.SmoothDamp(lockedTargetX,player.position.x,ref trackingVelocity,.65f,3.5f);if(p.z>=-4f)pathLocked=true;}float desiredX=lockedTargetX+Mathf.Sin(p.z*.28f)*.5f;float previousX=p.x;p.x=Mathf.SmoothDamp(p.x,desiredX,ref lateralVelocity,.18f,7f);transform.position=p;float lateral=(p.x-previousX)/Mathf.Max(.001f,Time.deltaTime);float yaw=Mathf.Atan2(lateral,speed)*Mathf.Rad2Deg;float lean=Mathf.Clamp(-lateral*2f,-13f,13f);transform.rotation=Quaternion.Slerp(transform.rotation,Quaternion.Euler(0,yaw,lean),1f-Mathf.Exp(-8f*Time.deltaTime));UpdateCameraLifetime();}
         private void FixedUpdate(){if(!exploded||!compensateMapScroll||explodedBody==null||game==null)return;debrisPhysicsAge+=Time.fixedDeltaTime;var tuning=game.Settings;float hold=tuning!=null?tuning.motorDebrisImpactHoldTime:.35f;if(debrisPhysicsAge<hold)return;float sharpness=tuning!=null?tuning.motorDebrisMapFollowSharpness:2.2f;var velocity=explodedBody.linearVelocity;velocity.z=Mathf.Lerp(velocity.z,-game.CurrentSpeed,1f-Mathf.Exp(-sharpness*Time.fixedDeltaTime));explodedBody.linearVelocity=velocity;}
-        private void UpdateCameraLifetime()
-        {
-            if(IsInsideCameraView()){hasBeenInsideCamera=true;return;}if(hasBeenInsideCamera)Destroy(gameObject);
-        }
-        private bool IsInsideCameraView()
-        {
-            if(trackingCamera==null)trackingCamera=Camera.main;if(trackingCamera==null||visualRenderers==null||visualRenderers.Length==0)return false;int first=-1;for(int i=0;i<visualRenderers.Length;i++)if(visualRenderers[i]!=null){first=i;break;}if(first<0)return false;var bounds=visualRenderers[first].bounds;for(int i=first+1;i<visualRenderers.Length;i++)if(visualRenderers[i]!=null)bounds.Encapsulate(visualRenderers[i].bounds);GeometryUtility.CalculateFrustumPlanes(trackingCamera,frustumPlanes);return GeometryUtility.TestPlanesAABB(frustumPlanes,bounds);
-        }
-        private void OnTriggerEnter(Collider other)
-        {
-            if(exploded)return;if(other.GetComponentInParent<EmergencyVehicleController>()!=null){hasBeenInsideCamera=true;game.Crash(transform.position-other.transform.position);StartCoroutine(Explode(true));return;}if(other.GetComponentInParent<RoadHazard>()!=null)StartCoroutine(Explode(false));
-        }
+        private void UpdateCameraLifetime(){if(IsInsideCameraView()){hasBeenInsideCamera=true;return;}if(hasBeenInsideCamera)Destroy(gameObject);}
+        private bool IsInsideCameraView(){if(trackingCamera==null)trackingCamera=Camera.main;if(trackingCamera==null||visualRenderers==null||visualRenderers.Length==0)return false;int first=-1;for(int i=0;i<visualRenderers.Length;i++)if(visualRenderers[i]!=null){first=i;break;}if(first<0)return false;var bounds=visualRenderers[first].bounds;for(int i=first+1;i<visualRenderers.Length;i++)if(visualRenderers[i]!=null)bounds.Encapsulate(visualRenderers[i].bounds);GeometryUtility.CalculateFrustumPlanes(trackingCamera,frustumPlanes);return GeometryUtility.TestPlanesAABB(frustumPlanes,bounds);}
+        private void OnTriggerEnter(Collider other){if(exploded)return;if(other.GetComponentInParent<EmergencyVehicleController>()!=null){hasBeenInsideCamera=true;game.Crash(transform.position-other.transform.position);StartCoroutine(Explode(true));return;}if(other.GetComponentInParent<RoadHazard>()!=null)StartCoroutine(Explode(false));}
         private IEnumerator Explode(bool preserveAfterPlayerHit)
         {
             exploded=true;var physicsCollider=GetComponent<BoxCollider>();foreach(var c in GetComponentsInChildren<Collider>()){c.enabled=true;c.isTrigger=false;}if(physicsCollider!=null){physicsCollider.enabled=true;physicsCollider.isTrigger=false;physicsCollider.size=new Vector3(.9f,1.15f,1.9f);physicsCollider.center=new Vector3(0,.58f,0);}var body=GetComponent<Rigidbody>();if(body!=null){body.isKinematic=false;body.useGravity=true;body.mass=280f;body.linearDamping=1.15f;body.angularDamping=2.4f;body.maxAngularVelocity=5f;body.centerOfMass=new Vector3(0,.32f,0);body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.interpolation=RigidbodyInterpolation.Interpolate;compensateMapScroll=!preserveAfterPlayerHit&&game!=null;float mapSpeed=compensateMapScroll?game.CurrentSpeed:0f;debrisPhysicsAge=0f;body.linearVelocity=new Vector3(Random.Range(-1.25f,1.25f),3.6f,6.5f-mapSpeed);body.angularVelocity=new Vector3(Random.Range(2.2f,4.2f),Random.Range(-2.2f,2.2f),Random.Range(-4.2f,4.2f));explodedBody=body;}
