@@ -1,40 +1,114 @@
+using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
 
 namespace EmergencyRoad
 {
+    [Serializable]
+    public sealed class EmergencyRoadMenuVehicleEntry
+    {
+        [Tooltip("Prefab xe. Kéo trực tiếp prefab vào đây.")]
+        public GameObject prefab;
+
+        [Tooltip("Tên hiển thị trong garage.")]
+        public string displayName = "XE MỚI";
+
+        [Min(0)]
+        [Tooltip("Giá mở khóa. 0 = miễn phí.")]
+        public int price;
+
+        [Tooltip("Âm còi riêng của xe. Có thể để trống.")]
+        public AudioClip hornClip;
+
+        [Header("GARAGE PREVIEW TRANSFORM")]
+        [Tooltip("Vị trí local của xe so với tâm bàn xoay.")]
+        public Vector3 previewLocalPosition = Vector3.zero;
+
+        [Tooltip("Góc local của xe so với tâm bàn xoay.")]
+        public Vector3 previewLocalEuler = Vector3.zero;
+
+        [Min(.01f)]
+        [Tooltip("Scale riêng khi hiện trong garage.")]
+        public float previewScale = 1f;
+    }
+
     [DisallowMultipleComponent]
     public sealed class EmergencyRoadMenu : MonoBehaviour
     {
         [Header("SCENE REFERENCES - DRAG DIRECTLY")]
-        [SerializeField] private EmergencyRoadCatalog catalog;
         [SerializeField] private EmergencyRoadMenuView sceneView;
-        [SerializeField, Tooltip("Kéo Empty GameObject nằm đúng tâm bàn xoay vào đây. Không dùng model xe làm pivot.")]
-        private Transform vehiclePreviewPivot;
         [SerializeField] private EmergencyRoadAudio audioService;
+
+        [Header("VEHICLES - DRAG DIRECTLY")]
+        [SerializeField]
+        [Tooltip("Danh sách xe dùng trực tiếp. Runtime không đọc EmergencyRoadCatalog.")]
+        private List<EmergencyRoadMenuVehicleEntry> vehicles = new();
 
         [Header("PREVIEW")]
         [SerializeField, Min(0f)] private float previewRotationSpeed = 24f;
-        [SerializeField, Min(0.1f)] private float previewTargetFootprint = 6f;
 
         private GameObject preview;
         private int index;
         private bool initialized;
 
-        public EmergencyRoadCatalog Catalog => catalog;
         public EmergencyRoadMenuView SceneView => sceneView;
-        public Transform VehiclePreviewPivot => vehiclePreviewPivot;
+        public IReadOnlyList<EmergencyRoadMenuVehicleEntry> Vehicles => vehicles;
 
-        private void Start() => InitializeAuthoredMenu();
-
-        public void ConfigureSceneReferences(EmergencyRoadCatalog data, EmergencyRoadMenuView view, Transform previewPivot, EmergencyRoadAudio audio)
+        private void Start()
         {
-            catalog = data;
+            InitializeAuthoredMenu();
+        }
+
+        /// <summary>
+        /// Chỉ được Editor authoring gọi để ghi reference trực tiếp vào scene.
+        /// Catalog chỉ được dùng một lần để migrate dữ liệu cũ sang list trực tiếp,
+        /// không được giữ hoặc đọc ở runtime.
+        /// </summary>
+        public void ConfigureSceneReferences(
+            EmergencyRoadCatalog sourceCatalog,
+            EmergencyRoadMenuView view,
+            Transform previewPivot,
+            EmergencyRoadAudio audio)
+        {
             sceneView = view;
-            vehiclePreviewPivot = previewPivot;
             audioService = audio;
+
+            if (sceneView != null && previewPivot != null)
+                sceneView.vehiclePreviewPivot = previewPivot;
+
+            if ((vehicles == null || vehicles.Count == 0) && sourceCatalog != null)
+            {
+                sourceCatalog.SynchronizePlayerVehicleData();
+                vehicles = new List<EmergencyRoadMenuVehicleEntry>();
+
+                for (int i = 0; i < sourceCatalog.PlayerVehicleCount; i++)
+                {
+                    vehicles.Add(new EmergencyRoadMenuVehicleEntry
+                    {
+                        prefab = sourceCatalog.PlayerVehiclePrefab(i),
+                        displayName = sourceCatalog.PlayerVehicleName(i),
+                        price = sourceCatalog.PlayerVehiclePrice(i),
+                        hornClip = sourceCatalog.HornForVehicle(i),
+                        previewLocalPosition = Vector3.zero,
+                        previewLocalEuler = Vector3.zero,
+                        previewScale = 1f
+                    });
+                }
+            }
+
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
+            if (sceneView != null) EditorUtility.SetDirty(sceneView);
+            if (gameObject.scene.IsValid()) EditorSceneManager.MarkSceneDirty(gameObject.scene);
+#endif
         }
 
         public void InitializeAuthoredMenu()
@@ -47,10 +121,9 @@ namespace EmergencyRoad
             }
 
             initialized = true;
-            catalog.SynchronizePlayerVehicleData();
-            EmergencyRoadUI.SetFont(catalog.uiFont);
-            audioService.ConfigureFromCatalog(catalog);
-            audioService.ApplyVolumes();
+            if (audioService != null)
+                audioService.ApplyVolumes();
+
             BindSceneUI();
             index = ResolveOwnedSelection();
 
@@ -59,16 +132,31 @@ namespace EmergencyRoad
                 EmergencyRoadProfile.Current.selectedVehicle = index;
                 EmergencyRoadProfile.Save();
             }
+
             Select(index);
         }
 
         private bool ValidateReferences()
         {
             bool valid = true;
-            if (catalog == null) { Debug.LogError("[Emergency Road] Menu Controller thiếu Catalog. Kéo EmergencyRoadCatalog.asset vào Inspector.", this); valid = false; }
-            if (sceneView == null) { Debug.LogError("[Emergency Road] Menu Controller thiếu Menu View. Kéo EmergencyRoadMenuView trong scene vào Inspector.", this); valid = false; }
-            if (vehiclePreviewPivot == null) { Debug.LogError("[Emergency Road] Menu Controller thiếu Vehicle Preview Pivot. Kéo Empty GameObject ở tâm bàn xoay vào Inspector.", this); valid = false; }
-            if (audioService == null) { Debug.LogError("[Emergency Road] Menu Controller thiếu Audio Service. Kéo EmergencyRoadAudio trong scene vào Inspector.", this); valid = false; }
+
+            if (sceneView == null)
+            {
+                Debug.LogError("[Emergency Road] Menu Controller thiếu Scene View. Gán EmergencyRoadMenuView trực tiếp trong Inspector.", this);
+                valid = false;
+            }
+            else if (sceneView.vehiclePreviewPivot == null)
+            {
+                Debug.LogError("[Emergency Road] EmergencyRoadMenuView thiếu Vehicle Preview Pivot. Pivot phải là Empty GameObject nằm đúng tâm bàn xoay.", sceneView);
+                valid = false;
+            }
+
+            if (vehicles == null || vehicles.Count == 0)
+            {
+                Debug.LogError("[Emergency Road] Menu Controller chưa có Vehicles. Kéo prefab xe trực tiếp vào list Vehicles trong Inspector.", this);
+                valid = false;
+            }
+
             return valid;
         }
 
@@ -79,30 +167,41 @@ namespace EmergencyRoad
             Bind(sceneView.vehicleAction, VehicleAction);
             Bind(sceneView.play, Play);
             Bind(sceneView.settingsOpen, ToggleSettings);
-            Bind(sceneView.quit, Application.Quit);
+            Bind(sceneView.quit, () => Application.Quit());
             Bind(sceneView.sideCollision, ToggleSideCollision);
             Bind(sceneView.selectVehicle, OpenGarage);
             Bind(sceneView.garageBack, CloseGarage);
-            Bind(sceneView.controlsOpen, () => { sceneView.settingsPanel.SetActive(false); sceneView.controlsPanel.SetActive(true); });
-            Bind(sceneView.settingsClose, ToggleSettings);
-            Bind(sceneView.controlsBack, () => { sceneView.controlsPanel.SetActive(false); sceneView.settingsPanel.SetActive(true); });
-            Bind(sceneView.music, v =>
+            Bind(sceneView.controlsOpen, () =>
             {
-                EmergencyRoadProfile.Current.musicVolume = v;
-                audioService.ApplyVolumes();
+                if (sceneView.settingsPanel != null) sceneView.settingsPanel.SetActive(false);
+                if (sceneView.controlsPanel != null) sceneView.controlsPanel.SetActive(true);
+            });
+            Bind(sceneView.settingsClose, ToggleSettings);
+            Bind(sceneView.controlsBack, () =>
+            {
+                if (sceneView.controlsPanel != null) sceneView.controlsPanel.SetActive(false);
+                if (sceneView.settingsPanel != null) sceneView.settingsPanel.SetActive(true);
+            });
+
+            Bind(sceneView.music, value =>
+            {
+                EmergencyRoadProfile.Current.musicVolume = value;
+                if (audioService != null) audioService.ApplyVolumes();
                 EmergencyRoadProfile.Save();
             }, EmergencyRoadProfile.Current.musicVolume);
-            Bind(sceneView.sfx, v =>
+
+            Bind(sceneView.sfx, value =>
             {
-                EmergencyRoadProfile.Current.sfxVolume = v;
-                audioService.ApplyVolumes();
+                EmergencyRoadProfile.Current.sfxVolume = value;
+                if (audioService != null) audioService.ApplyVolumes();
                 EmergencyRoadProfile.Save();
             }, EmergencyRoadProfile.Current.sfxVolume);
 
-            sceneView.mainMenuPanel.SetActive(true);
-            sceneView.garagePanel.SetActive(false);
-            sceneView.settingsPanel.SetActive(false);
-            sceneView.controlsPanel.SetActive(false);
+            if (sceneView.mainMenuPanel != null) sceneView.mainMenuPanel.SetActive(true);
+            if (sceneView.garagePanel != null) sceneView.garagePanel.SetActive(false);
+            if (sceneView.settingsPanel != null) sceneView.settingsPanel.SetActive(false);
+            if (sceneView.controlsPanel != null) sceneView.controlsPanel.SetActive(false);
+
             RefreshSideCollisionLabel();
         }
 
@@ -110,7 +209,11 @@ namespace EmergencyRoad
         {
             if (button == null) return;
             button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => { audioService.Click(); action(); });
+            button.onClick.AddListener(() =>
+            {
+                if (audioService != null) audioService.Click();
+                action?.Invoke();
+            });
         }
 
         private static void Bind(Slider slider, UnityEngine.Events.UnityAction<float> action, float value)
@@ -123,28 +226,31 @@ namespace EmergencyRoad
 
         private void Update()
         {
-            if (vehiclePreviewPivot != null)
-                vehiclePreviewPivot.Rotate(0f, previewRotationSpeed * Time.unscaledDeltaTime, 0f, Space.Self);
+            if (!initialized || sceneView == null || sceneView.vehiclePreviewPivot == null) return;
+            sceneView.vehiclePreviewPivot.Rotate(0f, previewRotationSpeed * Time.unscaledDeltaTime, 0f, Space.Self);
         }
 
         private void OpenGarage()
         {
             Select(ResolveOwnedSelection());
-            sceneView.mainMenuPanel.SetActive(false);
-            sceneView.garagePanel.SetActive(true);
+            if (sceneView.mainMenuPanel != null) sceneView.mainMenuPanel.SetActive(false);
+            if (sceneView.garagePanel != null) sceneView.garagePanel.SetActive(true);
         }
 
         private void CloseGarage()
         {
             Select(ResolveOwnedSelection());
-            sceneView.garagePanel.SetActive(false);
-            sceneView.mainMenuPanel.SetActive(true);
+            if (sceneView.garagePanel != null) sceneView.garagePanel.SetActive(false);
+            if (sceneView.mainMenuPanel != null) sceneView.mainMenuPanel.SetActive(true);
         }
 
         private void ToggleSettings()
         {
-            sceneView.settingsPanel.SetActive(!sceneView.settingsPanel.activeSelf);
-            sceneView.controlsPanel.SetActive(false);
+            if (sceneView.settingsPanel != null)
+                sceneView.settingsPanel.SetActive(!sceneView.settingsPanel.activeSelf);
+
+            if (sceneView.controlsPanel != null)
+                sceneView.controlsPanel.SetActive(false);
         }
 
         private void ToggleSideCollision()
@@ -162,83 +268,93 @@ namespace EmergencyRoad
 
         private void Select(int next)
         {
-            int vehicleCount = catalog.PlayerVehicleCount;
-            if (vehicleCount == 0) return;
+            int count = vehicles.Count;
+            if (count == 0) return;
 
-            index = (next + vehicleCount) % vehicleCount;
-            if (preview != null) Destroy(preview);
+            index = (next % count + count) % count;
 
-            GameObject vehiclePrefab = catalog.PlayerVehiclePrefab(index);
-            if (vehiclePrefab != null)
+            if (preview != null)
             {
-                preview = Instantiate(vehiclePrefab, vehiclePreviewPivot, false);
-                preview.name = $"Preview - {vehiclePrefab.name}";
-                preview.transform.localPosition = Vector3.zero;
-                preview.transform.localRotation = Quaternion.identity;
-                preview.transform.localScale = Vector3.one;
-                NormalizePreview(preview, previewTargetFootprint);
+                Destroy(preview);
+                preview = null;
             }
 
-            if (sceneView.vehicleName != null) sceneView.vehicleName.text = catalog.PlayerVehicleName(index);
-            if (sceneView.wallet != null) sceneView.wallet.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
+            EmergencyRoadMenuVehicleEntry entry = vehicles[index];
+            if (entry != null && entry.prefab != null)
+            {
+                preview = Instantiate(entry.prefab, sceneView.vehiclePreviewPivot, false);
+                preview.name = $"Preview - {entry.prefab.name}";
+                preview.transform.localPosition = entry.previewLocalPosition;
+                preview.transform.localRotation = Quaternion.Euler(entry.previewLocalEuler);
+                preview.transform.localScale = Vector3.one * Mathf.Max(.01f, entry.previewScale);
+            }
+
+            if (sceneView.vehicleName != null)
+            {
+                sceneView.vehicleName.text = entry != null && !string.IsNullOrWhiteSpace(entry.displayName)
+                    ? entry.displayName
+                    : $"XE {index + 1}";
+            }
+
+            if (sceneView.wallet != null)
+                sceneView.wallet.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
 
             bool unlocked = EmergencyRoadProfile.IsUnlocked(index);
-            int price = catalog.PlayerVehiclePrice(index);
+            int unlockPrice = entry != null ? Mathf.Max(0, entry.price) : 0;
             bool selected = unlocked && EmergencyRoadProfile.Current.selectedVehicle == index;
 
             if (sceneView.price != null)
+            {
                 sceneView.price.text = unlocked
                     ? (selected ? "ĐÃ SỞ HỮU • ĐANG DÙNG" : "ĐÃ SỞ HỮU • SẴN SÀNG")
-                    : $"CHƯA SỞ HỮU • GIÁ  ● {price:N0}";
+                    : $"CHƯA SỞ HỮU • GIÁ  ● {unlockPrice:N0}";
+            }
 
             if (sceneView.vehicleActionLabel != null)
                 sceneView.vehicleActionLabel.text = unlocked ? (selected ? "ĐANG DÙNG" : "CHỌN XE") : "MỞ KHÓA";
+
             if (sceneView.vehicleAction != null)
-                sceneView.vehicleAction.interactable = vehiclePrefab != null;
-        }
-
-        private static void NormalizePreview(GameObject vehicle, float targetFootprint)
-        {
-            Renderer[] renderers = vehicle.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0) return;
-
-            Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            float footprint = Mathf.Max(.01f, Mathf.Max(bounds.size.x, bounds.size.z));
-            vehicle.transform.localScale *= targetFootprint / footprint;
-
-            bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            Transform pivot = vehicle.transform.parent;
-            Vector3 centerLocal = pivot.InverseTransformPoint(bounds.center);
-            Vector3 bottomLocal = pivot.InverseTransformPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z));
-            vehicle.transform.localPosition += new Vector3(-centerLocal.x, -bottomLocal.y, -centerLocal.z);
+                sceneView.vehicleAction.interactable = entry != null && entry.prefab != null;
         }
 
         private int ResolveOwnedSelection()
         {
-            int vehicleCount = catalog.PlayerVehicleCount;
-            if (vehicleCount == 0) return 0;
-            int requested = Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle, 0, vehicleCount - 1);
-            if (EmergencyRoadProfile.IsUnlocked(requested) && catalog.PlayerVehiclePrefab(requested) != null) return requested;
-            for (int candidate = 0; candidate < vehicleCount; candidate++)
-                if (EmergencyRoadProfile.IsUnlocked(candidate) && catalog.PlayerVehiclePrefab(candidate) != null) return candidate;
+            if (vehicles == null || vehicles.Count == 0) return 0;
+
+            int requested = Mathf.Clamp(EmergencyRoadProfile.Current.selectedVehicle, 0, vehicles.Count - 1);
+            if (EmergencyRoadProfile.IsUnlocked(requested) && HasVehiclePrefab(requested))
+                return requested;
+
+            for (int candidate = 0; candidate < vehicles.Count; candidate++)
+            {
+                if (EmergencyRoadProfile.IsUnlocked(candidate) && HasVehiclePrefab(candidate))
+                    return candidate;
+            }
+
             return 0;
+        }
+
+        private bool HasVehiclePrefab(int vehicleIndex)
+        {
+            return vehicleIndex >= 0 && vehicleIndex < vehicles.Count &&
+                   vehicles[vehicleIndex] != null && vehicles[vehicleIndex].prefab != null;
         }
 
         private void VehicleAction()
         {
-            if (catalog.PlayerVehiclePrefab(index) == null)
+            if (!HasVehiclePrefab(index))
             {
                 if (sceneView.price != null) sceneView.price.text = "CHƯA GÁN PREFAB XE";
                 return;
             }
-            int price = catalog.PlayerVehiclePrice(index);
-            if (!EmergencyRoadProfile.TryUnlock(index, price))
+
+            int unlockPrice = Mathf.Max(0, vehicles[index].price);
+            if (!EmergencyRoadProfile.TryUnlock(index, unlockPrice))
             {
                 if (sceneView.price != null) sceneView.price.text = "KHÔNG ĐỦ TIỀN";
                 return;
             }
+
             EmergencyRoadProfile.Current.selectedVehicle = index;
             EmergencyRoadProfile.Save();
             Select(index);
