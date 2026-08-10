@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace EmergencyRoad
 {
@@ -11,60 +10,54 @@ namespace EmergencyRoad
         private const float MaximumSpacing = 25f;
         private const float SpawnAheadDistance = 145f;
         private const float RemoveBehindDistance = -10f;
-        private const float LegacyCleanupInterval = 0.25f;
+
+        [Header("DIRECT REFERENCES - DRAG IN INSPECTOR")]
+        [SerializeField] private EmergencyRoadGame game;
+        [SerializeField] private GameObject coinPrefab;
 
         private readonly List<GameObject> activeCoins = new();
-        private EmergencyRoadGame game;
-        private float nextLegacyCleanupTime;
         private int previousLane = 99;
+        private bool initialized;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Register()
+        public void Configure(EmergencyRoadGame owner, GameObject prefab)
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
-            SceneManager.sceneLoaded += HandleSceneLoaded;
+            game = owner;
+            coinPrefab = prefab;
+            if (!ValidatePrefab())
+            {
+                enabled = false;
+                return;
+            }
+            if (!initialized)
+            {
+                initialized = true;
+                FillRoadAhead();
+            }
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void EnsureForActiveScene()
+        private bool ValidatePrefab()
         {
-            EnsureForScene(SceneManager.GetActiveScene());
-        }
-
-        private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            EnsureForScene(scene);
-        }
-
-        private static void EnsureForScene(Scene scene)
-        {
-            if (!scene.IsValid() || scene.name != "Game") return;
-            if (FindFirstObjectByType<EmergencyRoadContinuousCoinSpawner>() != null) return;
-
-            var root = new GameObject("Sparse Continuous Road Coins");
-            SceneManager.MoveGameObjectToScene(root, scene);
-            root.AddComponent<EmergencyRoadContinuousCoinSpawner>();
+            if (game == null)
+            {
+                Debug.LogError("[Emergency Road] Continuous Coin Spawner thiếu Game reference. Kéo EmergencyRoadGame vào Inspector.", this);
+                return false;
+            }
+            if (coinPrefab == null)
+            {
+                Debug.LogError("[Emergency Road] Continuous Coin Spawner thiếu Coin Prefab. Kéo prefab vào Inspector/Catalog; runtime không tạo fallback.", this);
+                return false;
+            }
+            if (coinPrefab.GetComponentInChildren<RoadPickup>(true) == null || coinPrefab.GetComponentInChildren<CoinSpinner>(true) == null || coinPrefab.GetComponentInChildren<Collider>(true) == null)
+            {
+                Debug.LogError("[Emergency Road] Coin Prefab phải chứa sẵn RoadPickup + CoinSpinner + Collider trigger. Không AddComponent runtime.", coinPrefab);
+                return false;
+            }
+            return true;
         }
 
         private void Update()
         {
-            if (game == null)
-            {
-                game = FindFirstObjectByType<EmergencyRoadGame>();
-                if (game == null) return;
-
-                RemoveLegacyChunkCoins();
-                FillRoadAhead();
-            }
-
-            if (Time.unscaledTime >= nextLegacyCleanupTime)
-            {
-                nextLegacyCleanupTime = Time.unscaledTime + LegacyCleanupInterval;
-                RemoveLegacyChunkCoins();
-            }
-
-            if (game.Ended || Time.timeScale <= 0f) return;
-
+            if (!initialized || game == null || game.Ended || Time.timeScale <= 0f) return;
             MoveCoinsWithRoad();
             FillRoadAhead();
         }
@@ -72,7 +65,6 @@ namespace EmergencyRoad
         private void MoveCoinsWithRoad()
         {
             float deltaZ = game.CurrentSpeed * Time.deltaTime;
-
             for (int i = activeCoins.Count - 1; i >= 0; i--)
             {
                 GameObject coin = activeCoins[i];
@@ -82,11 +74,9 @@ namespace EmergencyRoad
                     activeCoins.RemoveAt(i);
                     continue;
                 }
-
                 Vector3 position = coin.transform.position;
                 position.z -= deltaZ;
                 coin.transform.position = position;
-
                 if (position.z < RemoveBehindDistance)
                 {
                     Destroy(coin);
@@ -99,7 +89,6 @@ namespace EmergencyRoad
         {
             float farthestZ = 0f;
             bool foundCoin = false;
-
             for (int i = 0; i < activeCoins.Count; i++)
             {
                 GameObject coin = activeCoins[i];
@@ -107,7 +96,6 @@ namespace EmergencyRoad
                 farthestZ = foundCoin ? Mathf.Max(farthestZ, coin.transform.position.z) : coin.transform.position.z;
                 foundCoin = true;
             }
-
             if (!foundCoin) farthestZ = 2f;
 
             int safety = 0;
@@ -122,21 +110,18 @@ namespace EmergencyRoad
         {
             int lane = ChooseLane();
             float spawnZ = requestedZ;
-
             for (int attempt = 0; attempt < 6; attempt++)
             {
-                Vector3 candidate = new Vector3(lane * EmergencyRoadGame.LaneWidth, 1.1f, spawnZ);
+                Vector3 candidate = new(lane * EmergencyRoadGame.LaneWidth, 1.1f, spawnZ);
                 if (!IsBlocked(candidate))
                 {
                     CreateCoin(candidate);
                     previousLane = lane;
                     return;
                 }
-
                 lane = ChooseAlternativeLane(lane);
                 spawnZ += 2.5f;
             }
-
             CreateCoin(new Vector3(lane * EmergencyRoadGame.LaneWidth, 1.1f, spawnZ));
             previousLane = lane;
         }
@@ -144,89 +129,38 @@ namespace EmergencyRoad
         private int ChooseLane()
         {
             int lane = Random.Range(-1, 2);
-            if (lane != previousLane || Random.value > 0.7f) return lane;
+            if (lane != previousLane || Random.value > .7f) return lane;
             return ChooseAlternativeLane(lane);
         }
 
         private static int ChooseAlternativeLane(int currentLane)
         {
-            int offset = Random.value < 0.5f ? 1 : 2;
+            int offset = Random.value < .5f ? 1 : 2;
             return ((currentLane + 1 + offset) % 3) - 1;
         }
 
         private static bool IsBlocked(Vector3 position)
         {
-            Collider[] hits = Physics.OverlapBox(
-                position,
-                new Vector3(1.05f, 0.8f, 2.1f),
-                Quaternion.identity,
-                ~0,
-                QueryTriggerInteraction.Collide);
-
+            Collider[] hits = Physics.OverlapBox(position, new Vector3(1.05f, .8f, 2.1f), Quaternion.identity, ~0, QueryTriggerInteraction.Collide);
             foreach (Collider hit in hits)
             {
                 if (hit == null) continue;
-                if (hit.GetComponentInParent<RoadHazard>() != null) return true;
-                if (hit.GetComponentInParent<MotorRushHazard>() != null) return true;
+                if (hit.GetComponentInParent<RoadHazard>() != null || hit.GetComponentInParent<MotorRushHazard>() != null) return true;
             }
-
             return false;
         }
 
         private void CreateCoin(Vector3 worldPosition)
         {
-            GameObject coin;
-            EmergencyRoadCatalog catalog = game.Catalog;
-
-            if (catalog != null && catalog.coinPrefab != null)
-            {
-                coin = Instantiate(catalog.coinPrefab, transform);
-                coin.name = "Sparse Continuous Coin";
-            }
-            else
-            {
-                coin = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                coin.name = "Sparse Continuous Coin - Fallback";
-                coin.transform.SetParent(transform);
-                coin.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-                coin.transform.localScale = new Vector3(0.48f, 0.13f, 0.48f);
-                coin.GetComponent<Renderer>().material.color = EmergencyRoadUI.Yellow;
-            }
-
+            GameObject coin = Instantiate(coinPrefab, transform, false);
+            coin.name = "Sparse Continuous Coin";
             coin.transform.position = worldPosition;
-
-            Collider[] colliders = coin.GetComponentsInChildren<Collider>(true);
-            if (colliders.Length == 0)
+            foreach (Collider collider in coin.GetComponentsInChildren<Collider>(true))
             {
-                var sphere = coin.AddComponent<SphereCollider>();
-                sphere.radius = 0.55f;
-                sphere.isTrigger = true;
+                collider.enabled = true;
+                collider.isTrigger = true;
             }
-            else
-            {
-                foreach (Collider collider in colliders)
-                {
-                    collider.enabled = true;
-                    collider.isTrigger = true;
-                }
-            }
-
-            if (coin.GetComponent<RoadPickup>() == null)
-                coin.AddComponent<RoadPickup>();
-
-            if (coin.GetComponent<CoinSpinner>() == null)
-                coin.AddComponent<CoinSpinner>();
-
             activeCoins.Add(coin);
-        }
-
-        private void RemoveLegacyChunkCoins()
-        {
-            foreach (RoadPickup pickup in FindObjectsByType<RoadPickup>(FindObjectsSortMode.None))
-            {
-                if (pickup == null || pickup.transform.IsChildOf(transform)) continue;
-                Destroy(pickup.gameObject);
-            }
         }
     }
 }

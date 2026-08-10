@@ -2,75 +2,112 @@ using UnityEngine;
 
 namespace EmergencyRoad
 {
+    [DisallowMultipleComponent]
     public sealed class EmergencyRoadAudio : MonoBehaviour
     {
         public static EmergencyRoadAudio Instance { get; private set; }
-        private AudioSource music;
-        private AudioSource sfx;
-        private AudioClip clickClip;
-        private AudioClip coinClip;
-        private AudioClip hornClip;
-        private AudioClip crashClip;
-        private AudioClip[] generatedVehicleHorns;
 
-        public static void Ensure(EmergencyRoadCatalog catalog=null)
-        {
-            if (Instance != null) { Instance.Configure(catalog); return; }
-            var go = new GameObject("Audio Service");
-            DontDestroyOnLoad(go);
-            Instance = go.AddComponent<EmergencyRoadAudio>();
-            Instance.Configure(catalog);
-        }
+        [Header("AUDIO SOURCES - DRAG FROM THIS SCENE")]
+        [SerializeField] private AudioSource musicSource;
+        [SerializeField] private AudioSource sfxSource;
+
+        [Header("AUDIO CLIPS - DRAG IN INSPECTOR")]
+        [SerializeField] private AudioClip backgroundMusic;
+        [SerializeField] private AudioClip buttonClickSound;
+        [SerializeField] private AudioClip coinSound;
+        [SerializeField] private AudioClip defaultHornSound;
+        [SerializeField] private AudioClip collisionSound;
+
+        public AudioSource MusicSource => musicSource;
+        public AudioSource SfxSource => sfxSource;
 
         private void Awake()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            if (Instance != null && Instance != this)
+            {
+                Debug.LogError("[Emergency Road] Có nhiều EmergencyRoadAudio trong scene. Chỉ giữ một Audio Service được author trực tiếp trong scene.", this);
+                enabled = false;
+                return;
+            }
+
             Instance = this;
-            music = gameObject.AddComponent<AudioSource>();
-            sfx = gameObject.AddComponent<AudioSource>();
-            var catalog=Resources.Load<EmergencyRoadCatalog>("EmergencyRoadCatalog");
-            music.loop = true;
-            music.clip = catalog!=null&&catalog.musicClip!=null?catalog.musicClip:CreateTone("City Pulse", 110f, 4f, true);
-            clickClip = catalog!=null&&catalog.uiClickClip!=null?catalog.uiClickClip:CreateTone("Click", 520f, .06f, false);
-            coinClip = catalog!=null&&catalog.coinClip!=null?catalog.coinClip:CreateTone("Coin", 880f, .12f, false);
-            hornClip = catalog!=null&&catalog.hornClip!=null?catalog.hornClip:CreateTone("Horn", 260f, .28f, false);
-            crashClip = catalog!=null&&catalog.crashClip!=null?catalog.crashClip:CreateTone("Crash", 75f, .45f, false);
-            generatedVehicleHorns=new[]{CreateTone("Còi Cứu Thương",420f,.24f,false),CreateTone("Còi Cảnh Sát",510f,.18f,false),CreateTone("Còi Cứu Hỏa",320f,.34f,false),CreateTone("Còi Taxi",610f,.13f,false),CreateTone("Còi Xe Bồn",230f,.38f,false),CreateTone("Còi Xe Ủi",180f,.42f,false),CreateTone("Còi Xe Xúc",275f,.3f,false)};
+            ValidateReferences();
             ApplyVolumes();
-            music.Play();
+
+            if (musicSource != null)
+            {
+                musicSource.loop = true;
+                if (backgroundMusic != null) musicSource.clip = backgroundMusic;
+                if (musicSource.clip != null && !musicSource.isPlaying) musicSource.Play();
+            }
         }
 
-        public void Configure(EmergencyRoadCatalog catalog)
+        private void OnDestroy()
         {
-            if(catalog==null||music==null||sfx==null)return;music.clip=catalog.musicClip!=null?catalog.musicClip:music.clip;clickClip=catalog.uiClickClip!=null?catalog.uiClickClip:clickClip;coinClip=catalog.coinClip!=null?catalog.coinClip:coinClip;hornClip=catalog.hornClip!=null?catalog.hornClip:hornClip;crashClip=catalog.crashClip!=null?catalog.crashClip:crashClip;if(!music.isPlaying)music.Play();ApplyVolumes();
+            if (Instance == this) Instance = null;
+        }
+
+        public void ConfigureFromCatalog(EmergencyRoadCatalog catalog)
+        {
+            if (catalog == null) return;
+            backgroundMusic = catalog.musicClip;
+            buttonClickSound = catalog.uiClickClip;
+            coinSound = catalog.coinClip;
+            defaultHornSound = catalog.hornClip;
+            collisionSound = catalog.crashClip;
+
+            if (musicSource != null)
+            {
+                musicSource.clip = backgroundMusic;
+                musicSource.loop = true;
+            }
+        }
+
+        public void ConfigureSources(AudioSource music, AudioSource sfx)
+        {
+            musicSource = music;
+            sfxSource = sfx;
+        }
+
+        private void ValidateReferences()
+        {
+            if (musicSource == null)
+                Debug.LogError("[Emergency Road] EmergencyRoadAudio thiếu Music Source. Kéo AudioSource từ scene vào Inspector.", this);
+            if (sfxSource == null)
+                Debug.LogError("[Emergency Road] EmergencyRoadAudio thiếu SFX Source. Kéo AudioSource từ scene vào Inspector.", this);
         }
 
         public void ApplyVolumes()
         {
-            music.volume = EmergencyRoadProfile.Current.musicVolume * .25f;
-            sfx.volume = EmergencyRoadProfile.Current.sfxVolume;
+            if (musicSource != null)
+                musicSource.volume = EmergencyRoadProfile.Current.musicVolume * 0.25f;
+            if (sfxSource != null)
+                sfxSource.volume = EmergencyRoadProfile.Current.sfxVolume;
         }
 
-        public void Click() => sfx.PlayOneShot(clickClip, .45f);
-        public void Coin() => sfx.PlayOneShot(coinClip, .65f);
-        public void Horn(AudioClip vehicleHorn=null,int vehicleIndex=-1){var clip=vehicleHorn;if(clip==null&&generatedVehicleHorns!=null&&vehicleIndex>=0&&vehicleIndex<generatedVehicleHorns.Length)clip=generatedVehicleHorns[vehicleIndex];sfx.PlayOneShot(clip!=null?clip:hornClip,.85f);}
-        public void Crash() => sfx.PlayOneShot(crashClip, 1f);
-
-        private static AudioClip CreateTone(string title, float frequency, float duration, bool musical)
+        public void Click()
         {
-            const int rate = 22050;
-            int count = Mathf.CeilToInt(rate * duration);
-            var samples = new float[count];
-            for (int i = 0; i < count; i++)
-            {
-                float t = (float)i / rate;
-                float f = musical ? frequency * (1f + Mathf.Floor(t * 2f) % 4f * .25f) : frequency;
-                float envelope = musical ? .7f : Mathf.Clamp01(1f - t / duration);
-                samples[i] = Mathf.Sin(2f * Mathf.PI * f * t) * envelope * .25f;
-            }
-            var clip = AudioClip.Create(title, count, 1, rate, false);
-            clip.SetData(samples, 0);
-            return clip;
+            if (sfxSource != null && buttonClickSound != null)
+                sfxSource.PlayOneShot(buttonClickSound, 0.45f);
+        }
+
+        public void Coin()
+        {
+            if (sfxSource != null && coinSound != null)
+                sfxSource.PlayOneShot(coinSound, 0.65f);
+        }
+
+        public void Horn(AudioClip vehicleHorn = null, int vehicleIndex = -1)
+        {
+            AudioClip clip = vehicleHorn != null ? vehicleHorn : defaultHornSound;
+            if (sfxSource != null && clip != null)
+                sfxSource.PlayOneShot(clip, 0.85f);
+        }
+
+        public void Crash()
+        {
+            if (sfxSource != null && collisionSound != null)
+                sfxSource.PlayOneShot(collisionSound, 1f);
         }
     }
 }
