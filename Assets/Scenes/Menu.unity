@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 73196357}
   - component: {fileID: 73196356}
   m_Layer: 0
-  m_Name: Garage Podium
+  m_Name: Be Xoay Trung Bay Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -273,7 +273,7 @@ GameObject:
   - component: {fileID: 102908093}
   - component: {fileID: 102908094}
   m_Layer: 0
-  m_Name: "THO\xC1T Button"
+  m_Name: Nut Thoat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -393,7 +393,7 @@ GameObject:
   - component: {fileID: 150483643}
   - component: {fileID: 150483642}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Va Cham Ben Hong
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -530,7 +530,7 @@ GameObject:
   - component: {fileID: 159377938}
   - component: {fileID: 159377937}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Tieu De Nha Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -665,7 +665,7 @@ GameObject:
   m_Component:
   - component: {fileID: 162663219}
   m_Layer: 0
-  m_Name: Preview Root (visible in Edit Mode)
+  m_Name: KHU VUC XEM TRUOC - HIEN TRONG EDIT MODE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -704,7 +704,7 @@ GameObject:
   - component: {fileID: 167290187}
   - component: {fileID: 167290186}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Mui Ten Xe Tiep Theo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -841,7 +841,7 @@ GameObject:
   - component: {fileID: 174408401}
   - component: {fileID: 174408400}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Mo Dieu Khien
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -978,7 +978,7 @@ GameObject:
   - component: {fileID: 194170625}
   - component: {fileID: 194170626}
   m_Layer: 0
-  m_Name: Fill Area
+  m_Name: Vung Gia Tri Am Luong Hieu Ung
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1055,7 +1055,7 @@ GameObject:
   - component: {fileID: 238580666}
   - component: {fileID: 238580667}
   m_Layer: 0
-  m_Name: "\u0110I\u1EC0U KHI\u1EC2N Button"
+  m_Name: Nut Mo Huong Dan Dieu Khien
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1175,7 +1175,7 @@ GameObject:
   - component: {fileID: 297492384}
   - component: {fileID: 297492385}
   m_Layer: 0
-  m_Name: Garage Key Light
+  m_Name: Den Chinh Gara - Chieu Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1334,7 +1334,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
       propertyPath: m_Name
-      value: Selected Vehicle Preview (Ambulance)
+      value: Xe Mau Xem Truoc - Cap Cuu
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1359,7 +1359,7 @@ GameObject:
   - component: {fileID: 328708564}
   - component: {fileID: 328708565}
   m_Layer: 0
-  m_Name: "QUAY L\u1EA0I Button"
+  m_Name: Nut Quay Lai Menu Chinh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1479,7 +1479,7 @@ GameObject:
   - component: {fileID: 383623508}
   - component: {fileID: 383623507}
   m_Layer: 0
-  m_Name: Settings Modal
+  m_Name: Bang Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,7 +1563,7 @@ GameObject:
   - component: {fileID: 385096508}
   - component: {fileID: 385096507}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Quay Lai Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1701,7 +1701,7 @@ GameObject:
   - component: {fileID: 479402317}
   - component: {fileID: 479402320}
   m_Layer: 0
-  m_Name: "QUAY L\u1EA0I Button"
+  m_Name: Nut Quay Lai Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1821,7 +1821,7 @@ GameObject:
   - component: {fileID: 484488868}
   - component: {fileID: 484488867}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Am Luong Hieu Ung
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1958,7 +1958,7 @@ GameObject:
   - component: {fileID: 545291249}
   - component: {fileID: 545291248}
   m_Layer: 0
-  m_Name: Controls Modal
+  m_Name: Bang Huong Dan Dieu Khien
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2037,7 +2037,7 @@ GameObject:
   - component: {fileID: 547204256}
   - component: {fileID: 547204257}
   m_Layer: 0
-  m_Name: "CH\u1ECCN XE Button"
+  m_Name: Nut Mo Gara Chon Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2157,7 +2157,7 @@ GameObject:
   - component: {fileID: 579922857}
   - component: {fileID: 579922856}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Am Luong Nhac
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2294,7 +2294,7 @@ GameObject:
   - component: {fileID: 592074246}
   - component: {fileID: 592074245}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2432,7 +2432,7 @@ GameObject:
   - component: {fileID: 659522722}
   - component: {fileID: 659522723}
   m_Layer: 0
-  m_Name: "\u203A Button"
+  m_Name: Nut Xe Tiep Theo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2553,7 +2553,7 @@ GameObject:
   - component: {fileID: 666470336}
   - component: {fileID: 666470337}
   m_Layer: 0
-  m_Name: "\u2039 Button"
+  m_Name: Nut Xe Truoc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2674,7 +2674,7 @@ GameObject:
   - component: {fileID: 673932868}
   - component: {fileID: 673932869}
   m_Layer: 0
-  m_Name: "B\u1EACT Button"
+  m_Name: Nut Bat Tat Va Cham Ben Hong
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2796,7 +2796,7 @@ GameObject:
   - component: {fileID: 755197996}
   - component: {fileID: 755197995}
   m_Layer: 0
-  m_Name: Main Menu UI - SCENE AUTHORED
+  m_Name: UI Menu Chinh - Dat San Trong Scene
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2935,7 +2935,7 @@ GameObject:
   - component: {fileID: 759391517}
   - component: {fileID: 759391516}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Huong Dan Phim Bam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3073,7 +3073,7 @@ GameObject:
   - component: {fileID: 771119681}
   - component: {fileID: 771119680}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Tieu De Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3210,7 +3210,7 @@ GameObject:
   - component: {fileID: 806862451}
   - component: {fileID: 806862450}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Ten Xe Dang Xem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3347,7 +3347,7 @@ GameObject:
   - component: {fileID: 822037363}
   - component: {fileID: 822037362}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Dong Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3484,7 +3484,7 @@ GameObject:
   - component: {fileID: 832341314}
   - component: {fileID: 832341316}
   m_Layer: 0
-  m_Name: MENU SCENE AUTHORING
+  m_Name: CAU HINH SCENE MENU
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3715,7 +3715,7 @@ GameObject:
   - component: {fileID: 836516073}
   - component: {fileID: 836516074}
   m_Layer: 0
-  m_Name: Handle Slide Area
+  m_Name: Vung Keo Nut Am Luong Hieu Ung
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3790,7 +3790,7 @@ GameObject:
   - component: {fileID: 851905828}
   - component: {fileID: 851905829}
   m_Layer: 0
-  m_Name: Global Volume - Bloom ACES Color Grade
+  m_Name: Hau Ky Toan Cuc - Bloom Va Mau ACES
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3840,7 +3840,7 @@ GameObject:
   - component: {fileID: 883825957}
   - component: {fileID: 883825956}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Mo Gara
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3977,7 +3977,7 @@ GameObject:
   - component: {fileID: 885428446}
   - component: {fileID: 885428445}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu So Du Dong Xu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4114,7 +4114,7 @@ GameObject:
   - component: {fileID: 967789584}
   - component: {fileID: 967789583}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Tieu De Tro Choi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4252,7 +4252,7 @@ GameObject:
   - component: {fileID: 1014157313}
   - component: {fileID: 1014157314}
   m_Layer: 0
-  m_Name: "C\xC0I \u0110\u1EB6T Button"
+  m_Name: Nut Mo Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4372,7 +4372,7 @@ GameObject:
   - component: {fileID: 1068654955}
   - component: {fileID: 1068654956}
   m_Layer: 0
-  m_Name: Main Menu - Right 25 Percent
+  m_Name: Bang Menu Chinh Ben Phai
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4451,7 +4451,7 @@ GameObject:
   - component: {fileID: 1110858229}
   - component: {fileID: 1110858230}
   m_Layer: 0
-  m_Name: Fill
+  m_Name: Phan Da To Am Luong Hieu Ung
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4526,7 +4526,7 @@ GameObject:
   - component: {fileID: 1146490318}
   - component: {fileID: 1146490317}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Bat Tat Va Cham
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4663,7 +4663,7 @@ GameObject:
   - component: {fileID: 1158700509}
   - component: {fileID: 1158700510}
   m_Layer: 0
-  m_Name: Handle
+  m_Name: Nut Keo Am Luong Hieu Ung
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4739,7 +4739,7 @@ GameObject:
   - component: {fileID: 1286317270}
   - component: {fileID: 1286317271}
   m_Layer: 0
-  m_Name: Slider
+  m_Name: Thanh Am Luong Hieu Ung
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4868,7 +4868,7 @@ GameObject:
   - component: {fileID: 1298172764}
   - component: {fileID: 1298172765}
   m_Layer: 0
-  m_Name: "CH\u1ECCN Button"
+  m_Name: Nut Chon Hoac Mo Khoa Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4988,7 +4988,7 @@ GameObject:
   - component: {fileID: 1333192359}
   - component: {fileID: 1333192360}
   m_Layer: 0
-  m_Name: Top Bar
+  m_Name: Thanh Tren - Tieu De Va Tien
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5065,7 +5065,7 @@ GameObject:
   - component: {fileID: 1368792262}
   - component: {fileID: 1368792261}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Choi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5203,7 +5203,7 @@ GameObject:
   - component: {fileID: 1507881053}
   - component: {fileID: 1507881054}
   m_Layer: 0
-  m_Name: Slider
+  m_Name: Thanh Am Luong Nhac
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5331,7 +5331,7 @@ GameObject:
   - component: {fileID: 1545243078}
   - component: {fileID: 1545243077}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Thoat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5469,7 +5469,7 @@ GameObject:
   - component: {fileID: 1602642677}
   - component: {fileID: 1602642678}
   m_Layer: 0
-  m_Name: "\u0110\xD3NG Button"
+  m_Name: Nut Dong Cai Dat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5589,7 +5589,7 @@ GameObject:
   - component: {fileID: 1619913880}
   - component: {fileID: 1619913881}
   m_Layer: 0
-  m_Name: Fill
+  m_Name: Phan Da To Am Luong Nhac
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5664,7 +5664,7 @@ GameObject:
   - component: {fileID: 1643452202}
   - component: {fileID: 1643452201}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Chon Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5801,7 +5801,7 @@ GameObject:
   - component: {fileID: 1645215988}
   - component: {fileID: 1645215989}
   m_Layer: 0
-  m_Name: Garage Selector Panel
+  m_Name: Bang Chon Xe Trong Gara
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5884,7 +5884,7 @@ GameObject:
   - component: {fileID: 1788322772}
   - component: {fileID: 1788322771}
   m_Layer: 0
-  m_Name: Garage Camera
+  m_Name: Camera Gara - Quay Xe Trung Bay
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6020,7 +6020,7 @@ GameObject:
   - component: {fileID: 1806152938}
   - component: {fileID: 1806152937}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Trang Thai Va Gia Xe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6157,7 +6157,7 @@ GameObject:
   - component: {fileID: 1827245329}
   - component: {fileID: 1827245330}
   m_Layer: 0
-  m_Name: Handle
+  m_Name: Nut Keo Am Luong Nhac
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6232,7 +6232,7 @@ GameObject:
   - component: {fileID: 1850706846}
   - component: {fileID: 1850706845}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Tieu De Dieu Khien
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6369,7 +6369,7 @@ GameObject:
   - component: {fileID: 1858794369}
   - component: {fileID: 1858794368}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Mui Ten Xe Truoc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6506,7 +6506,7 @@ GameObject:
   - component: {fileID: 1896956765}
   - component: {fileID: 1896956766}
   m_Layer: 0
-  m_Name: Handle Slide Area
+  m_Name: Vung Keo Nut Am Luong Nhac
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6582,7 +6582,7 @@ GameObject:
   - component: {fileID: 1921436489}
   - component: {fileID: 1921436488}
   m_Layer: 0
-  m_Name: Text TMP
+  m_Name: Chu Nut Quay Lai Menu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6719,7 +6719,7 @@ GameObject:
   - component: {fileID: 2042698650}
   - component: {fileID: 2042698651}
   m_Layer: 0
-  m_Name: Fill Area
+  m_Name: Vung Gia Tri Am Luong Nhac
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6796,7 +6796,7 @@ GameObject:
   - component: {fileID: 2075210803}
   - component: {fileID: 2075210804}
   m_Layer: 0
-  m_Name: "CH\u01A0I Button"
+  m_Name: Nut Choi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
