@@ -8,7 +8,7 @@ namespace EmergencyRoad.Editor
 {
     /// <summary>
     /// Editor-only scene wiring. Runtime never searches for or creates authored objects.
-    /// This runs after scripts compile so Menu.unity is already wired before Play is pressed.
+    /// Menu preview data is repaired whenever Menu.unity is opened and immediately before Play.
     /// </summary>
     [InitializeOnLoad]
     internal static class EmergencyRoadAutoTestInstaller
@@ -16,6 +16,8 @@ namespace EmergencyRoad.Editor
         private const string MenuScenePath = "Assets/Scenes/Menu.unity";
         private const string GameScenePath = "Assets/Scenes/Game.unity";
         private const string PreviewPivotName = "Selected Vehicle Preview (Ambulance)";
+
+        private static bool installing;
 
         private static readonly string[] VehicleNames =
         {
@@ -33,55 +35,140 @@ namespace EmergencyRoad.Editor
         static EmergencyRoadAutoTestInstaller()
         {
             EditorApplication.delayCall += InstallAuthoredScenes;
+            EditorSceneManager.sceneOpened += OnSceneOpened;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        }
+
+        private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
+        {
+            if (installing || scene.path != MenuScenePath) return;
+            EditorApplication.delayCall += () => RepairLoadedMenuScene(scene);
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state != PlayModeStateChange.ExitingEditMode || installing) return;
+
+            Scene menuScene = SceneManager.GetSceneByPath(MenuScenePath);
+            if (menuScene.IsValid() && menuScene.isLoaded)
+                RepairLoadedMenuScene(menuScene);
         }
 
         private static void InstallAuthoredScenes()
         {
+            if (installing) return;
+
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
             {
                 EditorApplication.delayCall += InstallAuthoredScenes;
                 return;
             }
 
-            InstallMenuScene();
-            InstallAutoTester();
+            installing = true;
+            try
+            {
+                InstallMenuScene();
+                InstallAutoTester();
+            }
+            finally
+            {
+                installing = false;
+            }
         }
 
         private static void InstallMenuScene()
         {
             if (!System.IO.File.Exists(MenuScenePath)) return;
 
-            Scene activeScene = SceneManager.GetActiveScene();
-            bool alreadyLoaded = activeScene.path == MenuScenePath;
+            Scene loaded = SceneManager.GetSceneByPath(MenuScenePath);
+            bool alreadyLoaded = loaded.IsValid() && loaded.isLoaded;
             Scene menuScene = alreadyLoaded
-                ? activeScene
+                ? loaded
                 : EditorSceneManager.OpenScene(MenuScenePath, OpenSceneMode.Additive);
 
-            EmergencyRoadMenuView view = FindInScene<EmergencyRoadMenuView>(menuScene);
-            EmergencyRoadSceneAuthoring authoring = FindInScene<EmergencyRoadSceneAuthoring>(menuScene);
+            RepairLoadedMenuScene(menuScene);
 
-            if (view == null || authoring == null)
-            {
-                Debug.LogError("[Emergency Road] Menu.unity thiếu EmergencyRoadMenuView hoặc EmergencyRoadSceneAuthoring.");
-                if (!alreadyLoaded) EditorSceneManager.CloseScene(menuScene, true);
+            if (!alreadyLoaded)
+                EditorSceneManager.CloseScene(menuScene, true);
+        }
+
+        private static void RepairLoadedMenuScene(Scene menuScene)
+        {
+            if (!menuScene.IsValid() || !menuScene.isLoaded || installing && EditorApplication.isPlaying)
                 return;
-            }
 
+            bool previousInstalling = installing;
+            installing = true;
+
+            try
+            {
+                EmergencyRoadMenuView view = FindInScene<EmergencyRoadMenuView>(menuScene);
+                EmergencyRoadSceneAuthoring authoring = FindInScene<EmergencyRoadSceneAuthoring>(menuScene);
+
+                if (view == null || authoring == null)
+                {
+                    Debug.LogError("[Emergency Road] Menu.unity thiếu EmergencyRoadMenuView hoặc EmergencyRoadSceneAuthoring.");
+                    return;
+                }
+
+                Transform pivot = EnsureEmptyPreviewPivot(menuScene, authoring);
+                if (pivot == null)
+                {
+                    Debug.LogError("[Emergency Road] Không thể tạo/gán Vehicle Preview Pivot trong Menu.unity.");
+                    return;
+                }
+
+                view.vehiclePreviewPivot = pivot;
+
+                if (view.vehicleActionLabel == null && view.vehicleAction != null)
+                    view.vehicleActionLabel = view.vehicleAction.GetComponentInChildren<TMPro.TMP_Text>(true);
+
+                if (view.sideCollisionLabel == null && view.sideCollision != null)
+                    view.sideCollisionLabel = view.sideCollision.GetComponentInChildren<TMPro.TMP_Text>(true);
+
+                EditorUtility.SetDirty(view);
+
+                EmergencyRoadMenu menu = view.GetComponent<EmergencyRoadMenu>();
+                if (menu == null)
+                    menu = view.gameObject.AddComponent<EmergencyRoadMenu>();
+
+                EmergencyRoadAudio audio = FindInScene<EmergencyRoadAudio>(menuScene);
+                menu.ConfigureSceneReferences(null, view, pivot, audio);
+                SeedVehiclesDirectly(menu, authoring);
+
+                EditorUtility.SetDirty(menu);
+                EditorSceneManager.MarkSceneDirty(menuScene);
+                EditorSceneManager.SaveScene(menuScene);
+            }
+            finally
+            {
+                installing = previousInstalling;
+            }
+        }
+
+        private static Transform EnsureEmptyPreviewPivot(Scene menuScene, EmergencyRoadSceneAuthoring authoring)
+        {
             Transform pivot = FindTransform(menuScene, PreviewPivotName);
-            if (pivot != null && pivot.GetComponentsInChildren<Renderer>(true).Length > 0)
+
+            if (pivot != null && !IsCleanEmptyPivot(pivot))
             {
                 Transform parent = pivot.parent;
-                Vector3 position = pivot.position;
-                Quaternion rotation = pivot.rotation;
+                Vector3 localPosition = pivot.localPosition;
+                Quaternion localRotation = pivot.localRotation;
 
                 GameObject prefabRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(pivot.gameObject);
-                Object.DestroyImmediate(prefabRoot != null ? prefabRoot : pivot.gameObject);
+                GameObject objectToRemove = prefabRoot != null ? prefabRoot : pivot.gameObject;
+
+                Object.DestroyImmediate(objectToRemove);
 
                 GameObject emptyPivot = new(PreviewPivotName);
-                emptyPivot.transform.SetParent(parent != null ? parent : authoring.PreviewRoot, true);
-                emptyPivot.transform.SetPositionAndRotation(position, rotation);
+                emptyPivot.transform.SetParent(parent != null ? parent : authoring.PreviewRoot, false);
+                emptyPivot.transform.localPosition = localPosition;
+                emptyPivot.transform.localRotation = localRotation;
                 emptyPivot.transform.localScale = Vector3.one;
                 pivot = emptyPivot.transform;
+
+                Debug.Log("[Emergency Road] Đã bỏ xe cứu thương preview mẫu, chỉ giữ Empty Vehicle Preview Pivot.");
             }
 
             if (pivot == null)
@@ -94,27 +181,17 @@ namespace EmergencyRoad.Editor
                 pivot = emptyPivot.transform;
             }
 
-            view.vehiclePreviewPivot = pivot;
-            if (view.vehicleActionLabel == null && view.vehicleAction != null)
-                view.vehicleActionLabel = view.vehicleAction.GetComponentInChildren<TMPro.TMP_Text>(true);
-            if (view.sideCollisionLabel == null && view.sideCollision != null)
-                view.sideCollisionLabel = view.sideCollision.GetComponentInChildren<TMPro.TMP_Text>(true);
-            EditorUtility.SetDirty(view);
+            return pivot;
+        }
 
-            EmergencyRoadMenu menu = view.GetComponent<EmergencyRoadMenu>();
-            if (menu == null)
-                menu = view.gameObject.AddComponent<EmergencyRoadMenu>();
+        private static bool IsCleanEmptyPivot(Transform pivot)
+        {
+            if (pivot == null) return false;
+            if (PrefabUtility.IsPartOfPrefabInstance(pivot.gameObject)) return false;
+            if (pivot.childCount > 0) return false;
 
-            EmergencyRoadAudio audio = FindInScene<EmergencyRoadAudio>(menuScene);
-            menu.ConfigureSceneReferences(null, view, pivot, audio);
-            SeedVehiclesDirectly(menu, authoring);
-
-            EditorUtility.SetDirty(menu);
-            EditorSceneManager.MarkSceneDirty(menuScene);
-            EditorSceneManager.SaveScene(menuScene);
-
-            if (!alreadyLoaded)
-                EditorSceneManager.CloseScene(menuScene, true);
+            Component[] components = pivot.GetComponents<Component>();
+            return components.Length == 1 && components[0] is Transform;
         }
 
         private static void SeedVehiclesDirectly(EmergencyRoadMenu menu, EmergencyRoadSceneAuthoring authoring)
@@ -155,9 +232,11 @@ namespace EmergencyRoad.Editor
         {
             if (!System.IO.File.Exists(GameScenePath)) return;
 
-            Scene active = SceneManager.GetActiveScene();
-            bool opened = active.path != GameScenePath;
-            Scene scene = opened ? EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Additive) : active;
+            Scene loaded = SceneManager.GetSceneByPath(GameScenePath);
+            bool alreadyLoaded = loaded.IsValid() && loaded.isLoaded;
+            Scene scene = alreadyLoaded
+                ? loaded
+                : EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Additive);
 
             EmergencyRoadAutoTester existing = FindInScene<EmergencyRoadAutoTester>(scene);
             if (existing == null)
@@ -169,7 +248,8 @@ namespace EmergencyRoad.Editor
                 Debug.Log("[Emergency Road] Added scene-authored AUTO TEST DRIVER to Game.unity (disabled until Run On Play is checked).");
             }
 
-            if (opened) EditorSceneManager.CloseScene(scene, true);
+            if (!alreadyLoaded)
+                EditorSceneManager.CloseScene(scene, true);
         }
 
         private static T FindInScene<T>(Scene scene) where T : Component
@@ -179,6 +259,7 @@ namespace EmergencyRoad.Editor
                 T value = root.GetComponentInChildren<T>(true);
                 if (value != null) return value;
             }
+
             return null;
         }
 
@@ -189,17 +270,20 @@ namespace EmergencyRoad.Editor
                 Transform found = FindTransformRecursive(root.transform, objectName);
                 if (found != null) return found;
             }
+
             return null;
         }
 
         private static Transform FindTransformRecursive(Transform root, string objectName)
         {
             if (root.name == objectName) return root;
+
             for (int i = 0; i < root.childCount; i++)
             {
                 Transform found = FindTransformRecursive(root.GetChild(i), objectName);
                 if (found != null) return found;
             }
+
             return null;
         }
     }
