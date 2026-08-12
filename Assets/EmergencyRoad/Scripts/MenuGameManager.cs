@@ -6,7 +6,7 @@ using TMPro;
 namespace EmergencyRoad
 {
     [DisallowMultipleComponent]
-    public sealed class EmergencyRoadMenu : MonoBehaviour
+    public sealed class MenuGameManager : MonoBehaviour
     {
         [Header("SCENE REFERENCES - DRAG DIRECTLY")]
         [SerializeField] private EmergencyRoadCatalog catalog;
@@ -16,7 +16,6 @@ namespace EmergencyRoad
         [SerializeField] private EmergencyRoadAudio audioService;
 
         [Header("PREVIEW")]
-        [SerializeField, Min(0f)] private float previewRotationSpeed = 24f;
         [SerializeField, Min(0.1f)] private float previewTargetFootprint = 6f;
 
         private GameObject preview;
@@ -119,12 +118,6 @@ namespace EmergencyRoad
             slider.onValueChanged.RemoveAllListeners();
             slider.SetValueWithoutNotify(value);
             slider.onValueChanged.AddListener(action);
-        }
-
-        private void Update()
-        {
-            if (vehiclePreviewPivot != null)
-                vehiclePreviewPivot.Rotate(0f, previewRotationSpeed * Time.unscaledDeltaTime, 0f, Space.Self);
         }
 
         private void OpenGarage()

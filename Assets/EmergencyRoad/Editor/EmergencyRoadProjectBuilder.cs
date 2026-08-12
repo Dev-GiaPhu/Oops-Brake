@@ -44,8 +44,7 @@ namespace EmergencyRoad.Editor
             if (EditorApplication.isCompiling) { EditorApplication.delayCall += AutoBuild; return; }
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             if(!EnsureTmpEssentialResources()){EditorApplication.delayCall+=AutoBuild;return;}
-            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.ReadAllText(MenuPath).Contains("Authoring Version 22 - Split Main Menu And Garage") ||
-                                         !File.Exists("Assets/Scenes/Game.unity") || !File.ReadAllText("Assets/Scenes/Game.unity").Contains("Authoring Version 22 - Split Main Menu And Garage");
+            bool authoredScenesMissing = !File.Exists(MenuPath) || !File.Exists("Assets/Scenes/Game.unity");
             if (authoredScenesMissing || AssetDatabase.LoadAssetAtPath<EmergencyRoadCatalog>(CatalogPath) == null || AssetDatabase.LoadAssetAtPath<EmergencyRoadGameplaySettings>(GameplaySettingsPath)==null) BuildGame();
         }
 
@@ -65,6 +64,21 @@ namespace EmergencyRoad.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[Emergency Road] Game catalog and Menu/Game build scenes are ready.");
+        }
+
+        [MenuItem("Tools/Emergency Road/Rebuild Menu Scene")]
+        public static void RebuildMenuScene()
+        {
+            EmergencyRoadCatalog catalog = AssetDatabase.LoadAssetAtPath<EmergencyRoadCatalog>(CatalogPath);
+            if (catalog == null)
+            {
+                Debug.LogError("[Emergency Road] Khong tim thay EmergencyRoadCatalog.asset.");
+                return;
+            }
+
+            ComposeMenuScene(catalog);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Emergency Road] Da dung lai Menu scene theo hierarchy truc quan.");
         }
 
         private static void BuildCatalog()
@@ -189,22 +203,43 @@ namespace EmergencyRoad.Editor
         private static void ComposeMenuScene(EmergencyRoadCatalog catalog)
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var root = new GameObject("MENU SCENE AUTHORING");
-            new GameObject("Authoring Version 22 - Split Main Menu And Garage").transform.SetParent(root.transform);
-            var preview = new GameObject("Preview Root (visible in Edit Mode)").transform;
-            preview.SetParent(root.transform);
-            CreateCamera(preview, "Garage Camera", new Vector3(8, 5.2f, -9), new Vector3(17,-35,0));
-            CreateLight(preview, "Garage Key Light", new Vector3(45,-35,0));
-            CreatePostFx(preview,catalog);
-            var podium = GameObject.CreatePrimitive(PrimitiveType.Cylinder); podium.name="Garage Podium"; podium.transform.SetParent(preview); podium.transform.position=new Vector3(3.4f,-.25f,0); podium.transform.localScale=new Vector3(3.5f,.15f,3.5f);
-            if (catalog.playerVehicles.Count > 0)
+
+            GameObject garageRoot = new("Nha Xe");
+            GameObject garagePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Sources/Asset Do Hoa 3D/Models/Garage/garage.fbx");
+            if (garagePrefab != null)
             {
-                var car=(GameObject)PrefabUtility.InstantiatePrefab(catalog.playerVehicles[0],scene); car.name="Selected Vehicle Preview (Ambulance)"; car.transform.SetParent(preview); car.transform.position=new Vector3(3.4f,.2f,0);
+                GameObject garageModel = (GameObject)PrefabUtility.InstantiatePrefab(garagePrefab, scene);
+                garageModel.name = "Model Nha Xe";
+                garageModel.transform.SetParent(garageRoot.transform, false);
+                garageModel.transform.localScale = Vector3.one * 100f;
             }
+
+            GameObject turntable = new("Be Xoay", typeof(MenuTurntable));
+            turntable.transform.SetParent(garageRoot.transform, false);
+            GameObject vehicleSpawn = new("Vi Tri Spawn Xe");
+            vehicleSpawn.transform.SetParent(turntable.transform, false);
+            vehicleSpawn.transform.localPosition = new Vector3(0f, .2f, 0f);
+
+            GameObject cameraObject = CreateCamera(null, "Camera Menu", new Vector3(10f, 5.2f, -10f), Vector3.zero);
+            cameraObject.transform.LookAt(new Vector3(0f, 1.2f, 0f));
+            CreateLight(null, "Anh Sang Chinh", new Vector3(45f, -35f, 0f));
+            CreatePostFx(null, catalog).name = "Hau Ky";
+
             EmergencyRoadUI.Configure(catalog);
-            EmergencyRoadSceneUIFactory.CreateMenu(preview);
-            root.AddComponent<EmergencyRoadSceneAuthoring>().Configure(EmergencyRoadSceneKind.Menu,catalog,preview);
-            EditorSceneManager.SaveScene(scene,MenuPath);
+            EmergencyRoadMenuView view = EmergencyRoadSceneUIFactory.CreateMenu(null);
+            view.gameObject.name = "UI Menu";
+            view.vehiclePreviewPivot = vehicleSpawn.transform;
+
+            GameObject manager = new("Game Manager");
+            AudioSource musicSource = manager.AddComponent<AudioSource>();
+            AudioSource sfxSource = manager.AddComponent<AudioSource>();
+            EmergencyRoadAudio audio = manager.AddComponent<EmergencyRoadAudio>();
+            audio.ConfigureSources(musicSource, sfxSource);
+            audio.ConfigureFromCatalog(catalog);
+            MenuGameManager menu = manager.AddComponent<MenuGameManager>();
+            menu.ConfigureSceneReferences(catalog, view, vehicleSpawn.transform, audio);
+
+            EditorSceneManager.SaveScene(scene, MenuPath);
         }
 
         private static void ComposeGameScene(EmergencyRoadCatalog catalog)
@@ -245,9 +280,10 @@ namespace EmergencyRoad.Editor
             EditorSceneManager.SaveScene(scene,"Assets/Scenes/Game.unity");
         }
 
-        private static void CreateCamera(Transform parent,string name,Vector3 position,Vector3 euler)
+        private static GameObject CreateCamera(Transform parent,string name,Vector3 position,Vector3 euler)
         {
             var go=new GameObject(name,typeof(Camera),typeof(AudioListener),typeof(UniversalAdditionalCameraData));go.transform.SetParent(parent);go.transform.position=position;go.transform.rotation=Quaternion.Euler(euler);go.tag="MainCamera";var data=go.GetComponent<UniversalAdditionalCameraData>();data.renderPostProcessing=true;data.antialiasing=AntialiasingMode.FastApproximateAntialiasing;go.GetComponent<Camera>().allowHDR=true;
+            return go;
         }
 
         private static void CreateLight(Transform parent,string name,Vector3 euler)
@@ -255,9 +291,10 @@ namespace EmergencyRoad.Editor
             var go=new GameObject(name,typeof(Light));go.transform.SetParent(parent);go.transform.rotation=Quaternion.Euler(euler==Vector3.zero?new Vector3(42,-28,0):euler);var light=go.GetComponent<Light>();light.type=LightType.Directional;light.intensity=1.25f;
         }
 
-        private static void CreatePostFx(Transform parent,EmergencyRoadCatalog catalog)
+        private static GameObject CreatePostFx(Transform parent,EmergencyRoadCatalog catalog)
         {
             var go=new GameObject("Global Volume - Bloom ACES Color Grade",typeof(Volume));go.transform.SetParent(parent);var volume=go.GetComponent<Volume>();volume.isGlobal=true;volume.priority=10;volume.sharedProfile=catalog.postProcessProfile;
+            return go;
         }
 
         private static void CreateGroundStrip(Transform chunk,int side,EmergencyRoadCatalog catalog)

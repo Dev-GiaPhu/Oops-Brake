@@ -141,7 +141,7 @@ namespace EmergencyRoad.Editor
                 controllerObject = new GameObject("Menu Controller");
                 controllerObject.transform.SetParent(root, false);
             }
-            EmergencyRoadMenu menu = GetOrAdd<EmergencyRoadMenu>(controllerObject);
+            MenuGameManager menu = GetOrAdd<MenuGameManager>(controllerObject);
             menu.ConfigureSceneReferences(catalog, view, pivot, audio);
             EditorUtility.SetDirty(menu);
             EditorUtility.SetDirty(view);
