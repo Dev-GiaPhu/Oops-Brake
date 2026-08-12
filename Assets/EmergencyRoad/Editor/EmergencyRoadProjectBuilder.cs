@@ -249,7 +249,7 @@ namespace EmergencyRoad.Editor
             new GameObject("Authoring Version 22 - Split Main Menu And Garage").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform; preview.SetParent(root.transform);
             CreateCamera(preview,"Chase Camera",new Vector3(0,7.6f,-10.5f),new Vector3(22,0,0));
-            CreateLight(preview,"Sun",Vector3.zero);
+            CreateLight(preview,"Sun",Vector3.zero).AddComponent<DayNightCycle>();
             CreatePostFx(preview,catalog);
             var world=new GameObject("Endless World Preview").transform;world.SetParent(preview);
             int previewChunkCount=Mathf.Clamp(Mathf.CeilToInt(150f/catalog.roadLength)+3,12,28);
@@ -286,9 +286,10 @@ namespace EmergencyRoad.Editor
             return go;
         }
 
-        private static void CreateLight(Transform parent,string name,Vector3 euler)
+        private static GameObject CreateLight(Transform parent,string name,Vector3 euler)
         {
             var go=new GameObject(name,typeof(Light));go.transform.SetParent(parent);go.transform.rotation=Quaternion.Euler(euler==Vector3.zero?new Vector3(42,-28,0):euler);var light=go.GetComponent<Light>();light.type=LightType.Directional;light.intensity=1.25f;
+            return go;
         }
 
         private static GameObject CreatePostFx(Transform parent,EmergencyRoadCatalog catalog)
