@@ -204,8 +204,9 @@ namespace EmergencyRoad
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
             Transform pivot = vehicle.transform.parent;
             Vector3 centerLocal = pivot.InverseTransformPoint(bounds.center);
-            Vector3 bottomLocal = pivot.InverseTransformPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z));
-            vehicle.transform.localPosition += new Vector3(-centerLocal.x, -bottomLocal.y, -centerLocal.z);
+            // Chỉ căn giữa trên bàn xoay. Độ cao Y do từng prefab tự cấu hình để
+            // bánh xe, xích xe và gầu xúc tiếp xúc mặt sàn đúng theo model riêng.
+            vehicle.transform.localPosition += new Vector3(-centerLocal.x, 0f, -centerLocal.z);
         }
 
         private int ResolveOwnedSelection()
