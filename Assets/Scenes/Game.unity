@@ -1433,7 +1433,7 @@ GameObject:
   m_Component:
   - component: {fileID: 136171087}
   m_Layer: 0
-  m_Name: Preview Root (visible in Edit Mode)
+  m_Name: The Gioi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1452,14 +1452,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 436579487}
-  - {fileID: 2040057325}
-  - {fileID: 397278289}
   - {fileID: 529638252}
   - {fileID: 1884094307}
   - {fileID: 1341525033}
-  - {fileID: 314001067}
-  m_Father: {fileID: 816916523}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &144664187
 PrefabInstance:
@@ -4013,7 +4009,7 @@ GameObject:
   - component: {fileID: 314001069}
   - component: {fileID: 314001068}
   m_Layer: 0
-  m_Name: Game HUD - SCENE AUTHORED
+  m_Name: Giao Dien Choi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4036,7 +4032,7 @@ RectTransform:
   - {fileID: 1200838963}
   - {fileID: 166769404}
   - {fileID: 1928240669}
-  m_Father: {fileID: 136171087}
+  m_Father: {fileID: 2200000008}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -5953,7 +5949,7 @@ GameObject:
   - component: {fileID: 397278289}
   - component: {fileID: 397278290}
   m_Layer: 0
-  m_Name: Global Volume - Bloom ACES Color Grade
+  m_Name: Hau Ky
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5972,7 +5968,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 136171087}
+  m_Father: {fileID: 2200000004}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &397278290
 MonoBehaviour:
@@ -6213,8 +6209,9 @@ GameObject:
   - component: {fileID: 436579490}
   - component: {fileID: 436579489}
   - component: {fileID: 436579488}
+  - component: {fileID: 436579491}
   m_Layer: 0
-  m_Name: Chase Camera
+  m_Name: Camera Theo Xe
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6233,7 +6230,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 136171087}
+  m_Father: {fileID: 2200000002}
   m_LocalEulerAnglesHint: {x: 33.84, y: 0, z: 0}
 --- !u!114 &436579488
 MonoBehaviour:
@@ -12326,7 +12323,7 @@ GameObject:
   - component: {fileID: 816916522}
   - component: {fileID: 816916524}
   m_Layer: 0
-  m_Name: GAME SCENE AUTHORING
+  m_Name: Game Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28563,7 +28560,7 @@ GameObject:
   - component: {fileID: 2040057327}
   - component: {fileID: 2040057328}
   m_Layer: 0
-  m_Name: Sun
+  m_Name: Mat Troi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28582,7 +28579,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 136171087}
+  m_Father: {fileID: 2200000004}
   m_LocalEulerAnglesHint: {x: 70.7, y: 115.7, z: 0}
 --- !u!108 &2040057326
 Light:
@@ -29622,7 +29619,7 @@ GameObject:
   - component: {fileID: 2100000002}
   - component: {fileID: 2100000003}
   m_Layer: 0
-  m_Name: AUTO TEST DRIVER
+  m_Name: Kiem Thu Tu Dong
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30318,8 +30315,110 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8437557469370930624, guid: 8adadfa643c87f74bb2402c31a4e577c, type: 3}
   m_PrefabInstance: {fileID: 2146377286}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2200000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2200000002}
+  m_Layer: 0
+  m_Name: Camera Game
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2200000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2200000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 436579487}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2200000003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2200000004}
+  m_Layer: 0
+  m_Name: Anh Sang
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2200000004
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2200000003}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2040057325}
+  - {fileID: 397278289}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2200000007
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2200000008}
+  m_Layer: 0
+  m_Name: UI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2200000008
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2200000007}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 314001067}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 136171087}
+  - {fileID: 2200000002}
+  - {fileID: 2200000004}
+  - {fileID: 2200000008}
   - {fileID: 816916523}
+  - {fileID: 1416897234}
