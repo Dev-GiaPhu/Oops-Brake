@@ -30,15 +30,15 @@ MonoBehaviour:
     displayName: TAXI
     price: 1100
     hornClip: {fileID: 0}
-  - prefab: {fileID: 2915879132325717256, guid: 87f15e00bc7d0a54d851c964bd63b8ef, type: 3}
+  - prefab: {fileID: 3894456470624861414, guid: 32e6a997fe85c894486f41e94ec21cf7, type: 3}
     displayName: "XE B\u1ED2N"
     price: 1600
     hornClip: {fileID: 0}
-  - prefab: {fileID: 1646028154367701847, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+  - prefab: {fileID: 6501026745361554071, guid: 3757c09d4e971554ebce6902eca065df, type: 3}
     displayName: "XE \u1EE6I"
     price: 2200
     hornClip: {fileID: 0}
-  - prefab: {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
+  - prefab: {fileID: 767612029922381195, guid: 16cdb7563e5978445b6217a646541010, type: 3}
     displayName: "XE X\xDAC"
     price: 3000
     hornClip: {fileID: 0}
@@ -47,9 +47,9 @@ MonoBehaviour:
   - {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
   - {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
   - {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
-  - {fileID: 2915879132325717256, guid: 87f15e00bc7d0a54d851c964bd63b8ef, type: 3}
-  - {fileID: 1646028154367701847, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
-  - {fileID: 1685519623977633847, guid: 24eb5806c8697f54eb4dc7f578f400e1, type: 3}
+  - {fileID: 3894456470624861414, guid: 32e6a997fe85c894486f41e94ec21cf7, type: 3}
+  - {fileID: 6501026745361554071, guid: 3757c09d4e971554ebce6902eca065df, type: 3}
+  - {fileID: 767612029922381195, guid: 16cdb7563e5978445b6217a646541010, type: 3}
   vehicleHornClips:
   - {fileID: 0}
   - {fileID: 0}
