@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7ca2f076d09374ed2bff14e3ed206564
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177697
+  packageName: GUI - Yellow Kid
+  packageVersion: 2.1.1
+  assetPath: Assets/Layer Lab/GUI-YellowKid/Prefabs/Prefabs_Component_UI_Etc/Toggle-Group.prefab
+  uploadId: 714421

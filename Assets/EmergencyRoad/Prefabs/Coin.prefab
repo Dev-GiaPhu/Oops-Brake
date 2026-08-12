@@ -57,7 +57,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -119,6 +119,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8876375705182167608}
+  - component: {fileID: 4250697910251132243}
+  - component: {fileID: 2347010080151978678}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Untagged
@@ -142,3 +144,27 @@ Transform:
   - {fileID: 6562652876380559613}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4250697910251132243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4579309226957050845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d426aeac8e54d12af1435e9306fb1cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2347010080151978678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4579309226957050845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44cfe162db0a49f3be25d892c06be956, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

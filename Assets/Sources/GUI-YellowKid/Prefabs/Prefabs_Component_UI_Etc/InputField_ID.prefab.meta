@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ab2996372080e45b887668b4707a678e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177697
+  packageName: GUI - Yellow Kid
+  packageVersion: 2.1.1
+  assetPath: Assets/Layer Lab/GUI-YellowKid/Prefabs/Prefabs_Component_UI_Etc/InputField_ID.prefab
+  uploadId: 714421

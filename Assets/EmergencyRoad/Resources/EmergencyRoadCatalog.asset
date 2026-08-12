@@ -15,15 +15,15 @@ MonoBehaviour:
   gameplaySettings: {fileID: 11400000, guid: 1de94fd62d8f583438375b8162b6deb6, type: 2}
   playerVehicleCatalog:
   - prefab: {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
-    displayName: "XE C\u1EE8U TH\u01AF\u01A0NG"
+    displayName: AMBULANCE
     price: 0
     hornClip: {fileID: 0}
   - prefab: {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
-    displayName: "XE C\u1EA2NH S\xC1T"
+    displayName: POLICE CAR
     price: 350
     hornClip: {fileID: 0}
   - prefab: {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
-    displayName: "XE C\u1EE8U H\u1ECEA"
+    displayName: FIRE TRUCK
     price: 700
     hornClip: {fileID: 0}
   - prefab: {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
@@ -31,15 +31,15 @@ MonoBehaviour:
     price: 1100
     hornClip: {fileID: 0}
   - prefab: {fileID: 3894456470624861414, guid: 32e6a997fe85c894486f41e94ec21cf7, type: 3}
-    displayName: "XE B\u1ED2N"
+    displayName: TANK TRUCK
     price: 1600
     hornClip: {fileID: 0}
   - prefab: {fileID: 6501026745361554071, guid: 3757c09d4e971554ebce6902eca065df, type: 3}
-    displayName: "XE \u1EE6I"
+    displayName: BULLDOZER
     price: 2200
     hornClip: {fileID: 0}
   - prefab: {fileID: 767612029922381195, guid: 16cdb7563e5978445b6217a646541010, type: 3}
-    displayName: "XE X\xDAC"
+    displayName: EXCAVATOR
     price: 3000
     hornClip: {fileID: 0}
   playerVehicles:

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ad7fae867a48a48e78e230bc11935b0d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177697
+  packageName: GUI - Yellow Kid
+  packageVersion: 2.1.1
+  assetPath: Assets/Layer Lab/GUI-YellowKid/Prefabs/Prefabs_Component_UI_Etc/InputField_Passward.prefab
+  uploadId: 714421

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4c9b78b71895e4498abc328ecc5032c7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177697
+  packageName: GUI - Yellow Kid
+  packageVersion: 2.1.1
+  assetPath: Assets/Layer Lab/GUI-YellowKid/Prefabs/Prefabs_Component_ActionTexts/ActionText_ReadyGo.prefab
+  uploadId: 714421

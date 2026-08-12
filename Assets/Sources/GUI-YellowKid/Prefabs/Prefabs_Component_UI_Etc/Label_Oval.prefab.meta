@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5af5d029138df4a78ab4b5085247f5ab
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 177697
+  packageName: GUI - Yellow Kid
+  packageVersion: 2.1.1
+  assetPath: Assets/Layer Lab/GUI-YellowKid/Prefabs/Prefabs_Component_UI_Etc/Label_Oval.prefab
+  uploadId: 714421
