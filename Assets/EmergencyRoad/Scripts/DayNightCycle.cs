@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace EmergencyRoad
@@ -26,6 +27,18 @@ namespace EmergencyRoad
         private float fixedY;
         private float fixedZ;
 
+        public static event Action<bool> NightStateChanged;
+        public static bool HasActiveCycle { get; private set; }
+        public static bool IsNight { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            NightStateChanged = null;
+            HasActiveCycle = false;
+            IsNight = false;
+        }
+
         private void Awake()
         {
             sun = GetComponent<Light>();
@@ -35,6 +48,13 @@ namespace EmergencyRoad
             fixedZ = angles.z;
             phase = CyclePhase.Day;
             sun.intensity = dayIntensity;
+            HasActiveCycle = true;
+            SetNightState(false, true);
+        }
+
+        private void OnDestroy()
+        {
+            HasActiveCycle = false;
         }
 
         private void Update()
@@ -79,6 +99,19 @@ namespace EmergencyRoad
             phaseTime = 0f;
             if (next == CyclePhase.Sunset || next == CyclePhase.Sunrise)
                 transitionStartX = currentX;
+
+            if (next == CyclePhase.Sunset)
+                SetNightState(true);
+            else if (next == CyclePhase.Sunrise)
+                SetNightState(false);
+        }
+
+        private static void SetNightState(bool isNight, bool forceNotify = false)
+        {
+            if (!forceNotify && IsNight == isNight) return;
+
+            IsNight = isNight;
+            NightStateChanged?.Invoke(isNight);
         }
     }
 }
