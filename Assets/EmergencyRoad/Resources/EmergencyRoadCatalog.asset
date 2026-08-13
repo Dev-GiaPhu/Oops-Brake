@@ -130,7 +130,7 @@ MonoBehaviour:
   postProcessProfile: {fileID: 11400000, guid: bfbb4584db5366a43aa9eb6b341261f0, type: 2}
   coinPrefab: {fileID: 4579309226957050845, guid: ba544797a652aa448b71e51499e09f94, type: 3}
   motorcyclePrefab: {fileID: 8421186050361847512, guid: 95eac6bea15613e40b4a4d0f582c2114, type: 3}
-  uiFont: {fileID: 11400000, guid: 02d04dc3328d6b64b836d3eb1c6254d8, type: 2}
+  uiFont: {fileID: 11400000, guid: 77aa30ca08fdd4cdd8ec6436a3af94ac, type: 2}
   panelSprite: {fileID: 0}
   buttonSprite: {fileID: 0}
   sliderBackgroundSprite: {fileID: 0}
