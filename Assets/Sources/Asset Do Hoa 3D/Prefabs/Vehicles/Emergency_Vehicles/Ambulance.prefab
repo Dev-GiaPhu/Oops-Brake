@@ -335,6 +335,7 @@ GameObject:
   - component: {fileID: 8073312965050044853}
   - component: {fileID: 7289374726781671655}
   - component: {fileID: 1276084488928268029}
+  - component: {fileID: 4604998360883755876}
   m_Layer: 0
   m_Name: Spot Light
   m_TagString: Untagged
@@ -445,6 +446,19 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &4604998360883755876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2269004767852369860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8e10879a2d4a859e8006de55dc5d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invert: 0
 --- !u!1 &2848139155967510085
 GameObject:
   m_ObjectHideFlags: 0
@@ -5651,6 +5665,7 @@ GameObject:
   - component: {fileID: 1820510479236671870}
   - component: {fileID: 5336782479694642096}
   - component: {fileID: 5691341520081713293}
+  - component: {fileID: 1863730332738498386}
   m_Layer: 0
   m_Name: Spot Light (1)
   m_TagString: Untagged
@@ -5761,6 +5776,19 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &1863730332738498386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5387745531391720581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8e10879a2d4a859e8006de55dc5d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invert: 0
 --- !u!1 &5888848147950971615
 GameObject:
   m_ObjectHideFlags: 0
