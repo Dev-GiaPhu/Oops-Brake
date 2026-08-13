@@ -2315,11 +2315,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSource: {fileID: 811951598}
   sfxSource: {fileID: 811951597}
-  backgroundMusic: {fileID: 0}
-  buttonClickSound: {fileID: 0}
-  coinSound: {fileID: 0}
-  defaultHornSound: {fileID: 0}
-  collisionSound: {fileID: 0}
+  backgroundMusic: {fileID: 8300000, guid: e86a32d0ba45049ff8934485475cb9f0, type: 3}
+  buttonClickSound: {fileID: 8300000, guid: b940bcd6a99fa44538282fa8dd0e4cc0, type: 3}
+  coinSound: {fileID: 8300000, guid: b940bcd6a99fa44538282fa8dd0e4cc0, type: 3}
+  defaultHornSound: {fileID: 8300000, guid: d5c77db5dd9ea4fe5aabc35fbab08a9d, type: 3}
+  collisionSound: {fileID: 8300000, guid: 49df7c0cfeeb144c380fa2e873580219, type: 3}
 --- !u!82 &811951597
 AudioSource:
   m_ObjectHideFlags: 0
