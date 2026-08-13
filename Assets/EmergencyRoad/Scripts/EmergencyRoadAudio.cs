@@ -60,6 +60,7 @@ namespace EmergencyRoad
             {
                 musicSource.clip = backgroundMusic;
                 musicSource.loop = true;
+                if (musicSource.clip != null && !musicSource.isPlaying) musicSource.Play();
             }
         }
 

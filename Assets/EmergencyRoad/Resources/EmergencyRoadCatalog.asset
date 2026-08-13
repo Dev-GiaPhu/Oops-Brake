@@ -136,11 +136,11 @@ MonoBehaviour:
   sliderBackgroundSprite: {fileID: 0}
   sliderFillSprite: {fileID: 0}
   sliderHandleSprite: {fileID: 0}
-  musicClip: {fileID: 0}
-  uiClickClip: {fileID: 0}
-  coinClip: {fileID: 0}
-  hornClip: {fileID: 0}
-  crashClip: {fileID: 0}
+  musicClip: {fileID: 8300000, guid: e86a32d0ba45049ff8934485475cb9f0, type: 3}
+  uiClickClip: {fileID: 8300000, guid: 10b4baeb494374a8ab4d9cf01ce42b8d, type: 3}
+  coinClip: {fileID: 8300000, guid: 5e6474bfebaa14014b9738d9c6dddcda, type: 3}
+  hornClip: {fileID: 8300000, guid: 7f876b175f2594bd08028036f4e2db6c, type: 3}
+  crashClip: {fileID: 8300000, guid: 49df7c0cfeeb144c380fa2e873580219, type: 3}
   roadLength: 7.4645844
   roadHalfWidth: 11.03214
   laneWidth: 5.185106
