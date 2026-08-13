@@ -51,7 +51,7 @@ namespace EmergencyRoad
             Transform playerTransform = game.Player.transform;
             float targetX = playerTransform.position.x;
             float t = 0f;
-            game.SetHazardAlert("CẢNH BÁO: MÔ TÔ ĐANG LAO TỚI");
+            game.SetHazardAlert("WARNING: MOTORCYCLE INCOMING");
             while (t < 2.2f)
             {
                 t += Time.unscaledDeltaTime;
@@ -61,7 +61,7 @@ namespace EmergencyRoad
                 yield return null;
             }
 
-            game.SetHazardAlert("ĐÃ KHÓA HƯỚNG — NÉ NGAY!");
+            game.SetHazardAlert("DIRECTION LOCKED — DODGE NOW!");
             line.startColor = Color.red;
             line.endColor = new Color(1f, .05f, .01f, .7f);
             line.widthMultiplier = .42f;

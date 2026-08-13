@@ -436,7 +436,7 @@ namespace EmergencyRoad
             int score = Mathf.FloorToInt(distance);
             EmergencyRoadProfile.Current.highScore = Mathf.Max(score, EmergencyRoadProfile.Current.highScore);
             EmergencyRoadProfile.Save();
-            if (gameOverScore != null) gameOverScore.text = $"{score:N0} m  •  KỶ LỤC {EmergencyRoadProfile.Current.highScore:N0} m";
+            if (gameOverScore != null) gameOverScore.text = $"{score:N0} m  •  BEST {EmergencyRoadProfile.Current.highScore:N0} m";
             if (gameOverPanel != null) gameOverPanel.SetActive(true);
         }
 

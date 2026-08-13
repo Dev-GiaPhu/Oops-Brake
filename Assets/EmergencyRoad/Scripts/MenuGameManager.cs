@@ -150,7 +150,7 @@ namespace EmergencyRoad
         private void RefreshSideCollisionLabel()
         {
             if (sceneView.sideCollisionLabel != null)
-                sceneView.sideCollisionLabel.text = EmergencyRoadProfile.Current.sideCollisionEnabled ? "BẬT" : "TẮT";
+                sceneView.sideCollisionLabel.text = EmergencyRoadProfile.Current.sideCollisionEnabled ? "ON" : "OFF";
         }
 
         private void Select(int next)
@@ -181,11 +181,11 @@ namespace EmergencyRoad
 
             if (sceneView.price != null)
                 sceneView.price.text = unlocked
-                    ? (selected ? "ĐÃ SỞ HỮU • ĐANG DÙNG" : "ĐÃ SỞ HỮU • SẴN SÀNG")
-                    : $"CHƯA SỞ HỮU • GIÁ  ● {price:N0}";
+                    ? (selected ? "OWNED • EQUIPPED" : "OWNED • READY")
+                    : $"LOCKED • PRICE  ● {price:N0}";
 
             if (sceneView.vehicleActionLabel != null)
-                sceneView.vehicleActionLabel.text = unlocked ? (selected ? "ĐANG DÙNG" : "CHỌN XE") : "MỞ KHÓA";
+                sceneView.vehicleActionLabel.text = unlocked ? (selected ? "EQUIPPED" : "SELECT") : "UNLOCK";
             if (sceneView.vehicleAction != null)
                 sceneView.vehicleAction.interactable = vehiclePrefab != null;
         }
@@ -224,13 +224,13 @@ namespace EmergencyRoad
         {
             if (catalog.PlayerVehiclePrefab(index) == null)
             {
-                if (sceneView.price != null) sceneView.price.text = "CHƯA GÁN PREFAB XE";
+                if (sceneView.price != null) sceneView.price.text = "VEHICLE PREFAB MISSING";
                 return;
             }
             int price = catalog.PlayerVehiclePrice(index);
             if (!EmergencyRoadProfile.TryUnlock(index, price))
             {
-                if (sceneView.price != null) sceneView.price.text = "KHÔNG ĐỦ TIỀN";
+                if (sceneView.price != null) sceneView.price.text = "NOT ENOUGH COINS";
                 return;
             }
             EmergencyRoadProfile.Current.selectedVehicle = index;
