@@ -128,7 +128,7 @@ MonoBehaviour:
   soilMaterial: {fileID: 2100000, guid: 99ab44ee527722a43a5e70868050dedf, type: 2}
   vfxParticleMaterial: {fileID: 2100000, guid: a4986c20ede3cfa47ace15e2ded20739, type: 2}
   postProcessProfile: {fileID: 11400000, guid: bfbb4584db5366a43aa9eb6b341261f0, type: 2}
-  coinPrefab: {fileID: 4579309226957050845, guid: ba544797a652aa448b71e51499e09f94, type: 3}
+  coinPrefab: {fileID: 4009716325937776529, guid: bddde96586ad17d4490632b9a89409b2, type: 3}
   motorcyclePrefab: {fileID: 8421186050361847512, guid: 95eac6bea15613e40b4a4d0f582c2114, type: 3}
   uiFont: {fileID: 11400000, guid: 77aa30ca08fdd4cdd8ec6436a3af94ac, type: 2}
   panelSprite: {fileID: 0}
