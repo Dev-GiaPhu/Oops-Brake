@@ -212,6 +212,7 @@ namespace EmergencyRoad.Editor
 
             Camera camera = FindInScene<Camera>(scene);
             EmergencyCameraJuice cameraJuice = camera != null ? GetOrAdd<EmergencyCameraJuice>(camera.gameObject) : null;
+            if (cameraJuice != null) cameraJuice.ConfigureCamera(camera);
 
             Transform physicsSurfaceTransform = FindDirectChild(runtimeWorld, "Road Physics Surface");
             if (physicsSurfaceTransform == null)
