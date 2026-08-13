@@ -55,6 +55,7 @@ namespace EmergencyRoad
         private TMP_Text gameOverScore;
         private TMP_Text hazardAlertText;
         private float distance;
+        private int collectedCoins;
         private float speed = 18f;
         private const float StartSpeed = 18f;
         private const float MaxSpeed = 45f;
@@ -102,6 +103,7 @@ namespace EmergencyRoad
             }
 
             initialized = true;
+            collectedCoins = 0;
             Time.timeScale = 1f;
             catalog.SynchronizePlayerVehicleData();
             LaneWidth = Mathf.Max(2f, catalog.laneWidth);
@@ -206,6 +208,7 @@ namespace EmergencyRoad
         {
             scoreText = sceneView.score;
             coinText = sceneView.coins;
+            if (coinText != null) coinText.text = "0";
             hazardAlertText = sceneView.hazardAlert;
             pausePanel = sceneView.pausePanel;
             gameOverPanel = sceneView.gameOverPanel;
@@ -255,11 +258,12 @@ namespace EmergencyRoad
             }
 
             if (scoreText != null) scoreText.text = $"{Mathf.FloorToInt(distance):N0} m";
-            if (coinText != null) coinText.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
+            if (coinText != null) coinText.text = $"{collectedCoins:N0}";
         }
 
         public void AddCoin()
         {
+            collectedCoins++;
             EmergencyRoadProfile.Current.coins++;
             EmergencyRoadProfile.Save();
             audioService.Coin();

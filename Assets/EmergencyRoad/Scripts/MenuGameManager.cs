@@ -173,7 +173,7 @@ namespace EmergencyRoad
             }
 
             if (sceneView.vehicleName != null) sceneView.vehicleName.text = catalog.PlayerVehicleName(index);
-            if (sceneView.wallet != null) sceneView.wallet.text = $"● {EmergencyRoadProfile.Current.coins:N0}";
+            if (sceneView.wallet != null) sceneView.wallet.text = $"{EmergencyRoadProfile.Current.coins:N0}";
 
             bool unlocked = EmergencyRoadProfile.IsUnlocked(index);
             int price = catalog.PlayerVehiclePrice(index);

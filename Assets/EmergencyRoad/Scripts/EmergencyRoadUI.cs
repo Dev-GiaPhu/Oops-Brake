@@ -101,6 +101,22 @@ namespace EmergencyRoad
             return label;
         }
 
+        public static Image Icon(Transform parent, string name, Sprite sprite, Vector2 anchorMin, Vector2 anchorMax)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            var image = go.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            return image;
+        }
+
         private static TextAlignmentOptions ToTmpAlignment(TextAnchor anchor) => anchor switch
         {
             TextAnchor.MiddleLeft => TextAlignmentOptions.MidlineLeft,
