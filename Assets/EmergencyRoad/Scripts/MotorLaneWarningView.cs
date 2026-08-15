@@ -22,9 +22,13 @@ namespace EmergencyRoad
         [SerializeField, Range(.05f, 1f)] private float minimumAlpha = .2f;
         private LaneSlot[] slots;
 
+        public int DisplayedLane { get; private set; } = int.MinValue;
+
         public bool IsConfigured => left.image != null && left.countdown != null &&
                                     center.image != null && center.countdown != null &&
-                                    right.image != null && right.countdown != null;
+                                    right.image != null && right.countdown != null &&
+                                    left.image != center.image && left.image != right.image && center.image != right.image &&
+                                    left.countdown != center.countdown && left.countdown != right.countdown && center.countdown != right.countdown;
 
         private void Awake()
         {
@@ -35,7 +39,8 @@ namespace EmergencyRoad
         public void Show(int lane, float secondsRemaining)
         {
             EnsureSlots();
-            int selected = Mathf.Clamp(lane + 1, 0, 2);
+            DisplayedLane = Mathf.Clamp(lane, -1, 1);
+            int selected = DisplayedLane + 1;
             for (int i = 0; i < slots.Length; i++)
             {
                 LaneSlot slot = slots[i];
@@ -53,6 +58,7 @@ namespace EmergencyRoad
         public void Hide()
         {
             EnsureSlots();
+            DisplayedLane = int.MinValue;
             for (int i = 0; i < slots.Length; i++)
                 if (slots[i].image != null) slots[i].image.gameObject.SetActive(false);
         }

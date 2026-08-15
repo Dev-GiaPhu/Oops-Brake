@@ -68,7 +68,8 @@ namespace EmergencyRoad
             }
             else
             {
-                motor.Initialize(targetLane * EmergencyRoadGame.LaneWidth, game, game.Player.transform, game.GameplayCamera);
+                motor.InitializeLane(targetLane, game, game.GameplayCamera);
+                Debug.Assert(motor.TargetLane == targetLane, "Motor warning lane and spawned motorcycle lane must match.", motor);
                 game.RegisterMotor(motor);
             }
 

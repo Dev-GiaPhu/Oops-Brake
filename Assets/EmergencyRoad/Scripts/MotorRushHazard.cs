@@ -18,13 +18,20 @@ namespace EmergencyRoad
         private bool compensateMapScroll;
         private float debrisPhysicsAge;
         private Vector3 previousPosition;
+        public int TargetLane { get; private set; }
 
         public void Initialize(float x, EmergencyRoadGame owner, Transform playerTransform, Camera camera)
         {
+            InitializeLane(Mathf.Clamp(Mathf.RoundToInt(x / EmergencyRoadGame.LaneWidth), -1, 1), owner, camera);
+        }
+
+        public void InitializeLane(int lane, EmergencyRoadGame owner, Camera camera)
+        {
             game = owner;
             trackingCamera = camera;
-            lockedTargetX = x;
-            transform.position = new Vector3(x + Mathf.Sin(-18f * .28f) * .5f, .45f, -18f);
+            TargetLane = Mathf.Clamp(lane, -1, 1);
+            lockedTargetX = TargetLane * EmergencyRoadGame.LaneWidth;
+            transform.position = new Vector3(lockedTargetX, .45f, -18f);
             EmergencyRoadGameplaySettings tuning = owner != null ? owner.Settings : null;
             speed = tuning != null ? tuning.motorSpeed : 34f;
             visualRenderers = GetComponentsInChildren<Renderer>(true);
@@ -37,7 +44,7 @@ namespace EmergencyRoad
             previousPosition = transform.position;
             Vector3 p = transform.position;
             p.z += speed * Time.deltaTime;
-            float desiredX = lockedTargetX + Mathf.Sin(p.z * .28f) * .5f;
+            float desiredX = lockedTargetX + Mathf.Sin(p.z * .28f) * .32f;
             float previousX = p.x;
             p.x = Mathf.SmoothDamp(p.x, desiredX, ref lateralVelocity, .18f, 7f);
             transform.position = p;

@@ -351,13 +351,13 @@ namespace EmergencyRoad
                 (candidates[i], candidates[swap]) = (candidates[swap], candidates[i]);
             }
 
-            // Prefer a lane already occupied by an obstacle. The motorcycle then adds no new blocked lane.
-            for (int pass = 0; pass < 2; pass++)
             for (int i = 0; i < candidates.Length; i++)
             {
                 int lane = candidates[i];
                 int index = lane + 1;
-                if (soleEscapeLane[index] || (pass == 0 && !occupiedLane[index])) continue;
+                // The warned lane itself must stay clear so the motorcycle cannot collide
+                // off-camera and get thrown into another lane before the player sees it.
+                if (soleEscapeLane[index] || occupiedLane[index]) continue;
                 bool alternativeOpen = false;
                 for (int other = 0; other < 3; other++)
                     if (other != index && !occupiedLane[other]) { alternativeOpen = true; break; }
