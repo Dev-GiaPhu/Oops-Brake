@@ -81,6 +81,7 @@ namespace EmergencyRoad
         public float CurrentSpeed => speed;
         public float BaseSpeed => baseSpeed;
         public float HornBoost01 => hornBoost01;
+        public bool IsFirstPersonView => cameraJuice != null && cameraJuice.IsFirstPerson;
         public IReadOnlyList<RoadHazard> ActiveHazards => activeHazards;
         public IReadOnlyList<MotorRushHazard> ActiveMotorHazards => activeMotorHazards;
         internal GameObject RoadChunkRootPrefab => roadChunkRootPrefab;

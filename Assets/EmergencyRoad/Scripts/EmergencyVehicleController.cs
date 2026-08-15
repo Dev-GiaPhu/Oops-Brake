@@ -129,7 +129,9 @@ namespace EmergencyRoad
                 t += Time.deltaTime;
                 float s = Mathf.Sin(Mathf.Clamp01(t / duration) * Mathf.PI);
                 visual.localPosition = baseLocalPosition + Vector3.right * (dir * .16f * s);
-                visual.localScale = Vector3.Scale(baseScale, new Vector3(1f - .34f * s, 1f + .035f * s, 1f + .08f * s));
+                visual.localScale = SuppressScaleEffects
+                    ? baseScale
+                    : Vector3.Scale(baseScale, new Vector3(1f - .34f * s, 1f + .035f * s, 1f + .08f * s));
                 yield return null;
             }
             visual.localPosition = baseLocalPosition;
@@ -158,12 +160,16 @@ namespace EmergencyRoad
             {
                 t += Time.deltaTime;
                 float s = Mathf.Sin(t / .38f * Mathf.PI);
-                visual.localScale = Vector3.Scale(baseScale, new Vector3(1f - .08f * s, 1f + .32f * s, 1f - .08f * s));
+                visual.localScale = SuppressScaleEffects
+                    ? baseScale
+                    : Vector3.Scale(baseScale, new Vector3(1f - .08f * s, 1f + .32f * s, 1f - .08f * s));
                 yield return null;
             }
             visual.localScale = baseScale;
             hornEffect = null;
         }
+
+        private bool SuppressScaleEffects => game != null && game.IsFirstPersonView;
 
         private void OnTriggerEnter(Collider other)
         {
