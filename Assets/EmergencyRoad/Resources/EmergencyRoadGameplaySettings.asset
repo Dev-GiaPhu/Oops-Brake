@@ -38,6 +38,10 @@ MonoBehaviour:
   crossTrafficSpeed: 11.5
   crossTrafficStartDistance: 44
   crossTrafficRouteLookDistance: 24
+  roadsideGrassWidth: 42
+  roadsideBuildingRows: 2
+  roadsideBuildingGap: 1.25
+  roadsideBuildingSetback: 10
   sideCheckHalfLength: 0.68
   releaseBehindPlayer: 0.32
   motorSpeed: 30

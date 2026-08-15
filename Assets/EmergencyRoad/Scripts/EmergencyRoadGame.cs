@@ -539,13 +539,15 @@ namespace EmergencyRoad
             building.transform.localPosition = local;
         }
 
-        public static void FitBuildingToLot(GameObject building, float maximumDepth)
+        public static void FitBuildingToLot(GameObject building, float maximumDepth, float maximumWidth = float.PositiveInfinity)
         {
             Renderer[] renderers = building.GetComponentsInChildren<Renderer>(true);
             if (renderers.Length == 0) return;
             Bounds bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            building.transform.localScale *= Mathf.Min(1f, maximumDepth / Mathf.Max(.1f, bounds.size.z));
+            float depthScale = maximumDepth / Mathf.Max(.1f, bounds.size.z);
+            float widthScale = float.IsPositiveInfinity(maximumWidth) ? 1f : maximumWidth / Mathf.Max(.1f, bounds.size.x);
+            building.transform.localScale *= Mathf.Min(1f, Mathf.Min(depthScale, widthScale));
             bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
             Vector3 local = building.transform.localPosition;
@@ -698,11 +700,13 @@ namespace EmergencyRoad
 
         private void SpawnTransitionGround(int zSide, float crossHalfLength, float gap)
         {
+            float grassWidth = owner.Settings != null ? owner.Settings.roadsideGrassWidth : 42f;
+            float grassInnerEdge = catalog.roadHalfWidth + 1f;
             for (int xSide = -1; xSide <= 1; xSide += 2)
             {
                 SpawnGroundPrefab(owner.GrassGroundPrefab, "Intersection Corner Grass",
-                    new Vector3(xSide * (catalog.roadHalfWidth + 10f), -.28f, zSide * (crossHalfLength + gap * .5f)),
-                    new Vector3(18f, .36f, gap + .04f));
+                    new Vector3(xSide * (grassInnerEdge + grassWidth * .5f), -.28f, zSide * (crossHalfLength + gap * .5f)),
+                    new Vector3(grassWidth, .36f, gap + .04f));
                 SpawnGroundPrefab(owner.SoilGroundPrefab, "Intersection Soil Edge",
                     new Vector3(xSide * (catalog.roadHalfWidth + .4f), -.12f, zSide * (crossHalfLength + gap * .5f)),
                     new Vector3(.8f, .12f, gap + .04f));
@@ -761,22 +765,17 @@ namespace EmergencyRoad
 
         private void SpawnGroundAndDecorations(int sequence)
         {
+            EmergencyRoadGameplaySettings tuning = owner.Settings;
+            float grassWidth = tuning != null ? tuning.roadsideGrassWidth : 42f;
+            float grassInnerEdge = catalog.roadHalfWidth + 1f;
             for (int side = -1; side <= 1; side += 2)
             {
                 SpawnGroundPrefab(owner.GrassGroundPrefab, side < 0 ? "Grass Ground Left" : "Grass Ground Right",
-                    new Vector3(side * (catalog.roadHalfWidth + 10f), -.28f, 0), new Vector3(18f, .36f, EmergencyRoadGame.ChunkSpacing + .08f));
+                    new Vector3(side * (grassInnerEdge + grassWidth * .5f), -.28f, 0), new Vector3(grassWidth, .36f, EmergencyRoadGame.ChunkSpacing + .08f));
                 SpawnGroundPrefab(owner.SoilGroundPrefab, side < 0 ? "Narrow Soil Border Left" : "Narrow Soil Border Right",
                     new Vector3(side * (catalog.roadHalfWidth + .4f), -.12f, 0), new Vector3(.8f, .12f, EmergencyRoadGame.ChunkSpacing + .08f));
 
-                if (catalog.decorationPrefabs.Count > 0)
-                {
-                    GameObject prefab = catalog.decorationPrefabs[(sequence * 2 + (side > 0 ? 1 : 0)) % catalog.decorationPrefabs.Count];
-                    GameObject building = Object.Instantiate(prefab, root.transform, false);
-                    building.transform.localRotation = Quaternion.Euler(0, side > 0 ? 180 : 0, 0);
-                    EmergencyRoadGame.FitBuildingToLot(building, EmergencyRoadGame.ChunkSpacing * .82f);
-                    EmergencyRoadGame.PositionOutsideRoad(building, side, catalog.roadHalfWidth, 8.5f);
-                    spawned.Add(building);
-                }
+                SpawnRoadsideBuildings(sequence, side, grassWidth);
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -800,6 +799,40 @@ namespace EmergencyRoad
                     spawned.Add(light);
                 }
             }
+        }
+
+        private void SpawnRoadsideBuildings(int sequence, int side, float grassWidth)
+        {
+            if (catalog.decorationPrefabs.Count == 0) return;
+            EmergencyRoadGameplaySettings tuning = owner.Settings;
+            int rows = tuning != null ? tuning.roadsideBuildingRows : 2;
+            float gap = tuning != null ? tuning.roadsideBuildingGap : 1.25f;
+            float setback = tuning != null ? tuning.roadsideBuildingSetback : 10f;
+            float usableWidth = Mathf.Max(4f, grassWidth - (setback - 1f) - gap * Mathf.Max(0, rows - 1));
+            float maximumBuildingWidth = usableWidth / Mathf.Max(1, rows);
+            float nextInnerEdge = catalog.roadHalfWidth + setback;
+
+            for (int row = 0; row < rows; row++)
+            {
+                int prefabIndex = (sequence * 2 + row + (side > 0 ? 1 : 0)) % catalog.decorationPrefabs.Count;
+                GameObject building = Object.Instantiate(catalog.decorationPrefabs[prefabIndex], root.transform, false);
+                building.transform.localRotation = Quaternion.Euler(0, side > 0 ? 180 : 0, 0);
+                EmergencyRoadGame.FitBuildingToLot(building, EmergencyRoadGame.ChunkSpacing * .82f, maximumBuildingWidth);
+                EmergencyRoadGame.PositionOutsideRoad(building, side, catalog.roadHalfWidth, nextInnerEdge - catalog.roadHalfWidth);
+
+                Bounds bounds = CalculateRendererBounds(building);
+                nextInnerEdge = (side > 0 ? bounds.max.x : -bounds.min.x) + gap;
+                spawned.Add(building);
+            }
+        }
+
+        private static Bounds CalculateRendererBounds(GameObject target)
+        {
+            Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0) return new Bounds(target.transform.position, Vector3.zero);
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+            return bounds;
         }
 
         private void SpawnGameplay(bool cross)
@@ -926,7 +959,6 @@ namespace EmergencyRoad
             GameObject visual = Object.Instantiate(source, holder.transform, false);
             EmergencyRoadGame.DisableVisualColliders(visual);
             EmergencyRoadGame.FitVehicle(visual, size.x, size.y);
-            visual.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             box.center = new Vector3(0, .72f, 0);
             box.size = tuning != null ? tuning.stoppedVehicleHitbox : new Vector3(EmergencyRoadGame.LaneWidth * .82f, 1.45f, 3.55f);
             responder.Configure(owner, true, owner.ImpactVfxPrefab);

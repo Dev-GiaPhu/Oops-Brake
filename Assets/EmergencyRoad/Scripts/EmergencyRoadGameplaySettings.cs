@@ -38,6 +38,11 @@ namespace EmergencyRoad
         [Min(4f)] public float crossTrafficSpeed=11.5f;
         [Min(20f)] public float crossTrafficStartDistance=44f;
         [Min(8f)] public float crossTrafficRouteLookDistance=24f;
+        [Header("Roadside Ground and Buildings")]
+        [Min(18f), Tooltip("Chiều rộng đất cỏ tính từ mép trong hiện tại và chỉ mở rộng ra ngoài.")] public float roadsideGrassWidth=42f;
+        [Range(1,2)] public int roadsideBuildingRows=2;
+        [Min(0f)] public float roadsideBuildingGap=1.25f;
+        [Min(6f)] public float roadsideBuildingSetback=10f;
         [Header("Side Collision")]
         [Min(.2f)] public float sideCheckHalfLength=.68f;
         public float releaseBehindPlayer=.32f;
