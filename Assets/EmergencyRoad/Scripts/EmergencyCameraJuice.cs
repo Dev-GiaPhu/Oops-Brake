@@ -8,6 +8,7 @@ namespace EmergencyRoad
         [SerializeField] private Camera controlledCamera;
         [Header("VIEW SWITCH")]
         [SerializeField, Min(.15f)] private float transitionDuration = .45f;
+        [SerializeField] private bool debugViewSwitch = true;
 
         private Transform target;
         private EmergencyVehicleFirstPersonRig vehicleRig;
@@ -51,6 +52,14 @@ namespace EmergencyRoad
                 if (controlledCamera != null) controlledCamera.fieldOfView = vehicleRig.FirstPersonFieldOfView;
             }
             mirrorView?.SetVisible(firstPerson, true);
+            if (debugViewSwitch)
+            {
+                string rigName = vehicleRig != null ? HierarchyPath(vehicleRig.transform) : "NULL";
+                string pivotName = CanSwitchView ? HierarchyPath(vehicleRig.CameraPivot) : "NULL";
+                string cameraName = controlledCamera != null ? HierarchyPath(controlledCamera.transform) : "NULL";
+                Debug.Log($"[Camera Debug][Initialize] component={HierarchyPath(transform)} camera={cameraName} " +
+                          $"rig={rigName} pivot={pivotName} canSwitch={CanSwitchView} savedFirstPerson={firstPerson}", this);
+            }
             if (controlledCamera == null)
                 Debug.LogError("[Emergency Road] EmergencyCameraJuice thiếu Camera reference trong Inspector.", this);
         }
@@ -75,6 +84,12 @@ namespace EmergencyRoad
         public bool ToggleView()
         {
             if (!CanSwitchView) ResolveSpawnedVehicleRig();
+            if (debugViewSwitch)
+            {
+                string pivotName = CanSwitchView ? HierarchyPath(vehicleRig.CameraPivot) : "NULL";
+                Debug.Log($"[Camera Debug][Toggle] frame={Time.frameCount} crash={crashView} " +
+                          $"canSwitch={CanSwitchView} currentFirstPerson={IsFirstPerson} pivot={pivotName}", this);
+            }
             if (crashView || !CanSwitchView)
             {
                 Debug.LogWarning("[Emergency Road] Không thể đổi góc nhìn: xe hiện tại chưa có Camera Pivot hợp lệ.", this);
@@ -96,6 +111,8 @@ namespace EmergencyRoad
             if (rig == null || !rig.HasCameraPivot) return;
             vehicleRig = rig;
             rig.BindStableCameraReference(target);
+            if (debugViewSwitch)
+                Debug.Log($"[Camera Debug][Resolve] rig={HierarchyPath(rig.transform)} pivot={HierarchyPath(rig.CameraPivot)}", this);
         }
 
         private void BeginViewTransition(bool toFirstPerson)
@@ -106,6 +123,12 @@ namespace EmergencyRoad
             transitionStartPosition = CameraTransform.position;
             transitionStartRotation = CameraTransform.rotation;
             transitionStartFov = controlledCamera != null ? controlledCamera.fieldOfView : 58f;
+            if (debugViewSwitch)
+            {
+                Vector3 destination = toFirstPerson ? vehicleRig.StableCameraPosition : ThirdPersonTargetPosition;
+                Debug.Log($"[Camera Debug][Begin] toFirstPerson={toFirstPerson} camera={HierarchyPath(CameraTransform)} " +
+                          $"start={transitionStartPosition:F3} destination={destination:F3} pivot={vehicleRig.CameraPivot.position:F3}", this);
+            }
             EmergencyRoadProfile.Current.firstPersonView = toFirstPerson;
             EmergencyRoadProfile.Save();
             mirrorView?.SetVisible(toFirstPerson);
@@ -156,6 +179,9 @@ namespace EmergencyRoad
             if (t < 1f) return;
             firstPerson = transitionToFirstPerson;
             transitioning = false;
+            if (debugViewSwitch)
+                Debug.Log($"[Camera Debug][Complete] firstPerson={firstPerson} cameraPosition={CameraTransform.position:F3} " +
+                          $"cameraRotation={CameraTransform.eulerAngles:F2}", this);
         }
 
         private void UpdateThirdPerson(float dt)
@@ -195,6 +221,15 @@ namespace EmergencyRoad
         {
             float u = 1f - t;
             return u * u * u * a + 3f * u * u * t * b + 3f * u * t * t * c + t * t * t * d;
+        }
+
+        private static string HierarchyPath(Transform value)
+        {
+            if (value == null) return "NULL";
+            string path = value.name;
+            for (Transform parent = value.parent; parent != null; parent = parent.parent)
+                path = parent.name + "/" + path;
+            return path + $" (id={value.GetInstanceID()})";
         }
     }
 }

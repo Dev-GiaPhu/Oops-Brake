@@ -248,7 +248,11 @@ namespace EmergencyRoad
             if (Keyboard.current != null)
             {
                 if (Keyboard.current.cKey.wasPressedThisFrame && !ended)
-                    ToggleCameraView();
+                {
+                    bool switched = ToggleCameraView();
+                    Debug.Log($"[Camera Debug][Input] C pressed frame={Time.frameCount} switched={switched} " +
+                              $"gameplayCamera={(gameplayCamera != null ? gameplayCamera.name : "NULL")}", this);
+                }
                 if (Keyboard.current.escapeKey.wasPressedThisFrame && !ended)
                     TogglePause();
             }
