@@ -97,20 +97,23 @@ namespace EmergencyRoad
             EmergencyFirstPersonMirrorView mirrors = view.GetComponent<EmergencyFirstPersonMirrorView>();
             if (mirrors == null) mirrors = view.gameObject.AddComponent<EmergencyFirstPersonMirrorView>();
             Transform parent = view.transform;
-            Image left = CreateMirror(parent, "Left Rear View Mirror", new Vector2(.025f, .2f), new Vector2(.19f, .39f));
-            Image right = CreateMirror(parent, "Right Rear View Mirror", new Vector2(.81f, .2f), new Vector2(.975f, .39f));
+            RawImage left = CreateMirror(parent, "Left Rear View Mirror", new Vector2(.025f, .2f), new Vector2(.19f, .39f));
+            RawImage right = CreateMirror(parent, "Right Rear View Mirror", new Vector2(.81f, .2f), new Vector2(.975f, .39f));
             mirrors.Configure(left, right);
             view.firstPersonMirrors = mirrors;
             return mirrors;
         }
 
-        private static Image CreateMirror(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax)
+        private static RawImage CreateMirror(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax)
         {
             Transform existing = parent.Find(name);
             bool created = existing == null;
-            GameObject go = created ? new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)) : existing.gameObject;
+            GameObject go = created ? new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage)) : existing.gameObject;
             go.transform.SetParent(parent, false);
-            Image image = go.GetComponent<Image>();
+            Image oldImage = go.GetComponent<Image>();
+            if (oldImage != null) Object.DestroyImmediate(oldImage);
+            RawImage image = go.GetComponent<RawImage>();
+            if (image == null) image = go.AddComponent<RawImage>();
             if (created)
             {
                 RectTransform rect = (RectTransform)go.transform;

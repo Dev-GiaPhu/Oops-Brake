@@ -7,8 +7,8 @@ namespace EmergencyRoad
     public sealed class EmergencyFirstPersonMirrorView : MonoBehaviour
     {
         [Header("MIRROR IMAGES - DRAG FROM THIS SCENE")]
-        [SerializeField] private Image leftMirror;
-        [SerializeField] private Image rightMirror;
+        [SerializeField] private RawImage leftMirror;
+        [SerializeField] private RawImage rightMirror;
 
         [Header("SLIDE ANIMATION")]
         [SerializeField, Min(.05f)] private float slideDuration = .28f;
@@ -24,7 +24,7 @@ namespace EmergencyRoad
 
         public bool IsConfigured => leftMirror != null && rightMirror != null;
 
-        public void Configure(Image left, Image right)
+        public void Configure(RawImage left, RawImage right)
         {
             leftMirror = left;
             rightMirror = right;
