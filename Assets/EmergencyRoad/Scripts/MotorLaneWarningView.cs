@@ -18,8 +18,8 @@ namespace EmergencyRoad
         [SerializeField] private LaneSlot center = new();
         [SerializeField] private LaneSlot right = new();
         [Header("BLINK")]
-        [SerializeField, Min(1f)] private float blinkSpeed = 8f;
-        [SerializeField, Range(.05f, 1f)] private float minimumAlpha = .2f;
+        [SerializeField, Min(1f)] private float blinkSpeed = 4f;
+        [SerializeField, Range(.05f, 1f)] private float minimumAlpha = .7f;
         private LaneSlot[] slots;
 
         public int DisplayedLane { get; private set; } = int.MinValue;
@@ -51,7 +51,7 @@ namespace EmergencyRoad
                 Color color = slot.image.color;
                 color.a = Mathf.Lerp(minimumAlpha, 1f, .5f + .5f * Mathf.Sin(Time.unscaledTime * blinkSpeed));
                 slot.image.color = color;
-                if (slot.countdown != null) slot.countdown.text = $"{Mathf.Max(0f, secondsRemaining):0.0}s";
+                if (slot.countdown != null) slot.countdown.text = $"Waring!!\n{Mathf.Max(0f, secondsRemaining):0.0}s";
             }
         }
 
