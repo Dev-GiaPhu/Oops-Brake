@@ -244,7 +244,13 @@ namespace EmergencyRoad
         private void Update()
         {
             if (!initialized) return;
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame && !ended) TogglePause();
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.cKey.wasPressedThisFrame && !ended)
+                    ToggleCameraView();
+                if (Keyboard.current.escapeKey.wasPressedThisFrame && !ended)
+                    TogglePause();
+            }
             if (paused || ended || chunks.Count == 0) return;
 
             float start = Settings != null ? Settings.startSpeed : StartSpeed;

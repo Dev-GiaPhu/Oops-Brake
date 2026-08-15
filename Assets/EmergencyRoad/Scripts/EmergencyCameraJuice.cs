@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace EmergencyRoad
 {
@@ -26,31 +25,10 @@ namespace EmergencyRoad
         private Vector3 transitionStartPosition;
         private Quaternion transitionStartRotation;
         private float transitionStartFov;
-        private InputAction switchViewAction;
-
         public bool CanSwitchView => vehicleRig != null && vehicleRig.HasCameraPivot;
         public bool IsFirstPerson => transitioning ? transitionToFirstPerson : firstPerson;
 
         public void ConfigureCamera(Camera camera) => controlledCamera = camera;
-
-        private void Awake()
-        {
-            switchViewAction = new InputAction("Switch Camera View", InputActionType.Button, "<Keyboard>/c");
-            switchViewAction.performed += OnSwitchViewPerformed;
-        }
-
-        private void OnEnable() => switchViewAction?.Enable();
-
-        private void OnDisable() => switchViewAction?.Disable();
-
-        private void OnDestroy()
-        {
-            if (switchViewAction == null) return;
-            switchViewAction.performed -= OnSwitchViewPerformed;
-            switchViewAction.Dispose();
-        }
-
-        private void OnSwitchViewPerformed(InputAction.CallbackContext context) => ToggleView();
 
         public void Initialize(Transform value) => Initialize(value, null);
 
