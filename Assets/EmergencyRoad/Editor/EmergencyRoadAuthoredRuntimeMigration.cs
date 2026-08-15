@@ -28,7 +28,6 @@ namespace EmergencyRoad.Editor
         private const string MotorWarningMaterialPath = "Assets/EmergencyRoad/Resources/MotorWarning.mat";
         private const string ImpactVfxPath = RuntimePrefabFolder + "/VehicleImpactVFX.prefab";
         private const string MotorImpactVfxPath = RuntimePrefabFolder + "/MotorImpactVFX.prefab";
-        private const string PlayerRoadDustPath = "Assets/EmergencyRoad/Resources/PlayerRoadDust.prefab";
 
         static EmergencyRoadAuthoredRuntimeMigration()
         {
@@ -241,7 +240,6 @@ namespace EmergencyRoad.Editor
             GameObject warning = AssetDatabase.LoadAssetAtPath<GameObject>(MotorWarningPath);
             GameObject impact = AssetDatabase.LoadAssetAtPath<GameObject>(ImpactVfxPath);
             GameObject motorImpact = AssetDatabase.LoadAssetAtPath<GameObject>(MotorImpactVfxPath);
-            GameObject roadDust = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerRoadDustPath);
 
             SerializedObject gameSO = new(game);
             SetReference(gameSO, "catalog", catalog);
@@ -269,7 +267,6 @@ namespace EmergencyRoad.Editor
             SetReference(gameSO, "motorWarningLinePrefab", warning);
             SetReference(gameSO, "impactVfxPrefab", impact);
             SetReference(gameSO, "motorImpactVfxPrefab", motorImpact);
-            SetReference(gameSO, "playerRoadDustPrefab", roadDust);
             gameSO.ApplyModifiedPropertiesWithoutUndo();
 
             SerializedObject coinSO = new(coinSpawner);

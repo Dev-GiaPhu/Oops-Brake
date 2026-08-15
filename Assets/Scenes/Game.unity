@@ -20052,7 +20052,6 @@ MonoBehaviour:
   motorWarningLinePrefab: {fileID: 2825856544032428750, guid: 3a4e497f20291f947b7b464cd038b532, type: 3}
   impactVfxPrefab: {fileID: 3004057181360373652, guid: 4cb3829fecc06b247bc9ab94aeb43e15, type: 3}
   motorImpactVfxPrefab: {fileID: 5889883797817961948, guid: 61105363b3a371247b1f2a41a803275a, type: 3}
-  playerRoadDustPrefab: {fileID: 2594134528210653565, guid: 316625a8c1c774405b407577445b52c7, type: 3}
 --- !u!1001 &1346237908
 PrefabInstance:
   m_ObjectHideFlags: 0

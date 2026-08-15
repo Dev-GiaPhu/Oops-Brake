@@ -41,7 +41,6 @@ namespace EmergencyRoad
         [SerializeField] private GameObject motorWarningLinePrefab;
         [SerializeField] private GameObject impactVfxPrefab;
         [SerializeField] private GameObject motorImpactVfxPrefab;
-        [SerializeField] private GameObject playerRoadDustPrefab;
 
         private readonly List<RoadChunk> chunks = new();
         private readonly List<RoadHazard> activeHazards = new();
@@ -178,15 +177,6 @@ namespace EmergencyRoad
             player.Initialize(visual.transform, this, catalog.HornForVehicle(selected), selected);
             cameraJuice.Initialize(playerRoot);
 
-            if (playerRoadDustPrefab != null)
-            {
-                GameObject dust = Instantiate(playerRoadDustPrefab, playerRoot, false);
-                dust.name = "Player Road Dust";
-            }
-            else
-            {
-                Debug.LogError("[Emergency Road] Chưa kéo Player Road Dust Prefab vào Game Controller. Runtime không dùng asset lookup hoặc tự tạo ParticleSystem.", this);
-            }
         }
 
         private void BuildRoad()
