@@ -922,6 +922,7 @@ namespace EmergencyRoad
             GameObject visual = Object.Instantiate(source, holder.transform, false);
             EmergencyRoadGame.DisableVisualColliders(visual);
             EmergencyRoadGame.FitVehicle(visual, size.x, size.y);
+            visual.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             box.center = new Vector3(0, .72f, 0);
             box.size = tuning != null ? tuning.stoppedVehicleHitbox : new Vector3(EmergencyRoadGame.LaneWidth * .82f, 1.45f, 3.55f);
             responder.Configure(owner, true, owner.ImpactVfxPrefab);
@@ -973,7 +974,7 @@ namespace EmergencyRoad
             EmergencyRoadGame.DisableVisualColliders(visual);
             Vector2 size = tuning != null ? tuning.stoppedVehicleSize : new Vector2(2.18f, 4.05f);
             EmergencyRoadGame.FitVehicle(visual, size.x, size.y);
-            visual.transform.localRotation = Quaternion.Euler(0, left ? -90 : 90, 0);
+            visual.transform.localRotation = Quaternion.Euler(0, left ? 90 : -90, 0);
 
             hitbox.isTrigger = true;
             hitbox.center = new Vector3(0, .72f, 0);
