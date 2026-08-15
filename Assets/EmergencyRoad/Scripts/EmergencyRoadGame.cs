@@ -701,15 +701,12 @@ namespace EmergencyRoad
         private void SpawnTransitionGround(int zSide, float crossHalfLength, float gap)
         {
             float grassWidth = owner.Settings != null ? owner.Settings.roadsideGrassWidth : 42f;
-            float grassInnerEdge = catalog.roadHalfWidth + 1f;
+            float grassInnerEdge = catalog.roadHalfWidth;
             for (int xSide = -1; xSide <= 1; xSide += 2)
             {
                 SpawnGroundPrefab(owner.GrassGroundPrefab, "Intersection Corner Grass",
                     new Vector3(xSide * (grassInnerEdge + grassWidth * .5f), -.28f, zSide * (crossHalfLength + gap * .5f)),
                     new Vector3(grassWidth, .36f, gap + .04f));
-                SpawnGroundPrefab(owner.SoilGroundPrefab, "Intersection Soil Edge",
-                    new Vector3(xSide * (catalog.roadHalfWidth + .4f), -.12f, zSide * (crossHalfLength + gap * .5f)),
-                    new Vector3(.8f, .12f, gap + .04f));
             }
         }
 
@@ -767,14 +764,11 @@ namespace EmergencyRoad
         {
             EmergencyRoadGameplaySettings tuning = owner.Settings;
             float grassWidth = tuning != null ? tuning.roadsideGrassWidth : 42f;
-            float grassInnerEdge = catalog.roadHalfWidth + 1f;
+            float grassInnerEdge = catalog.roadHalfWidth;
             for (int side = -1; side <= 1; side += 2)
             {
                 SpawnGroundPrefab(owner.GrassGroundPrefab, side < 0 ? "Grass Ground Left" : "Grass Ground Right",
                     new Vector3(side * (grassInnerEdge + grassWidth * .5f), -.28f, 0), new Vector3(grassWidth, .36f, EmergencyRoadGame.ChunkSpacing + .08f));
-                SpawnGroundPrefab(owner.SoilGroundPrefab, side < 0 ? "Narrow Soil Border Left" : "Narrow Soil Border Right",
-                    new Vector3(side * (catalog.roadHalfWidth + .4f), -.12f, 0), new Vector3(.8f, .12f, EmergencyRoadGame.ChunkSpacing + .08f));
-
                 SpawnRoadsideBuildings(sequence, side, grassWidth);
 
                 for (int j = 0; j < 2; j++)
@@ -808,7 +802,7 @@ namespace EmergencyRoad
             int rows = tuning != null ? tuning.roadsideBuildingRows : 2;
             float gap = tuning != null ? tuning.roadsideBuildingGap : 1.25f;
             float setback = tuning != null ? tuning.roadsideBuildingSetback : 10f;
-            float usableWidth = Mathf.Max(4f, grassWidth - (setback - 1f) - gap * Mathf.Max(0, rows - 1));
+            float usableWidth = Mathf.Max(4f, grassWidth - setback - gap * Mathf.Max(0, rows - 1));
             float maximumBuildingWidth = usableWidth / Mathf.Max(1, rows);
             float nextInnerEdge = catalog.roadHalfWidth + setback;
 
