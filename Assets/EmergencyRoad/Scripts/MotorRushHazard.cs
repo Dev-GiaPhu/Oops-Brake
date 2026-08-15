@@ -14,10 +14,13 @@ namespace EmergencyRoad
         private Camera trackingCamera;
         private Renderer[] visualRenderers;
         private readonly Plane[] frustumPlanes = new Plane[6];
+        private readonly RaycastHit[] sweepHits = new RaycastHit[16];
         private Rigidbody explodedBody;
         private bool compensateMapScroll;
         private float debrisPhysicsAge;
         private Vector3 previousPosition;
+        private Rigidbody body;
+        private BoxCollider hitbox;
         public int TargetLane { get; private set; }
 
         public void Initialize(float x, EmergencyRoadGame owner, Transform playerTransform, Camera camera)
@@ -35,28 +38,62 @@ namespace EmergencyRoad
             EmergencyRoadGameplaySettings tuning = owner != null ? owner.Settings : null;
             speed = tuning != null ? tuning.motorSpeed : 34f;
             visualRenderers = GetComponentsInChildren<Renderer>(true);
+            body = GetComponent<Rigidbody>();
+            hitbox = GetComponent<BoxCollider>();
+            if (hitbox != null) hitbox.isTrigger = false;
+            if (body != null)
+            {
+                body.isKinematic = true;
+                body.useGravity = false;
+                body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            }
             previousPosition = transform.position;
         }
 
         private void Update()
         {
             if (exploded || game == null) return;
-            previousPosition = transform.position;
-            Vector3 p = transform.position;
-            p.z += speed * Time.deltaTime;
-            float desiredX = lockedTargetX + Mathf.Sin(p.z * .28f) * .32f;
-            float previousX = p.x;
-            p.x = Mathf.SmoothDamp(p.x, desiredX, ref lateralVelocity, .18f, 7f);
-            transform.position = p;
-            float lateral = (p.x - previousX) / Mathf.Max(.001f, Time.deltaTime);
-            float yaw = Mathf.Atan2(lateral, speed) * Mathf.Rad2Deg;
-            float lean = Mathf.Clamp(-lateral * 2f, -13f, 13f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, yaw, lean), 1f - Mathf.Exp(-8f * Time.deltaTime));
             UpdateCameraLifetime();
         }
 
         private void FixedUpdate()
         {
+            if (!exploded && game != null)
+            {
+                previousPosition = body != null ? body.position : transform.position;
+                Vector3 p = previousPosition;
+                p.z += speed * Time.fixedDeltaTime;
+                float desiredX = lockedTargetX + Mathf.Sin(p.z * .28f) * .32f;
+                float previousX = p.x;
+                p.x = Mathf.SmoothDamp(p.x, desiredX, ref lateralVelocity, .18f, 7f, Time.fixedDeltaTime);
+                float lateral = (p.x - previousX) / Mathf.Max(.001f, Time.fixedDeltaTime);
+                float yaw = Mathf.Atan2(lateral, speed) * Mathf.Rad2Deg;
+                float lean = Mathf.Clamp(-lateral * 2f, -13f, 13f);
+                Quaternion currentRotation = body != null ? body.rotation : transform.rotation;
+                Quaternion rotation = Quaternion.Slerp(currentRotation, Quaternion.Euler(0, yaw, lean),
+                    1f - Mathf.Exp(-8f * Time.fixedDeltaTime));
+                if (body != null)
+                {
+                    Vector3 movement = p - body.position;
+                    float moveDistance = movement.magnitude;
+                    if (moveDistance > .001f)
+                    {
+                        Vector3 halfExtents = hitbox != null
+                            ? Vector3.Scale(hitbox.size * .5f, transform.lossyScale)
+                            : new Vector3(.48f, .68f, 1.13f);
+                        Vector3 castCenter = hitbox != null ? hitbox.transform.TransformPoint(hitbox.center) : body.position;
+                        int hitCount = Physics.BoxCastNonAlloc(castCenter, halfExtents, movement / moveDistance,
+                            sweepHits, body.rotation, moveDistance + .08f, ~0, QueryTriggerInteraction.Collide);
+                        for (int i = 0; i < hitCount && !exploded; i++) HandleImpact(sweepHits[i].collider);
+                        if (exploded) return;
+                    }
+                    body.MovePosition(p);
+                    body.MoveRotation(rotation);
+                }
+                else transform.SetPositionAndRotation(p, rotation);
+                return;
+            }
             if (!exploded || !compensateMapScroll || explodedBody == null || game == null) return;
             debrisPhysicsAge += Time.fixedDeltaTime;
             EmergencyRoadGameplaySettings tuning = game.Settings;
@@ -99,7 +136,17 @@ namespace EmergencyRoad
 
         private void OnTriggerEnter(Collider other)
         {
-            if (exploded) return;
+            HandleImpact(other);
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision != null) HandleImpact(collision.collider);
+        }
+
+        private void HandleImpact(Collider other)
+        {
+            if (exploded || other == null) return;
             if (other.GetComponentInParent<EmergencyVehicleController>() != null)
             {
                 hasBeenInsideCamera = true;

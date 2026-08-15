@@ -18,6 +18,7 @@ namespace EmergencyRoad
         private float xVelocity;
         private bool occupyingReservedEscape;
         private readonly bool[] reservedLanes = new bool[3];
+        private Rigidbody body;
 
         public void Initialize(EmergencyRoadGame owner, int startLane, float speed, float changeChance, float interval, float brakeDistance, float brakeStrength)
         {
@@ -30,6 +31,14 @@ namespace EmergencyRoad
             brakingDistance = Mathf.Max(4f, brakeDistance);
             brakingStrength = Mathf.Max(1f, brakeStrength);
             nextDecision = Time.time + Random.Range(decisionInterval * .65f, decisionInterval * 1.35f);
+            body = GetComponent<Rigidbody>();
+            if (body != null)
+            {
+                body.isKinematic = true;
+                body.useGravity = false;
+                body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            }
         }
 
         private void Update()
@@ -50,23 +59,7 @@ namespace EmergencyRoad
                 desiredSpeed,
                 (desiredSpeed < roadSpeed ? brakingStrength : brakingStrength * .35f) * Time.deltaTime);
 
-            Vector3 position = transform.position;
-            position.z += (roadSpeed - game.CurrentSpeed) * Time.deltaTime;
-            position.x = Mathf.SmoothDamp(
-                position.x,
-                targetX,
-                ref xVelocity,
-                .42f,
-                EmergencyRoadGame.LaneWidth * 1.65f);
-            transform.position = position;
-
-            if (position.z < -32f || position.z > 165f)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            if (Time.time < nextDecision || position.z < 9f) return;
+            if (Time.time < nextDecision || transform.position.z < 9f) return;
             nextDecision = Time.time + Random.Range(decisionInterval * .75f, decisionInterval * 1.35f);
 
             int soleRoute = FindSoleOpenRoute();
@@ -85,6 +78,18 @@ namespace EmergencyRoad
                 lane = candidate;
                 targetX = lane * EmergencyRoadGame.LaneWidth;
             }
+        }
+
+        private void FixedUpdate()
+        {
+            if (game == null || game.Ended) return;
+            Vector3 position = body != null ? body.position : transform.position;
+            position.z += (roadSpeed - game.CurrentSpeed) * Time.fixedDeltaTime;
+            position.x = Mathf.SmoothDamp(position.x, targetX, ref xVelocity, .42f,
+                EmergencyRoadGame.LaneWidth * 1.65f, Time.fixedDeltaTime);
+            if (body != null) body.MovePosition(position);
+            else transform.position = position;
+            if (position.z < -32f || position.z > 165f) Destroy(gameObject);
         }
 
         private int FindSoleOpenRoute()

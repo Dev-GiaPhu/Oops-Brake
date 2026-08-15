@@ -457,11 +457,13 @@ namespace EmergencyRoad
             DisableVisualColliders(visual);
             FitVehicle(visual, 2.12f, 4.05f);
 
-            hitbox.isTrigger = true;
+            hitbox.isTrigger = false;
             hitbox.center = new Vector3(0, .72f, 0);
             hitbox.size = new Vector3(2.35f, 1.45f, 3.55f);
             body.isKinematic = true;
             body.useGravity = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
 
             EmergencyRoadGameplaySettings tuning = Settings;
             float minimum = tuning != null ? tuning.trafficMinimumRoadSpeed : 8f;
@@ -1078,11 +1080,13 @@ namespace EmergencyRoad
             EmergencyRoadGame.FitVehicle(visual, size.x, size.y);
             visual.transform.localRotation = Quaternion.Euler(0, left ? 90 : -90, 0);
 
-            hitbox.isTrigger = true;
+            hitbox.isTrigger = false;
             hitbox.center = new Vector3(0, .72f, 0);
             hitbox.size = tuning != null ? tuning.stoppedVehicleHitbox : new Vector3(2.54f, 1.45f, 3.55f);
             body.isKinematic = true;
             body.useGravity = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
             mover.Configure(lane * EmergencyRoadGame.LaneWidth, left, tuning != null ? tuning.crossTrafficSpeed : 11.5f, tuning != null ? tuning.crossTrafficStartDistance : 44f);
             responder.Configure(owner, false, owner.ImpactVfxPrefab);
             owner.RegisterHazard(hazard);

@@ -399,6 +399,8 @@ namespace EmergencyRoad.Editor
             Rigidbody body = root.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
             SameDirectionTraffic mover = root.AddComponent<SameDirectionTraffic>();
             EmergencyTrafficCrashResponder responder = root.AddComponent<EmergencyTrafficCrashResponder>();
             responder.ConfigurePrefabReferences(box, body, mover, null);
@@ -415,6 +417,8 @@ namespace EmergencyRoad.Editor
             Rigidbody body = root.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
             SideCrossingHazard mover = root.AddComponent<SideCrossingHazard>();
             EmergencyTrafficCrashResponder responder = root.AddComponent<EmergencyTrafficCrashResponder>();
             responder.ConfigurePrefabReferences(box, body, null, mover);
@@ -437,12 +441,14 @@ namespace EmergencyRoad.Editor
             GameObject root = new("MotorRushHazard");
             root.AddComponent<MotorRushHazard>();
             BoxCollider box = root.AddComponent<BoxCollider>();
-            box.isTrigger = true;
+            box.isTrigger = false;
             box.size = new Vector3(.95f, 1.35f, 2.25f);
             box.center = new Vector3(0, .45f, 0);
             Rigidbody body = root.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
             if (catalog.motorcyclePrefab != null)
             {
                 GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(catalog.motorcyclePrefab);
@@ -482,8 +488,14 @@ namespace EmergencyRoad.Editor
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(ImpactVfxPath) != null) return;
             GameObject root = new("VehicleImpactVFX");
-            CreateParticle(root.transform, "Fire", catalog.vfxParticleMaterial, new Color(1f, .18f, .015f, 1f), .55f, .066f, 90f, 1.25f, 240);
-            CreateParticle(root.transform, "Smoke", catalog.vfxParticleMaterial, new Color(.18f, .18f, .2f, .65f), 1.25f, .7f, 11f, .72f);
+            ParticleSystem fire = CreateParticle(root.transform, "Fire", catalog.vfxParticleMaterial, Color.white, .55f, .12f, 90f, 1.25f, 240);
+            ConfigureFireColor(fire);
+            Light fireLight = fire.gameObject.AddComponent<Light>();
+            fireLight.type = LightType.Point;
+            fireLight.color = new Color(1f, .24f, .025f);
+            fireLight.intensity = 2.4f;
+            fireLight.range = 5.5f;
+            CreateParticle(root.transform, "Smoke", catalog.vfxParticleMaterial, new Color(.18f, .18f, .2f, .48f), 1.25f, .48f, 11f, .72f);
             PrefabUtility.SaveAsPrefabAsset(root, ImpactVfxPath);
             Object.DestroyImmediate(root);
         }
@@ -499,12 +511,13 @@ namespace EmergencyRoad.Editor
             main.loop = false;
             main.startLifetime = new ParticleSystem.MinMaxCurve(.55f, 1.05f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(5f, 9f);
-            main.startSize = new ParticleSystem.MinMaxCurve(.036f, .084f);
-            main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, .08f, .01f), new Color(1f, .85f, .08f));
+            main.startSize = new ParticleSystem.MinMaxCurve(.07f, .16f);
+            main.startColor = Color.white;
             main.maxParticles = 140;
             var emission = ps.emission;
             emission.rateOverTime = 0;
             emission.SetBursts(new[] { new ParticleSystem.Burst(0, 110) });
+            ConfigureFireColor(ps);
             if (catalog.vfxParticleMaterial != null) root.GetComponent<ParticleSystemRenderer>().sharedMaterial = catalog.vfxParticleMaterial;
             ps.Play();
             Light light = root.AddComponent<Light>();
@@ -517,7 +530,7 @@ namespace EmergencyRoad.Editor
             Object.DestroyImmediate(root);
         }
 
-        private static void CreateParticle(Transform parent, string name, Material material, Color color, float lifetime, float size, float rate, float speed, int maxParticles = 72)
+        private static ParticleSystem CreateParticle(Transform parent, string name, Material material, Color color, float lifetime, float size, float rate, float speed, int maxParticles = 72)
         {
             GameObject go = new(name, typeof(ParticleSystem));
             go.transform.SetParent(parent, false);
@@ -540,6 +553,23 @@ namespace EmergencyRoad.Editor
             shape.radius = .18f;
             if (material != null) go.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
             ps.Play();
+            return ps;
+        }
+
+        private static void ConfigureFireColor(ParticleSystem fire)
+        {
+            var color = fire.colorOverLifetime;
+            color.enabled = true;
+            Gradient gradient = new();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(new Color(1f, .9f, .2f), 0f),
+                    new GradientColorKey(new Color(1f, .24f, .015f), .45f),
+                    new GradientColorKey(new Color(.32f, .015f, .005f), 1f)
+                },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(.2f, 1f) });
+            color.color = gradient;
         }
 
         private static void EnsureCoinPrefab(GameObject prefab)

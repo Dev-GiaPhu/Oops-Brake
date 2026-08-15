@@ -78,6 +78,11 @@ namespace EmergencyRoad
             TryResolveTrafficImpact(other);
         }
 
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision != null) TryResolveTrafficImpact(collision.collider);
+        }
+
         private void DetectAlongMovement(Vector3 origin, Quaternion orientation, Vector3 movement)
         {
             float distance = movement.magnitude;
