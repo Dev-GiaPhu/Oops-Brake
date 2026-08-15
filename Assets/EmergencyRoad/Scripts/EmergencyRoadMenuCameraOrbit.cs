@@ -21,6 +21,8 @@ namespace EmergencyRoad
         private Quaternion homeRotation;
         private float yaw;
         private float pitch;
+        private Vector3 dragStartOffset;
+        private Vector3 dragStartRight;
         private float releasedAt = float.NegativeInfinity;
         private bool dragging;
 
@@ -40,7 +42,17 @@ namespace EmergencyRoad
             if (vehicleCenter == null || Mouse.current == null) return;
             Mouse mouse = Mouse.current;
             if (mouse.leftButton.wasPressedThisFrame)
+            {
                 dragging = mouse.position.ReadValue().x <= Screen.width * draggableScreenWidth;
+                if (dragging)
+                {
+                    dragStartOffset = transform.position - vehicleCenter.position;
+                    dragStartRight = transform.right;
+                    yaw = 0f;
+                    pitch = 0f;
+                    return;
+                }
+            }
 
             if (dragging && mouse.leftButton.isPressed)
             {
@@ -67,10 +79,9 @@ namespace EmergencyRoad
 
         private void ApplyOrbit()
         {
-            Vector3 offset = homePosition - vehicleCenter.position;
             Quaternion orbit = Quaternion.AngleAxis(yaw, Vector3.up) *
-                               Quaternion.AngleAxis(pitch, homeRotation * Vector3.right);
-            transform.position = vehicleCenter.position + orbit * offset;
+                               Quaternion.AngleAxis(pitch, dragStartRight);
+            transform.position = vehicleCenter.position + orbit * dragStartOffset;
             Vector3 look = vehicleCenter.position - transform.position;
             if (look.sqrMagnitude > .001f) transform.rotation = Quaternion.LookRotation(look, Vector3.up);
         }
