@@ -23,6 +23,7 @@ namespace EmergencyRoad
         private float pitch;
         private Vector3 dragStartOffset;
         private Vector3 dragStartRight;
+        private Quaternion dragStartRotation;
         private float releasedAt = float.NegativeInfinity;
         private bool dragging;
 
@@ -48,6 +49,7 @@ namespace EmergencyRoad
                 {
                     dragStartOffset = transform.position - vehicleCenter.position;
                     dragStartRight = transform.right;
+                    dragStartRotation = transform.rotation;
                     yaw = 0f;
                     pitch = 0f;
                     return;
@@ -82,8 +84,7 @@ namespace EmergencyRoad
             Quaternion orbit = Quaternion.AngleAxis(yaw, Vector3.up) *
                                Quaternion.AngleAxis(pitch, dragStartRight);
             transform.position = vehicleCenter.position + orbit * dragStartOffset;
-            Vector3 look = vehicleCenter.position - transform.position;
-            if (look.sqrMagnitude > .001f) transform.rotation = Quaternion.LookRotation(look, Vector3.up);
+            transform.rotation = orbit * dragStartRotation;
         }
     }
 }
