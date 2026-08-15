@@ -28,15 +28,12 @@ namespace EmergencyRoad
         public void Tick(float roadDelta)
         {
             if (!moving && transform.position.z < startDistance) moving = true;
-        }
-
-        private void FixedUpdate()
-        {
             if (!moving) return;
-            Vector3 p = body != null ? body.position : transform.position;
-            p.x = Mathf.MoveTowards(p.x, targetX, moveSpeed * Time.fixedDeltaTime);
-            if (body != null) body.MovePosition(p);
-            else transform.position = p;
+            // This vehicle belongs to a scrolling road chunk. Local movement preserves
+            // the fake road scroll; writing Rigidbody world position would cancel it.
+            Vector3 p = transform.localPosition;
+            p.x = Mathf.MoveTowards(p.x, targetX, moveSpeed * Time.deltaTime);
+            transform.localPosition = p;
         }
     }
 }
