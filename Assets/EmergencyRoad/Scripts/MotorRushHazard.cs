@@ -154,7 +154,10 @@ namespace EmergencyRoad
                 StartCoroutine(Explode(true, null));
                 return;
             }
-            if (other.GetComponentInParent<RoadHazard>() != null) StartCoroutine(Explode(false, other));
+            if (other.GetComponentInParent<RoadHazard>() != null ||
+                other.GetComponentInParent<SameDirectionTraffic>() != null ||
+                other.GetComponentInParent<SideCrossingHazard>() != null)
+                StartCoroutine(Explode(false, other));
         }
 
         private IEnumerator Explode(bool preserveAfterPlayerHit, Collider impactedCollider)

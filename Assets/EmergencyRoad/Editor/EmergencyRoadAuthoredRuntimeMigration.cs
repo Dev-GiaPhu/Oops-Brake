@@ -399,8 +399,6 @@ namespace EmergencyRoad.Editor
             Rigidbody body = root.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;
-            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-            body.interpolation = RigidbodyInterpolation.Interpolate;
             SameDirectionTraffic mover = root.AddComponent<SameDirectionTraffic>();
             EmergencyTrafficCrashResponder responder = root.AddComponent<EmergencyTrafficCrashResponder>();
             responder.ConfigurePrefabReferences(box, body, mover, null);
@@ -417,8 +415,6 @@ namespace EmergencyRoad.Editor
             Rigidbody body = root.AddComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;
-            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-            body.interpolation = RigidbodyInterpolation.Interpolate;
             SideCrossingHazard mover = root.AddComponent<SideCrossingHazard>();
             EmergencyTrafficCrashResponder responder = root.AddComponent<EmergencyTrafficCrashResponder>();
             responder.ConfigurePrefabReferences(box, body, null, mover);
