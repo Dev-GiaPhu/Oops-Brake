@@ -43,7 +43,10 @@ MonoBehaviour:
   motorSpeed: 34
   motorTrackingSmoothTime: 0.65
   motorMaxLateralSpeed: 3.5
-  motorWarningTrackTime: 2.2
+  motorWarningTrackTime: 3
   motorLockedWarningTime: 0.55
+  motorPlanningRetryDelay: 1
+  motorCrossroadSafetyDistance: 24
+  motorObstacleSafetyDistance: 9
   motorDebrisImpactHoldTime: 0.35
   motorDebrisMapFollowSharpness: 2.2

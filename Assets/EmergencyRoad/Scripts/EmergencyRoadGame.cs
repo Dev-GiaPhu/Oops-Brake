@@ -311,6 +311,63 @@ namespace EmergencyRoad
             }
         }
 
+        internal bool TryPlanMotorRush(float warningDuration, float motorSpeed, out int selectedLane)
+        {
+            selectedLane = 0;
+            if (player == null) return false;
+
+            EmergencyRoadGameplaySettings tuning = Settings;
+            float catchTime = Mathf.Max(.1f, (player.transform.position.z + 18f) / Mathf.Max(1f, motorSpeed));
+            float arrivalTime = warningDuration + catchTime;
+            float projectedPlayerZ = player.transform.position.z + CurrentSpeed * arrivalTime;
+            float crossroadSafety = tuning != null ? tuning.motorCrossroadSafetyDistance : 24f;
+            for (int i = 0; i < chunks.Count; i++)
+                if (chunks[i].IsCrossroad && Mathf.Abs(chunks[i].PositionZ - projectedPlayerZ) <= crossroadSafety)
+                    return false;
+
+            float obstacleSafety = tuning != null ? tuning.motorObstacleSafetyDistance : 9f;
+            float minimumZ = projectedPlayerZ - obstacleSafety;
+            float maximumZ = projectedPlayerZ + obstacleSafety;
+            bool[] soleEscapeLane = new bool[3];
+            FillReservedLanes(minimumZ, maximumZ, soleEscapeLane);
+            bool[] occupiedLane = new bool[3];
+            for (int i = activeHazards.Count - 1; i >= 0; i--)
+            {
+                RoadHazard hazard = activeHazards[i];
+                if (hazard == null)
+                {
+                    activeHazards.RemoveAt(i);
+                    continue;
+                }
+                Vector3 position = hazard.transform.position;
+                if (position.z < minimumZ || position.z > maximumZ || Mathf.Abs(position.x) > LaneWidth * 1.5f) continue;
+                occupiedLane[Mathf.Clamp(Mathf.RoundToInt(position.x / LaneWidth) + 1, 0, 2)] = true;
+            }
+
+            int[] candidates = { -1, 0, 1 };
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                int swap = Random.Range(i, candidates.Length);
+                (candidates[i], candidates[swap]) = (candidates[swap], candidates[i]);
+            }
+
+            // Prefer a lane already occupied by an obstacle. The motorcycle then adds no new blocked lane.
+            for (int pass = 0; pass < 2; pass++)
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                int lane = candidates[i];
+                int index = lane + 1;
+                if (soleEscapeLane[index] || (pass == 0 && !occupiedLane[index])) continue;
+                bool alternativeOpen = false;
+                for (int other = 0; other < 3; other++)
+                    if (other != index && !occupiedLane[other]) { alternativeOpen = true; break; }
+                if (!alternativeOpen) continue;
+                selectedLane = lane;
+                return true;
+            }
+            return false;
+        }
+
         internal void PlanEscapeLanes(int requestedLane, bool wantsTwoLaneBlock, out int firstOpenLane, out int secondOpenLane)
         {
             requestedLane = Mathf.Clamp(requestedLane, -1, 1);
@@ -564,6 +621,7 @@ namespace EmergencyRoad
         private readonly List<GameObject> spawned = new();
 
         public float PositionZ => root.transform.localPosition.z;
+        public bool IsCrossroad { get; private set; }
 
         private RoadChunk(GameObject rootObject, EmergencyRoadCatalog data, EmergencyRoadGame game)
         {
@@ -594,6 +652,7 @@ namespace EmergencyRoad
             foreach (GameObject go in spawned) if (go != null) Object.Destroy(go);
             spawned.Clear();
             root.transform.localPosition = new Vector3(0, 0, z);
+            IsCrossroad = cross;
             bool meshCovered = !cross && owner.IsCrossroadMeshCovered(sequence);
             root.name = cross ? "Crossroad Chunk" : meshCovered ? "Crossroad Footprint Spacer" : "Road_1 Chunk";
 

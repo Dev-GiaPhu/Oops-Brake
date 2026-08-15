@@ -6,14 +6,11 @@ namespace EmergencyRoad
     public sealed class MotorRushHazard : MonoBehaviour
     {
         private EmergencyRoadGame game;
-        private Transform player;
         private float speed = 34f;
         private bool exploded;
-        private bool pathLocked;
         private bool hasBeenInsideCamera;
         private float lockedTargetX;
         private float lateralVelocity;
-        private float trackingVelocity;
         private Camera trackingCamera;
         private Renderer[] visualRenderers;
         private readonly Plane[] frustumPlanes = new Plane[6];
@@ -25,7 +22,6 @@ namespace EmergencyRoad
         public void Initialize(float x, EmergencyRoadGame owner, Transform playerTransform, Camera camera)
         {
             game = owner;
-            player = playerTransform;
             trackingCamera = camera;
             lockedTargetX = x;
             transform.position = new Vector3(x + Mathf.Sin(-18f * .28f) * .5f, .45f, -18f);
@@ -41,15 +37,6 @@ namespace EmergencyRoad
             previousPosition = transform.position;
             Vector3 p = transform.position;
             p.z += speed * Time.deltaTime;
-            if (!pathLocked && player != null)
-            {
-                EmergencyRoadGameplaySettings tuning = game.Settings;
-                float smooth = tuning != null ? tuning.motorTrackingSmoothTime : .65f;
-                float maxLateral = tuning != null ? tuning.motorMaxLateralSpeed : 3.5f;
-                lockedTargetX = Mathf.SmoothDamp(lockedTargetX, player.position.x, ref trackingVelocity, smooth, maxLateral);
-                if (p.z >= -4f) pathLocked = true;
-            }
-
             float desiredX = lockedTargetX + Mathf.Sin(p.z * .28f) * .5f;
             float previousX = p.x;
             p.x = Mathf.SmoothDamp(p.x, desiredX, ref lateralVelocity, .18f, 7f);

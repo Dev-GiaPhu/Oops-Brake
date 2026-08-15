@@ -50,8 +50,11 @@ namespace EmergencyRoad
         [Min(1)] public float motorSpeed=34f;
         [Min(.05f)] public float motorTrackingSmoothTime=.65f;
         [Min(.1f)] public float motorMaxLateralSpeed=3.5f;
-        [Min(.5f)] public float motorWarningTrackTime=2.2f;
+        [Min(.5f), Tooltip("Thời gian đếm ngược cảnh báo ở làn trước khi mô tô xuất hiện.")] public float motorWarningTrackTime=3f;
         [Min(.1f)] public float motorLockedWarningTime=.55f;
+        [Min(.1f)] public float motorPlanningRetryDelay=1f;
+        [Min(0f)] public float motorCrossroadSafetyDistance=24f;
+        [Min(1f)] public float motorObstacleSafetyDistance=9f;
         [Header("Motorcycle Debris Physics")]
         [Min(0)] public float motorDebrisImpactHoldTime=.35f;
         [Min(.25f)] public float motorDebrisMapFollowSharpness=2.2f;

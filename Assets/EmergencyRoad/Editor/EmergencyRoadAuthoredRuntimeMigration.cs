@@ -482,7 +482,7 @@ namespace EmergencyRoad.Editor
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(ImpactVfxPath) != null) return;
             GameObject root = new("VehicleImpactVFX");
-            CreateParticle(root.transform, "Fire", catalog.vfxParticleMaterial, new Color(1f, .18f, .015f, 1f), .55f, .22f, 36f, 1.25f, 120);
+            CreateParticle(root.transform, "Fire", catalog.vfxParticleMaterial, new Color(1f, .18f, .015f, 1f), .55f, .066f, 90f, 1.25f, 240);
             CreateParticle(root.transform, "Smoke", catalog.vfxParticleMaterial, new Color(.18f, .18f, .2f, .65f), 1.25f, .7f, 11f, .72f);
             PrefabUtility.SaveAsPrefabAsset(root, ImpactVfxPath);
             Object.DestroyImmediate(root);
@@ -499,12 +499,12 @@ namespace EmergencyRoad.Editor
             main.loop = false;
             main.startLifetime = new ParticleSystem.MinMaxCurve(.55f, 1.05f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(5f, 9f);
-            main.startSize = new ParticleSystem.MinMaxCurve(.12f, .28f);
+            main.startSize = new ParticleSystem.MinMaxCurve(.036f, .084f);
             main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, .08f, .01f), new Color(1f, .85f, .08f));
-            main.maxParticles = 72;
+            main.maxParticles = 140;
             var emission = ps.emission;
             emission.rateOverTime = 0;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0, 48) });
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0, 110) });
             if (catalog.vfxParticleMaterial != null) root.GetComponent<ParticleSystemRenderer>().sharedMaterial = catalog.vfxParticleMaterial;
             ps.Play();
             Light light = root.AddComponent<Light>();

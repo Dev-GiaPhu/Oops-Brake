@@ -9,6 +9,7 @@ namespace EmergencyRoad
         [SerializeField] private EmergencyRoadGame game;
         [SerializeField] private GameObject warningLinePrefab;
         [SerializeField] private GameObject motorRushHazardPrefab;
+        [SerializeField] private MotorLaneWarningView laneWarningView;
 
         private float timer;
         private bool active;
@@ -30,46 +31,34 @@ namespace EmergencyRoad
 
         private IEnumerator RunEvent()
         {
-            if (warningLinePrefab == null || motorRushHazardPrefab == null)
+            if (motorRushHazardPrefab == null || laneWarningView == null || !laneWarningView.IsConfigured)
             {
-                Debug.LogError("[Emergency Road] MotorRushDirector thiếu Warning Line Prefab hoặc Motor Rush Hazard Prefab trong Inspector.", this);
+                Debug.LogError("[Emergency Road] MotorRushDirector thiếu Motor Rush Hazard Prefab hoặc Motor Lane Warning View chưa gắn đủ 3 Image + TMP_Text.", this);
                 timer = 10f;
                 yield break;
             }
 
-            active = true;
-            GameObject warning = Instantiate(warningLinePrefab, transform, false);
-            LineRenderer line = warning.GetComponent<LineRenderer>();
-            if (line == null)
+            EmergencyRoadGameplaySettings tuning = game.Settings;
+            float warningDuration = tuning != null ? tuning.motorWarningTrackTime : 3f;
+            float motorSpeed = tuning != null ? tuning.motorSpeed : 34f;
+            if (!game.TryPlanMotorRush(warningDuration, motorSpeed, out int targetLane))
             {
-                Debug.LogError("[Emergency Road] Motor Warning prefab phải chứa sẵn LineRenderer.", warning);
-                Destroy(warning);
-                active = false;
+                timer = tuning != null ? tuning.motorPlanningRetryDelay : 1f;
                 yield break;
             }
 
-            Transform playerTransform = game.Player.transform;
-            float targetX = playerTransform.position.x;
-            float t = 0f;
-            game.SetHazardAlert("WARNING: MOTORCYCLE INCOMING");
-            while (t < 2.2f)
+            active = true;
+            float elapsed = 0f;
+            game.SetHazardAlert("MÔ TÔ SẮP XUẤT HIỆN");
+            while (elapsed < warningDuration)
             {
-                t += Time.unscaledDeltaTime;
-                targetX = Mathf.Lerp(targetX, playerTransform.position.x, 1f - Mathf.Exp(-3.2f * Time.unscaledDeltaTime));
-                line.widthMultiplier = .22f + Mathf.Sin(t * 18f) * .08f;
-                UpdateWarningPath(line, targetX);
+                elapsed += Time.deltaTime;
+                laneWarningView.Show(targetLane, warningDuration - elapsed);
                 yield return null;
             }
 
-            game.SetHazardAlert("DIRECTION LOCKED — DODGE NOW!");
-            targetX = game.ResolveMotorTargetX(targetX, playerTransform.position.z - 8f,
-                playerTransform.position.z + EmergencyRoadGame.ChunkSpacing * 2.5f);
-            UpdateWarningPath(line, targetX);
-            line.startColor = Color.red;
-            line.endColor = new Color(1f, .05f, .01f, .7f);
-            line.widthMultiplier = .42f;
-            yield return new WaitForSecondsRealtime(.55f);
-
+            laneWarningView.Hide();
+            game.SetHazardAlert("");
             GameObject motorObject = Instantiate(motorRushHazardPrefab, transform, false);
             MotorRushHazard motor = motorObject.GetComponent<MotorRushHazard>();
             if (motor == null)
@@ -79,24 +68,20 @@ namespace EmergencyRoad
             }
             else
             {
-                motor.Initialize(targetX, game, playerTransform, game.GameplayCamera);
+                motor.Initialize(targetLane * EmergencyRoadGame.LaneWidth, game, game.Player.transform, game.GameplayCamera);
                 game.RegisterMotor(motor);
             }
 
-            Destroy(warning);
-            game.SetHazardAlert("");
             while (motor != null) yield return null;
             timer = Random.Range(15f, 23f);
             active = false;
         }
 
-        private static void UpdateWarningPath(LineRenderer line, float targetX)
+        private void OnDisable()
         {
-            for (int i = 0; i < line.positionCount; i++)
-            {
-                float z = Mathf.Lerp(-18f, 72f, (float)i / (line.positionCount - 1));
-                line.SetPosition(i, new Vector3(targetX + Mathf.Sin(z * .28f) * .65f, .08f, z));
-            }
+            if (laneWarningView != null) laneWarningView.Hide();
+            active = false;
         }
     }
+
 }
