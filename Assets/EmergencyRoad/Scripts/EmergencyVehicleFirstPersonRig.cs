@@ -22,16 +22,17 @@ namespace EmergencyRoad
         private Transform stableVehicleRoot;
         private Vector3 stableCameraLocalPosition;
         private Quaternion stableCameraLocalRotation;
+        private Quaternion visualBaseRotationRelativeToRoot;
         private float targetSteering;
         private float currentSteering;
 
         public bool HasCameraPivot => cameraPivot != null;
         public Transform CameraPivot => cameraPivot;
         public Vector3 StableCameraPosition => stableVehicleRoot != null
-            ? stableVehicleRoot.TransformPoint(stableCameraLocalPosition)
+            ? stableVehicleRoot.TransformPoint(CurrentVisualRotationDelta * stableCameraLocalPosition)
             : cameraPivot.position;
         public Quaternion StableCameraRotation => stableVehicleRoot != null
-            ? stableVehicleRoot.rotation * stableCameraLocalRotation
+            ? stableVehicleRoot.rotation * CurrentVisualRotationDelta * stableCameraLocalRotation
             : cameraPivot.rotation;
         public float FirstPersonFieldOfView => firstPersonFieldOfView;
         public Vector3 LeftWindowEntryPosition => cameraPivot != null
@@ -54,6 +55,16 @@ namespace EmergencyRoad
             stableVehicleRoot = vehicleRoot;
             stableCameraLocalPosition = vehicleRoot.InverseTransformPoint(cameraPivot.position);
             stableCameraLocalRotation = Quaternion.Inverse(vehicleRoot.rotation) * cameraPivot.rotation;
+            visualBaseRotationRelativeToRoot = Quaternion.Inverse(vehicleRoot.rotation) * transform.rotation;
+        }
+
+        private Quaternion CurrentVisualRotationDelta
+        {
+            get
+            {
+                Quaternion currentRelative = Quaternion.Inverse(stableVehicleRoot.rotation) * transform.rotation;
+                return currentRelative * Quaternion.Inverse(visualBaseRotationRelativeToRoot);
+            }
         }
 
         private void LateUpdate()
