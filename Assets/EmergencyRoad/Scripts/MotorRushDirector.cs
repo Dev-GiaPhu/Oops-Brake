@@ -62,6 +62,9 @@ namespace EmergencyRoad
             }
 
             game.SetHazardAlert("DIRECTION LOCKED — DODGE NOW!");
+            targetX = game.ResolveMotorTargetX(targetX, playerTransform.position.z - 8f,
+                playerTransform.position.z + EmergencyRoadGame.ChunkSpacing * 2.5f);
+            UpdateWarningPath(line, targetX);
             line.startColor = Color.red;
             line.endColor = new Color(1f, .05f, .01f, .7f);
             line.widthMultiplier = .42f;

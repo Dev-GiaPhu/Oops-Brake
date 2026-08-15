@@ -66,6 +66,9 @@ namespace EmergencyRoad
         private int lastCrossroadSequence = -100;
         private int nextCrossroadRadius = 1;
         private int lastCrossroadRadius = 1;
+        private int escapeLane;
+        private int escapeTargetLane;
+        private bool hasEscapeLane;
         private bool paused;
         private bool ended;
         private bool initialized;
@@ -188,6 +191,7 @@ namespace EmergencyRoad
 
         private void BuildRoad()
         {
+            hasEscapeLane = false;
             nextObstacleDistance = Mathf.Max(20f, catalog.startingSafeDistance);
             EmergencyRoadGameplaySettings tuning = Settings;
             int min = tuning != null ? tuning.minStraightChunksBetweenIntersections : 10;
@@ -315,6 +319,53 @@ namespace EmergencyRoad
                 float z = marker.transform.position.z;
                 if (z >= minimumZ && z <= maximumZ) result[marker.SoleOpenLane + 1] = true;
             }
+        }
+
+        internal void PlanEscapeLanes(int requestedLane, bool wantsTwoLaneBlock, out int firstOpenLane, out int secondOpenLane)
+        {
+            requestedLane = Mathf.Clamp(requestedLane, -1, 1);
+            secondOpenLane = -99;
+            if (!hasEscapeLane)
+            {
+                escapeLane = escapeTargetLane = requestedLane;
+                hasEscapeLane = true;
+            }
+
+            if (!wantsTwoLaneBlock)
+            {
+                firstOpenLane = escapeLane;
+                return;
+            }
+
+            if (escapeLane == escapeTargetLane && requestedLane != escapeLane)
+                escapeTargetLane = requestedLane;
+
+            if (escapeLane != escapeTargetLane)
+            {
+                firstOpenLane = escapeLane;
+                secondOpenLane = escapeLane + System.Math.Sign(escapeTargetLane - escapeLane);
+                escapeLane = secondOpenLane;
+                return;
+            }
+
+            firstOpenLane = escapeLane;
+        }
+
+        internal float ResolveMotorTargetX(float requestedX, float minimumZ, float maximumZ)
+        {
+            int requestedLane = Mathf.Clamp(Mathf.RoundToInt(requestedX / LaneWidth), -1, 1);
+            if (!IsLaneReserved(requestedLane, minimumZ, maximumZ)) return requestedLane * LaneWidth;
+            int bestLane = requestedLane;
+            int bestDistance = int.MaxValue;
+            for (int lane = -1; lane <= 1; lane++)
+            {
+                if (IsLaneReserved(lane, minimumZ, maximumZ)) continue;
+                int distance = Mathf.Abs(lane - requestedLane);
+                if (distance >= bestDistance) continue;
+                bestLane = lane;
+                bestDistance = distance;
+            }
+            return bestLane * LaneWidth;
         }
 
         internal void SpawnSameDirectionTraffic(int lane, float worldZ)
@@ -765,30 +816,33 @@ namespace EmergencyRoad
                 return;
             }
 
-            int openLane = Random.Range(-1, 2);
+            int requestedOpenLane = Random.Range(-1, 2);
             float obstacleZ = Random.Range(-EmergencyRoadGame.ChunkSpacing * .22f, EmergencyRoadGame.ChunkSpacing * .22f);
             EmergencyRoadGameplaySettings tuning = owner.Settings;
             float doubleBlockChance = Mathf.Lerp(tuning != null ? tuning.twoLaneBlockChanceAtStart : .58f,
                 tuning != null ? tuning.twoLaneBlockChanceAtMaxSpeed : .32f, owner.Difficulty01);
             float movingTrafficChance = tuning != null ? tuning.sameDirectionTrafficChance : .28f;
+            bool wantsTwoLaneBlock = Random.value < doubleBlockChance;
+            owner.PlanEscapeLanes(requestedOpenLane, wantsTwoLaneBlock, out int openLane, out int transitionLane);
+            SpawnRouteMarker(openLane, obstacleZ);
+            if (transitionLane >= -1) SpawnRouteMarker(transitionLane, obstacleZ);
 
             if (catalog.trafficVehicles.Count > 0 && Random.value < movingTrafficChance)
             {
                 int trafficLane = openLane;
-                while (trafficLane == openLane) trafficLane = Random.Range(-1, 2);
+                while (trafficLane == openLane || trafficLane == transitionLane) trafficLane = Random.Range(-1, 2);
                 owner.SpawnSameDirectionTraffic(trafficLane, root.transform.position.z + obstacleZ);
                 return;
             }
 
-            if (Random.value < doubleBlockChance)
+            if (wantsTwoLaneBlock && transitionLane < -1)
             {
-                SpawnRouteMarker(openLane, obstacleZ);
                 for (int lane = -1; lane <= 1; lane++) if (lane != openLane) SpawnObstacle(lane, obstacleZ);
             }
             else
             {
-                int blockedLane = openLane;
-                while (blockedLane == openLane) blockedLane = Random.Range(-1, 2);
+                int blockedLane = Random.Range(-1, 2);
+                while (blockedLane == openLane || blockedLane == transitionLane) blockedLane = Random.Range(-1, 2);
                 SpawnObstacle(blockedLane, obstacleZ);
             }
         }
@@ -907,6 +961,7 @@ namespace EmergencyRoad
             EmergencyRoadGameplaySettings tuning = owner.Settings;
             float worldZ = root.transform.position.z + 8f;
             int lane = FindCrossTrafficBlockLane(worldZ, left, tuning != null ? tuning.crossTrafficRouteLookDistance : 24f);
+            if (lane < -1) return;
 
             GameObject holder = Object.Instantiate(owner.CrossTrafficHazardPrefab, root.transform, false);
             holder.transform.localPosition = new Vector3(left ? -12f : 12f, .45f, 8f);
@@ -928,7 +983,7 @@ namespace EmergencyRoad
             EmergencyRoadGame.DisableVisualColliders(visual);
             Vector2 size = tuning != null ? tuning.stoppedVehicleSize : new Vector2(2.18f, 4.05f);
             EmergencyRoadGame.FitVehicle(visual, size.x, size.y);
-            visual.transform.localRotation = Quaternion.Euler(0, left ? 90 : -90, 0);
+            visual.transform.localRotation = Quaternion.Euler(0, left ? -90 : 90, 0);
 
             hitbox.isTrigger = true;
             hitbox.center = new Vector3(0, .72f, 0);
@@ -944,12 +999,11 @@ namespace EmergencyRoad
         private int FindCrossTrafficBlockLane(float worldZ, bool fromLeft, float routeLookDistance)
         {
             int[] priority = fromLeft ? new[] { -1, 0, 1 } : new[] { 1, 0, -1 };
+            float protectedDistance = Mathf.Max(routeLookDistance, EmergencyRoadGame.ChunkSpacing * 2.25f);
             Physics.SyncTransforms();
             foreach (int lane in priority)
-                if (!owner.IsLaneReserved(lane, worldZ - routeLookDistance, worldZ + routeLookDistance) && !IsHazardLaneOccupied(lane, worldZ)) return lane;
-            foreach (int lane in priority)
-                if (!owner.IsLaneReserved(lane, worldZ - routeLookDistance, worldZ + routeLookDistance)) return lane;
-            return priority[0];
+                if (!owner.IsLaneReserved(lane, worldZ - protectedDistance, worldZ + protectedDistance) && !IsHazardLaneOccupied(lane, worldZ)) return lane;
+            return -99;
         }
 
         private static bool IsHazardLaneOccupied(int lane, float worldZ)

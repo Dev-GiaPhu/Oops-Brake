@@ -214,7 +214,7 @@ namespace EmergencyRoad.Editor
                 garageModel.transform.localScale = Vector3.one * 100f;
             }
 
-            GameObject turntable = new("Be Xoay", typeof(MenuTurntable));
+            GameObject turntable = new("Khu Vuc Trung Bay");
             turntable.transform.SetParent(garageRoot.transform, false);
             GameObject vehicleSpawn = new("Vi Tri Spawn Xe");
             vehicleSpawn.transform.SetParent(turntable.transform, false);
@@ -222,6 +222,7 @@ namespace EmergencyRoad.Editor
 
             GameObject cameraObject = CreateCamera(null, "Camera Menu", new Vector3(10f, 5.2f, -10f), Vector3.zero);
             cameraObject.transform.LookAt(new Vector3(0f, 1.2f, 0f));
+            cameraObject.AddComponent<EmergencyRoadMenuCameraOrbit>().Configure(vehicleSpawn.transform);
             CreateLight(null, "Anh Sang Chinh", new Vector3(45f, -35f, 0f));
             CreatePostFx(null, catalog).name = "Hau Ky";
 

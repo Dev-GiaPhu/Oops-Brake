@@ -2865,10 +2865,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 430e8ecb0149ca7439ce6d11ee051328, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1520820098}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 430e8ecb0149ca7439ce6d11ee051328, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1627104888}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 430e8ecb0149ca7439ce6d11ee051328, type: 3}
 --- !u!1 &936379009
 GameObject:
@@ -5283,19 +5280,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 430e8ecb0149ca7439ce6d11ee051328, type: 3}
   m_PrefabInstance: {fileID: 922578468}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1627104888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627104886}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec0152a901c94ca41b4349dd1e5c5fd0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rotationSpeed: 0
 --- !u!1 &1633640318
 GameObject:
   m_ObjectHideFlags: 0
@@ -6519,6 +6503,7 @@ GameObject:
   - component: {fileID: 2061855437}
   - component: {fileID: 2061855436}
   - component: {fileID: 2061855435}
+  - component: {fileID: 2061855439}
   m_Layer: 0
   m_Name: Camera Menu
   m_TagString: MainCamera
@@ -6909,6 +6894,25 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 94f14d7628ce3e24c87766f5d86b0ff9, type: 3}
+--- !u!114 &2061855439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2061855434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44fc52df413d42ab83b83bfa4bc53c2d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  vehicleCenter: {fileID: 1520820098}
+  draggableScreenWidth: 0.75
+  horizontalLimit: 24
+  verticalLimit: 10
+  sensitivity: 0.11
+  returnDelay: 2.5
+  returnSmoothTime: 0.65
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
