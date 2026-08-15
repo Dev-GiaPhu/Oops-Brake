@@ -980,12 +980,13 @@ namespace EmergencyRoad
             if (owner.CrossTrafficHazardPrefab == null || catalog.trafficVehicles.Count == 0) return;
             bool left = Random.value < .5f;
             EmergencyRoadGameplaySettings tuning = owner.Settings;
-            float worldZ = root.transform.position.z + 8f;
+            float branchLaneZ = left ? -EmergencyRoadGame.LaneWidth : EmergencyRoadGame.LaneWidth;
+            float worldZ = root.transform.position.z + branchLaneZ;
             int lane = FindCrossTrafficBlockLane(worldZ, left, tuning != null ? tuning.crossTrafficRouteLookDistance : 24f);
             if (lane < -1) return;
 
             GameObject holder = Object.Instantiate(owner.CrossTrafficHazardPrefab, root.transform, false);
-            holder.transform.localPosition = new Vector3(left ? -12f : 12f, .45f, 8f);
+            holder.transform.localPosition = new Vector3(left ? -12f : 12f, .05f, branchLaneZ);
             holder.transform.localRotation = Quaternion.identity;
             RoadHazard hazard = holder.GetComponent<RoadHazard>();
             BoxCollider hitbox = holder.GetComponent<BoxCollider>();
