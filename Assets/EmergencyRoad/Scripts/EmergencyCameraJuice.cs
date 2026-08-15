@@ -8,6 +8,7 @@ namespace EmergencyRoad
         [SerializeField] private Camera controlledCamera;
         [Header("VIEW SWITCH")]
         [SerializeField, Min(.15f)] private float transitionDuration = .45f;
+        [SerializeField] private bool mirrorsEnabled = true;
         [SerializeField] private bool debugViewSwitch = true;
 
         private Transform target;
@@ -51,7 +52,7 @@ namespace EmergencyRoad
                 cameraTransform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
                 if (controlledCamera != null) controlledCamera.fieldOfView = vehicleRig.FirstPersonFieldOfView;
             }
-            mirrorView?.SetVisible(firstPerson, true);
+            mirrorView?.SetVisible(firstPerson && mirrorsEnabled, true);
             if (debugViewSwitch)
             {
                 string rigName = vehicleRig != null ? HierarchyPath(vehicleRig.transform) : "NULL";
@@ -100,6 +101,14 @@ namespace EmergencyRoad
             return true;
         }
 
+        public bool ToggleMirrors()
+        {
+            if (!IsFirstPerson || mirrorView == null) return false;
+            mirrorsEnabled = !mirrorsEnabled;
+            mirrorView.SetVisible(mirrorsEnabled);
+            return true;
+        }
+
         private void ResolveSpawnedVehicleRig()
         {
             // The playable vehicle is instantiated at runtime. Reconnect only to that
@@ -131,7 +140,7 @@ namespace EmergencyRoad
             }
             EmergencyRoadProfile.Current.firstPersonView = toFirstPerson;
             EmergencyRoadProfile.Save();
-            mirrorView?.SetVisible(toFirstPerson);
+            mirrorView?.SetVisible(toFirstPerson && mirrorsEnabled);
         }
 
         private void LateUpdate()

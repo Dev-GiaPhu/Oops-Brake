@@ -271,6 +271,8 @@ namespace EmergencyRoad
                     Debug.Log($"[Camera Debug][Input] C pressed frame={Time.frameCount} switched={switched} " +
                               $"gameplayCamera={(gameplayCamera != null ? gameplayCamera.name : "NULL")}", this);
                 }
+                if (Keyboard.current.vKey.wasPressedThisFrame && !ended)
+                    cameraJuice.ToggleMirrors();
                 if (Keyboard.current.escapeKey.wasPressedThisFrame && !ended)
                     TogglePause();
             }
