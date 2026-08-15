@@ -19,14 +19,23 @@ namespace EmergencyRoad
         [SerializeField, Min(1f)] private float returnSharpness = 8f;
 
         private Quaternion steeringBaseRotation;
+        private Transform stableVehicleRoot;
+        private Vector3 stableCameraLocalPosition;
+        private Quaternion stableCameraLocalRotation;
         private float targetSteering;
         private float currentSteering;
 
         public bool HasCameraPivot => cameraPivot != null;
         public Transform CameraPivot => cameraPivot;
+        public Vector3 StableCameraPosition => stableVehicleRoot != null
+            ? stableVehicleRoot.TransformPoint(stableCameraLocalPosition)
+            : cameraPivot.position;
+        public Quaternion StableCameraRotation => stableVehicleRoot != null
+            ? stableVehicleRoot.rotation * stableCameraLocalRotation
+            : cameraPivot.rotation;
         public float FirstPersonFieldOfView => firstPersonFieldOfView;
         public Vector3 LeftWindowEntryPosition => cameraPivot != null
-            ? cameraPivot.TransformPoint(leftWindowEntryOffset)
+            ? StableCameraPosition + StableCameraRotation * leftWindowEntryOffset
             : transform.position;
 
         private void Awake()
@@ -39,13 +48,21 @@ namespace EmergencyRoad
             targetSteering = Mathf.Clamp(normalized, -1f, 1f);
         }
 
+        public void BindStableCameraReference(Transform vehicleRoot)
+        {
+            if (cameraPivot == null || vehicleRoot == null) return;
+            stableVehicleRoot = vehicleRoot;
+            stableCameraLocalPosition = vehicleRoot.InverseTransformPoint(cameraPivot.position);
+            stableCameraLocalRotation = Quaternion.Inverse(vehicleRoot.rotation) * cameraPivot.rotation;
+        }
+
         private void LateUpdate()
         {
             if (steeringWheel == null) return;
             float sharpness = Mathf.Abs(targetSteering) > .01f ? steeringSharpness : returnSharpness;
             currentSteering = Mathf.Lerp(currentSteering, targetSteering, 1f - Mathf.Exp(-sharpness * Time.deltaTime));
-            Vector3 axis = steeringLocalAxis.sqrMagnitude > .001f ? steeringLocalAxis.normalized : Vector3.forward;
-            steeringWheel.localRotation = steeringBaseRotation * Quaternion.AngleAxis(-currentSteering * maximumSteeringAngle, axis);
+            Vector3 axis = steeringLocalAxis.sqrMagnitude > .001f ? steeringLocalAxis.normalized : Vector3.up;
+            steeringWheel.localRotation = steeringBaseRotation * Quaternion.AngleAxis(currentSteering * maximumSteeringAngle, axis);
         }
 
         private void OnDisable()

@@ -47,6 +47,7 @@ namespace EmergencyRoad
             baseScale = visual.localScale;
             baseLocalPosition = visual.localPosition;
             firstPersonRig = visual.GetComponentInChildren<EmergencyVehicleFirstPersonRig>(true);
+            if (firstPersonRig != null) firstPersonRig.BindStableCameraReference(transform);
         }
 
         private void Update()

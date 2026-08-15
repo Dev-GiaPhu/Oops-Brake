@@ -10,6 +10,8 @@ namespace EmergencyRoad
         [Header("VIEW SWITCH")]
         [SerializeField] private Key switchViewKey = Key.C;
         [SerializeField, Min(.15f)] private float transitionDuration = .45f;
+        [SerializeField, Min(1f)] private float firstPersonPositionSharpness = 13f;
+        [SerializeField, Min(1f)] private float firstPersonRotationSharpness = 16f;
 
         private Transform target;
         private EmergencyVehicleFirstPersonRig vehicleRig;
@@ -103,7 +105,10 @@ namespace EmergencyRoad
             }
             if (firstPerson && CanSwitchView)
             {
-                transform.SetPositionAndRotation(vehicleRig.CameraPivot.position, vehicleRig.CameraPivot.rotation);
+                transform.position = Vector3.Lerp(transform.position, vehicleRig.StableCameraPosition,
+                    1f - Mathf.Exp(-firstPersonPositionSharpness * dt));
+                transform.rotation = Quaternion.Slerp(transform.rotation, vehicleRig.StableCameraRotation,
+                    1f - Mathf.Exp(-firstPersonRotationSharpness * dt));
                 if (controlledCamera != null)
                     controlledCamera.fieldOfView = Mathf.Lerp(controlledCamera.fieldOfView, vehicleRig.FirstPersonFieldOfView, 1f - Mathf.Exp(-10f * dt));
                 return;
@@ -117,8 +122,8 @@ namespace EmergencyRoad
             float t = Mathf.Clamp01(transitionTime / Mathf.Max(.15f, transitionDuration));
             float smooth = t * t * (3f - 2f * t);
             Vector3 thirdTarget = ThirdPersonTargetPosition;
-            Vector3 destination = transitionToFirstPerson ? vehicleRig.CameraPivot.position : thirdTarget;
-            Quaternion destinationRotation = transitionToFirstPerson ? vehicleRig.CameraPivot.rotation : baseRotation;
+            Vector3 destination = transitionToFirstPerson ? vehicleRig.StableCameraPosition : thirdTarget;
+            Quaternion destinationRotation = transitionToFirstPerson ? vehicleRig.StableCameraRotation : baseRotation;
             Vector3 window = vehicleRig.LeftWindowEntryPosition;
             Vector3 controlA = Vector3.Lerp(transitionStartPosition, window, .58f);
             Vector3 controlB = window;
