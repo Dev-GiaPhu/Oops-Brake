@@ -94,6 +94,7 @@ namespace EmergencyRoad
 
         public bool ToggleView()
         {
+            if (!CanSwitchView) ResolveSpawnedVehicleRig();
             if (crashView || !CanSwitchView)
             {
                 Debug.LogWarning("[Emergency Road] Không thể đổi góc nhìn: xe hiện tại chưa có Camera Pivot hợp lệ.", this);
@@ -102,6 +103,19 @@ namespace EmergencyRoad
 
             BeginViewTransition(!IsFirstPerson);
             return true;
+        }
+
+        private void ResolveSpawnedVehicleRig()
+        {
+            // The playable vehicle is instantiated at runtime. Reconnect only to that
+            // instance, never to the editable/preview vehicle that may also be in scene.
+            GameObject playerVisual = GameObject.Find("Player Emergency Vehicle");
+            if (playerVisual == null) return;
+            EmergencyVehicleFirstPersonRig rig =
+                playerVisual.GetComponentInChildren<EmergencyVehicleFirstPersonRig>(true);
+            if (rig == null || !rig.HasCameraPivot) return;
+            vehicleRig = rig;
+            rig.BindStableCameraReference(target);
         }
 
         private void BeginViewTransition(bool toFirstPerson)

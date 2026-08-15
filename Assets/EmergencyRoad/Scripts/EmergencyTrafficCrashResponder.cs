@@ -145,10 +145,15 @@ namespace EmergencyRoad
                 transform.SetPositionAndRotation(previousRootPosition, previousRootRotation);
             if (body != null)
             {
+                // A kinematic Rigidbody cannot accept velocity assignments. Clear any
+                // remaining motion while it is still dynamic, then freeze it in place.
+                if (!body.isKinematic)
+                {
+                    body.linearVelocity = Vector3.zero;
+                    body.angularVelocity = Vector3.zero;
+                }
                 body.isKinematic = true;
                 body.useGravity = false;
-                body.linearVelocity = Vector3.zero;
-                body.angularVelocity = Vector3.zero;
                 body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             }
 
