@@ -183,6 +183,7 @@ namespace EmergencyRoad
             FitVehicle(visual, 2.2f, 4.2f, false);
 
             player.Initialize(visual.transform, this, catalog.HornForVehicle(selected), selected);
+            cameraJuice.ConfigureCamera(gameplayCamera);
             cameraJuice.Initialize(playerRoot, visual.GetComponentInChildren<EmergencyVehicleFirstPersonRig>(true), sceneView.firstPersonMirrors);
 
         }

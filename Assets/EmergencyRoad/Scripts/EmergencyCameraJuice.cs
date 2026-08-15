@@ -27,6 +27,7 @@ namespace EmergencyRoad
         private float transitionStartFov;
         public bool CanSwitchView => vehicleRig != null && vehicleRig.HasCameraPivot;
         public bool IsFirstPerson => transitioning ? transitionToFirstPerson : firstPerson;
+        private Transform CameraTransform => controlledCamera != null ? controlledCamera.transform : transform;
 
         public void ConfigureCamera(Camera camera) => controlledCamera = camera;
 
@@ -39,13 +40,14 @@ namespace EmergencyRoad
             target = value;
             vehicleRig = rig;
             mirrorView = mirrors;
-            basePosition = transform.position;
-            baseRotation = transform.rotation;
+            Transform cameraTransform = CameraTransform;
+            basePosition = cameraTransform.position;
+            baseRotation = cameraTransform.rotation;
             firstPerson = EmergencyRoadProfile.Current.firstPersonView && CanSwitchView;
             transitioning = false;
             if (firstPerson)
             {
-                transform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
+                cameraTransform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
                 if (controlledCamera != null) controlledCamera.fieldOfView = vehicleRig.FirstPersonFieldOfView;
             }
             mirrorView?.SetVisible(firstPerson, true);
@@ -101,8 +103,8 @@ namespace EmergencyRoad
             transitionToFirstPerson = toFirstPerson;
             transitioning = true;
             transitionTime = 0f;
-            transitionStartPosition = transform.position;
-            transitionStartRotation = transform.rotation;
+            transitionStartPosition = CameraTransform.position;
+            transitionStartRotation = CameraTransform.rotation;
             transitionStartFov = controlledCamera != null ? controlledCamera.fieldOfView : 58f;
             EmergencyRoadProfile.Current.firstPersonView = toFirstPerson;
             EmergencyRoadProfile.Save();
@@ -125,7 +127,7 @@ namespace EmergencyRoad
             }
             if (firstPerson && CanSwitchView)
             {
-                transform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
+                CameraTransform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
                 if (controlledCamera != null)
                     controlledCamera.fieldOfView = Mathf.Lerp(controlledCamera.fieldOfView, vehicleRig.FirstPersonFieldOfView, 1f - Mathf.Exp(-10f * dt));
                 return;
@@ -144,8 +146,8 @@ namespace EmergencyRoad
             Vector3 window = vehicleRig.LeftWindowEntryPosition;
             Vector3 controlA = Vector3.Lerp(transitionStartPosition, window, .58f);
             Vector3 controlB = window;
-            transform.position = CubicBezier(transitionStartPosition, controlA, controlB, destination, smooth);
-            transform.rotation = Quaternion.Slerp(transitionStartRotation, destinationRotation, smooth);
+            CameraTransform.position = CubicBezier(transitionStartPosition, controlA, controlB, destination, smooth);
+            CameraTransform.rotation = Quaternion.Slerp(transitionStartRotation, destinationRotation, smooth);
             if (controlledCamera != null)
             {
                 float targetFov = transitionToFirstPerson ? vehicleRig.FirstPersonFieldOfView : ThirdPersonFieldOfView;
@@ -164,23 +166,25 @@ namespace EmergencyRoad
                 shakeTime -= dt;
                 follow += (Vector3)Random.insideUnitCircle * shakeStrength * (shakeTime / .42f);
             }
-            transform.position = Vector3.Lerp(transform.position, follow, 1f - Mathf.Exp(-5f * dt));
-            transform.rotation = Quaternion.Slerp(transform.rotation, baseRotation, 1f - Mathf.Exp(-7f * dt));
+            Transform cameraTransform = CameraTransform;
+            cameraTransform.position = Vector3.Lerp(cameraTransform.position, follow, 1f - Mathf.Exp(-5f * dt));
+            cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, baseRotation, 1f - Mathf.Exp(-7f * dt));
             if (controlledCamera != null)
                 controlledCamera.fieldOfView = Mathf.Lerp(controlledCamera.fieldOfView, ThirdPersonFieldOfView, 1f - Mathf.Exp(-3f * dt));
         }
 
         private void UpdateCrashView(float dt)
         {
+            Transform cameraTransform = CameraTransform;
             Vector3 desired = target.position + crashOffset;
             if (shakeTime > 0)
             {
                 shakeTime -= dt;
                 desired += (Vector3)Random.insideUnitCircle * shakeStrength * Mathf.Clamp01(shakeTime / .48f);
             }
-            transform.position = Vector3.Lerp(transform.position, desired, 1f - Mathf.Exp(-3.5f * dt));
+            cameraTransform.position = Vector3.Lerp(cameraTransform.position, desired, 1f - Mathf.Exp(-3.5f * dt));
             Vector3 aim = target.position + Vector3.left * 1.65f + Vector3.up * .75f;
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(aim - transform.position, Vector3.up), 1f - Mathf.Exp(-4f * dt));
+            cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, Quaternion.LookRotation(aim - cameraTransform.position, Vector3.up), 1f - Mathf.Exp(-4f * dt));
             if (controlledCamera != null) controlledCamera.fieldOfView = Mathf.Lerp(controlledCamera.fieldOfView, 49f, 1f - Mathf.Exp(-3f * dt));
         }
 
