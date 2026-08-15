@@ -20,6 +20,7 @@ namespace EmergencyRoad
         private Rigidbody explodedBody;
         private bool compensateMapScroll;
         private float debrisPhysicsAge;
+        private Vector3 previousPosition;
 
         public void Initialize(float x, EmergencyRoadGame owner, Transform playerTransform, Camera camera)
         {
@@ -31,11 +32,13 @@ namespace EmergencyRoad
             EmergencyRoadGameplaySettings tuning = owner != null ? owner.Settings : null;
             speed = tuning != null ? tuning.motorSpeed : 34f;
             visualRenderers = GetComponentsInChildren<Renderer>(true);
+            previousPosition = transform.position;
         }
 
         private void Update()
         {
             if (exploded || game == null) return;
+            previousPosition = transform.position;
             Vector3 p = transform.position;
             p.z += speed * Time.deltaTime;
             if (!pathLocked && player != null)
@@ -107,15 +110,22 @@ namespace EmergencyRoad
             {
                 hasBeenInsideCamera = true;
                 game.Crash(transform.position - other.transform.position);
-                StartCoroutine(Explode(true));
+                StartCoroutine(Explode(true, null));
                 return;
             }
-            if (other.GetComponentInParent<RoadHazard>() != null) StartCoroutine(Explode(false));
+            if (other.GetComponentInParent<RoadHazard>() != null) StartCoroutine(Explode(false, other));
         }
 
-        private IEnumerator Explode(bool preserveAfterPlayerHit)
+        private IEnumerator Explode(bool preserveAfterPlayerHit, Collider impactedCollider)
         {
             exploded = true;
+            if (!preserveAfterPlayerHit && impactedCollider != null)
+            {
+                transform.position = previousPosition;
+                impactedCollider.enabled = true;
+                impactedCollider.isTrigger = false;
+                Physics.SyncTransforms();
+            }
             BoxCollider physicsCollider = GetComponent<BoxCollider>();
             foreach (Collider collider in GetComponentsInChildren<Collider>(true))
             {
@@ -144,9 +154,9 @@ namespace EmergencyRoad
                 body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
                 body.interpolation = RigidbodyInterpolation.Interpolate;
                 compensateMapScroll = !preserveAfterPlayerHit && game != null;
-                float mapSpeed = compensateMapScroll ? game.CurrentSpeed : 0f;
                 debrisPhysicsAge = 0f;
-                body.linearVelocity = new Vector3(Random.Range(-1.25f, 1.25f), 3.6f, 6.5f - mapSpeed);
+                float impactForwardMomentum = preserveAfterPlayerHit ? 6.5f : Mathf.Max(3f, speed * .18f);
+                body.linearVelocity = new Vector3(Random.Range(-1.25f, 1.25f), 3.6f, impactForwardMomentum);
                 body.angularVelocity = new Vector3(Random.Range(2.2f, 4.2f), Random.Range(-2.2f, 2.2f), Random.Range(-4.2f, 4.2f));
                 explodedBody = body;
             }
