@@ -10,8 +10,6 @@ namespace EmergencyRoad
         [Header("VIEW SWITCH")]
         [SerializeField] private Key switchViewKey = Key.C;
         [SerializeField, Min(.15f)] private float transitionDuration = .45f;
-        [SerializeField, Min(1f)] private float firstPersonPositionSharpness = 13f;
-        [SerializeField, Min(1f)] private float firstPersonRotationSharpness = 16f;
 
         private Transform target;
         private EmergencyVehicleFirstPersonRig vehicleRig;
@@ -105,10 +103,7 @@ namespace EmergencyRoad
             }
             if (firstPerson && CanSwitchView)
             {
-                transform.position = Vector3.Lerp(transform.position, vehicleRig.StableCameraPosition,
-                    1f - Mathf.Exp(-firstPersonPositionSharpness * dt));
-                transform.rotation = Quaternion.Slerp(transform.rotation, vehicleRig.StableCameraRotation,
-                    1f - Mathf.Exp(-firstPersonRotationSharpness * dt));
+                transform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
                 if (controlledCamera != null)
                     controlledCamera.fieldOfView = Mathf.Lerp(controlledCamera.fieldOfView, vehicleRig.FirstPersonFieldOfView, 1f - Mathf.Exp(-10f * dt));
                 return;

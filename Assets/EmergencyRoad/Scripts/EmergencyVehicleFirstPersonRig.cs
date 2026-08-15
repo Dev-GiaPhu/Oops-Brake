@@ -20,19 +20,19 @@ namespace EmergencyRoad
 
         private Quaternion steeringBaseRotation;
         private Transform stableVehicleRoot;
-        private Vector3 stableCameraLocalPosition;
-        private Quaternion stableCameraLocalRotation;
-        private Quaternion visualBaseRotationRelativeToRoot;
+        private Vector3 stableVisualOriginLocalPosition;
+        private Vector3 cameraOffsetFromVisualOrigin;
+        private Quaternion cameraRotationRelativeToVisual;
         private float targetSteering;
         private float currentSteering;
 
         public bool HasCameraPivot => cameraPivot != null;
         public Transform CameraPivot => cameraPivot;
         public Vector3 StableCameraPosition => stableVehicleRoot != null
-            ? stableVehicleRoot.TransformPoint(CurrentVisualRotationDelta * stableCameraLocalPosition)
+            ? stableVehicleRoot.TransformPoint(stableVisualOriginLocalPosition) + transform.rotation * cameraOffsetFromVisualOrigin
             : cameraPivot.position;
         public Quaternion StableCameraRotation => stableVehicleRoot != null
-            ? stableVehicleRoot.rotation * CurrentVisualRotationDelta * stableCameraLocalRotation
+            ? transform.rotation * cameraRotationRelativeToVisual
             : cameraPivot.rotation;
         public float FirstPersonFieldOfView => firstPersonFieldOfView;
         public Vector3 LeftWindowEntryPosition => cameraPivot != null
@@ -53,18 +53,9 @@ namespace EmergencyRoad
         {
             if (cameraPivot == null || vehicleRoot == null) return;
             stableVehicleRoot = vehicleRoot;
-            stableCameraLocalPosition = vehicleRoot.InverseTransformPoint(cameraPivot.position);
-            stableCameraLocalRotation = Quaternion.Inverse(vehicleRoot.rotation) * cameraPivot.rotation;
-            visualBaseRotationRelativeToRoot = Quaternion.Inverse(vehicleRoot.rotation) * transform.rotation;
-        }
-
-        private Quaternion CurrentVisualRotationDelta
-        {
-            get
-            {
-                Quaternion currentRelative = Quaternion.Inverse(stableVehicleRoot.rotation) * transform.rotation;
-                return currentRelative * Quaternion.Inverse(visualBaseRotationRelativeToRoot);
-            }
+            stableVisualOriginLocalPosition = vehicleRoot.InverseTransformPoint(transform.position);
+            cameraOffsetFromVisualOrigin = Quaternion.Inverse(transform.rotation) * (cameraPivot.position - transform.position);
+            cameraRotationRelativeToVisual = Quaternion.Inverse(transform.rotation) * cameraPivot.rotation;
         }
 
         private void LateUpdate()
