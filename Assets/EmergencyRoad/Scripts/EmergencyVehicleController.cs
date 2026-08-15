@@ -21,7 +21,6 @@ namespace EmergencyRoad
         private Vector3 baseLocalPosition;
         private double nextHornDspTime;
         private EmergencyVehicleFirstPersonRig firstPersonRig;
-        private bool viewKeyWasHeld;
 
         public int CurrentLane => lane;
         public bool HornHeld { get; private set; }
@@ -60,9 +59,6 @@ namespace EmergencyRoad
             }
             if (Keyboard.current.aKey.wasPressedThisFrame) Shift(-1);
             if (Keyboard.current.dKey.wasPressedThisFrame) Shift(1);
-            bool viewKeyHeld = Keyboard.current.cKey.isPressed;
-            if (viewKeyHeld && !viewKeyWasHeld) game.ToggleCameraView();
-            viewKeyWasHeld = viewKeyHeld;
             HornHeld = Keyboard.current.spaceKey.isPressed;
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
                 Honk();
@@ -223,7 +219,6 @@ namespace EmergencyRoad
         private void OnDisable()
         {
             HornHeld = false;
-            viewKeyWasHeld = false;
         }
 
         private void EnableHeavyCrashPhysics(Vector3 impactDirection)
