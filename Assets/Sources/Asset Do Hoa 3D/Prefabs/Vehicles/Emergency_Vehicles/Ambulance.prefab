@@ -139,6 +139,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7692165000289135385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1300060915949032323
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5950426215655437212}
+  m_Layer: 0
+  m_Name: camera pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5950426215655437212
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1300060915949032323}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.41700006, y: 2.011, z: 0.899}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1715524737215420195}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1719635883831344536
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,6 +307,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5950426215655437212}
   - {fileID: 4205087187428133810}
   - {fileID: 1764827225723753121}
   - {fileID: 1606180935819937086}
@@ -530,6 +562,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
 --- !u!1 &2607627370277035179
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,6 +807,7 @@ GameObject:
   - component: {fileID: 2528055771141382573}
   - component: {fileID: 1493698371004476936}
   - component: {fileID: 3701494387874585282}
+  - component: {fileID: 8720021356985978162}
   m_Layer: 0
   m_Name: Ambulance
   m_TagString: Untagged
@@ -843,6 +884,26 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8720021356985978162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2908944898091809559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b527eae4383461695c585cf318a2050, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraPivot: {fileID: 5950426215655437212}
+  steeringWheel: {fileID: 8470198352638912561}
+  leftWindowEntryOffset: {x: -1.15, y: 0.08, z: -0.35}
+  firstPersonFieldOfView: 64
+  steeringLocalAxis: {x: 0, y: 1, z: 0}
+  maximumSteeringAngle: 105
+  steeringSharpness: 11
+  returnSharpness: 8
 --- !u!1 &3405766012529367220
 GameObject:
   m_ObjectHideFlags: 0
@@ -6092,6 +6153,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
 --- !u!1 &5888848147950971615
 GameObject:
   m_ObjectHideFlags: 0
@@ -6441,7 +6510,7 @@ Transform:
   m_GameObject: {fileID: 6650096749697072342}
   serializedVersion: 2
   m_LocalRotation: {x: -0.3544539, y: -0, z: -0, w: 0.9350735}
-  m_LocalPosition: {x: -0.50424856, y: 1.7238078, z: 1.4660162}
+  m_LocalPosition: {x: -0.417, y: 1.7238078, z: 1.4660162}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
