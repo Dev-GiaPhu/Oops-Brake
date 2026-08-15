@@ -482,7 +482,7 @@ namespace EmergencyRoad.Editor
         {
             if (AssetDatabase.LoadAssetAtPath<GameObject>(ImpactVfxPath) != null) return;
             GameObject root = new("VehicleImpactVFX");
-            CreateParticle(root.transform, "Fire", catalog.vfxParticleMaterial, new Color(1f, .18f, .015f, 1f), .55f, .42f, 18f, 1.25f);
+            CreateParticle(root.transform, "Fire", catalog.vfxParticleMaterial, new Color(1f, .18f, .015f, 1f), .55f, .22f, 36f, 1.25f, 120);
             CreateParticle(root.transform, "Smoke", catalog.vfxParticleMaterial, new Color(.18f, .18f, .2f, .65f), 1.25f, .7f, 11f, .72f);
             PrefabUtility.SaveAsPrefabAsset(root, ImpactVfxPath);
             Object.DestroyImmediate(root);
@@ -499,12 +499,12 @@ namespace EmergencyRoad.Editor
             main.loop = false;
             main.startLifetime = new ParticleSystem.MinMaxCurve(.55f, 1.05f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(5f, 9f);
-            main.startSize = new ParticleSystem.MinMaxCurve(.25f, .55f);
+            main.startSize = new ParticleSystem.MinMaxCurve(.12f, .28f);
             main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, .08f, .01f), new Color(1f, .85f, .08f));
-            main.maxParticles = 36;
+            main.maxParticles = 72;
             var emission = ps.emission;
             emission.rateOverTime = 0;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0, 26) });
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0, 48) });
             if (catalog.vfxParticleMaterial != null) root.GetComponent<ParticleSystemRenderer>().sharedMaterial = catalog.vfxParticleMaterial;
             ps.Play();
             Light light = root.AddComponent<Light>();
@@ -517,7 +517,7 @@ namespace EmergencyRoad.Editor
             Object.DestroyImmediate(root);
         }
 
-        private static void CreateParticle(Transform parent, string name, Material material, Color color, float lifetime, float size, float rate, float speed)
+        private static void CreateParticle(Transform parent, string name, Material material, Color color, float lifetime, float size, float rate, float speed, int maxParticles = 72)
         {
             GameObject go = new(name, typeof(ParticleSystem));
             go.transform.SetParent(parent, false);
@@ -530,7 +530,7 @@ namespace EmergencyRoad.Editor
             main.startSpeed = speed;
             main.startSize = size;
             main.startColor = color;
-            main.maxParticles = 72;
+            main.maxParticles = maxParticles;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             var emission = ps.emission;
             emission.rateOverTime = rate;

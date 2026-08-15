@@ -21,6 +21,8 @@ namespace EmergencyRoad
         private bool crashed;
         private Vector3 previousCenter;
         private Quaternion previousRotation;
+        private Vector3 previousRootPosition;
+        private Quaternion previousRootRotation;
 
         public bool Crashed => crashed;
 
@@ -45,6 +47,8 @@ namespace EmergencyRoad
             }
             previousCenter = WorldCenter;
             previousRotation = WorldRotation;
+            previousRootPosition = transform.position;
+            previousRootRotation = transform.rotation;
             initialized = true;
         }
 
@@ -65,6 +69,8 @@ namespace EmergencyRoad
             if (!crashed) DetectCurrentOverlap(currentCenter, currentRotation);
             previousCenter = currentCenter;
             previousRotation = currentRotation;
+            previousRootPosition = transform.position;
+            previousRootRotation = transform.rotation;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -103,22 +109,30 @@ namespace EmergencyRoad
         private void TryResolveTrafficImpact(Collider otherCollider)
         {
             if (crashed || otherCollider == null || otherCollider.transform.IsChildOf(transform)) return;
+            RoadHazard otherHazard = otherCollider.GetComponentInParent<RoadHazard>();
+            if (otherHazard == null) return;
             EmergencyTrafficCrashResponder other = otherCollider.GetComponentInParent<EmergencyTrafficCrashResponder>();
-            if (other == null || other == this) return;
+            if (other == this) return;
 
-            Vector3 impactDirection = other.WorldCenter - WorldCenter;
+            Vector3 otherCenter = other != null ? other.WorldCenter : otherCollider.bounds.center;
+            Vector3 impactDirection = otherCenter - WorldCenter;
             if (impactDirection.sqrMagnitude < .001f) impactDirection = transform.right;
+            if (other == null)
+            {
+                Crash(impactDirection, true);
+                return;
+            }
             if (other.crashed)
             {
-                Crash(impactDirection);
+                Crash(impactDirection, true);
                 return;
             }
 
-            Crash(impactDirection);
-            other.Crash(-impactDirection);
+            Crash(impactDirection, true);
+            other.Crash(-impactDirection, true);
         }
 
-        private void Crash(Vector3 impactDirection)
+        private void Crash(Vector3 impactDirection, bool restorePreviousPose = false)
         {
             if (crashed) return;
             crashed = true;
@@ -127,6 +141,8 @@ namespace EmergencyRoad
 
             if (sameDirectionTraffic != null) sameDirectionTraffic.enabled = false;
             if (sideCrossingTraffic != null) sideCrossingTraffic.enabled = false;
+            if (restorePreviousPose)
+                transform.SetPositionAndRotation(previousRootPosition, previousRootRotation);
             if (body != null)
             {
                 body.isKinematic = true;
