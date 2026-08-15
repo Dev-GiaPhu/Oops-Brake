@@ -103,6 +103,7 @@ namespace EmergencyRoad
         public void InitializeAuthoredGame()
         {
             if (initialized) return;
+            ResolveGameplayCameraController();
             if (!ValidateReferences())
             {
                 enabled = false;
@@ -129,6 +130,23 @@ namespace EmergencyRoad
             if (coinSpawner != null) coinSpawner.Configure(this, catalog.coinPrefab);
             if (motorRushDirector != null)
                 motorRushDirector.Configure(this, catalog.motorcyclePrefab);
+        }
+
+        private void ResolveGameplayCameraController()
+        {
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null) return;
+
+            EmergencyCameraJuice mainCameraJuice = mainCamera.GetComponent<EmergencyCameraJuice>();
+            if (mainCameraJuice == null) return;
+
+            if (gameplayCamera != mainCamera || cameraJuice != mainCameraJuice)
+            {
+                Debug.Log($"[Camera Debug][ResolveMainCamera] replaced camera=" +
+                          $"{(gameplayCamera != null ? gameplayCamera.name : "NULL")} with MainCamera={mainCamera.name}", this);
+                gameplayCamera = mainCamera;
+                cameraJuice = mainCameraJuice;
+            }
         }
 
         private bool ValidateReferences()
