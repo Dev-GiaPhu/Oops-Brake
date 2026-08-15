@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bc335b3582d3f2499aeb01205543e23, type: 3}
   m_Name: EmergencyRoadGameplaySettings
   m_EditorClassIdentifier: 
-  startSpeed: 20
-  maxSpeed: 80
-  distanceToMaxSpeed: 1000
-  obstacleGapAtMinimumSpeed: 15
+  startSpeed: 15
+  maxSpeed: 60
+  distanceToMaxSpeed: 3000
+  obstacleGapAtMinimumSpeed: 20
   obstacleGapAtMaximumSpeed: 50
   minimumObstacleReactionTime: 0.75
   twoLaneBlockChanceAtStart: 0.58
