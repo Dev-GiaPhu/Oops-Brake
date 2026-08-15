@@ -129,7 +129,7 @@ MonoBehaviour:
   vfxParticleMaterial: {fileID: 2100000, guid: a4986c20ede3cfa47ace15e2ded20739, type: 2}
   postProcessProfile: {fileID: 11400000, guid: bfbb4584db5366a43aa9eb6b341261f0, type: 2}
   coinPrefab: {fileID: 4009716325937776529, guid: bddde96586ad17d4490632b9a89409b2, type: 3}
-  motorcyclePrefab: {fileID: 8421186050361847512, guid: 95eac6bea15613e40b4a4d0f582c2114, type: 3}
+  motorcyclePrefab: {fileID: 8016535568332569131, guid: 7a9a960214be6bf4cb4b83c8a5f5f85c, type: 3}
   uiFont: {fileID: 11400000, guid: 77aa30ca08fdd4cdd8ec6436a3af94ac, type: 2}
   panelSprite: {fileID: 0}
   buttonSprite: {fileID: 0}
@@ -140,7 +140,7 @@ MonoBehaviour:
   uiClickClip: {fileID: 8300000, guid: 10b4baeb494374a8ab4d9cf01ce42b8d, type: 3}
   coinClip: {fileID: 8300000, guid: 5e6474bfebaa14014b9738d9c6dddcda, type: 3}
   hornClip: {fileID: 8300000, guid: 7f876b175f2594bd08028036f4e2db6c, type: 3}
-  crashClip: {fileID: 8300000, guid: 49df7c0cfeeb144c380fa2e873580219, type: 3}
+  crashClip: {fileID: 8300000, guid: e63dfe43ae39944a79b4b196bec7033a, type: 3}
   roadLength: 7.4645844
   roadHalfWidth: 11.03214
   laneWidth: 5.185106
