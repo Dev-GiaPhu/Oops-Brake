@@ -24,6 +24,7 @@ namespace EmergencyRoad
         private Vector3 dragStartOffset;
         private Vector3 dragStartRight;
         private Quaternion dragStartRotation;
+        private Vector2 previousPointerPosition;
         private float releasedAt = float.NegativeInfinity;
         private bool dragging;
 
@@ -50,6 +51,7 @@ namespace EmergencyRoad
                     dragStartOffset = transform.position - vehicleCenter.position;
                     dragStartRight = transform.right;
                     dragStartRotation = transform.rotation;
+                    previousPointerPosition = mouse.position.ReadValue();
                     yaw = 0f;
                     pitch = 0f;
                     return;
@@ -58,7 +60,9 @@ namespace EmergencyRoad
 
             if (dragging && mouse.leftButton.isPressed)
             {
-                Vector2 delta = mouse.delta.ReadValue();
+                Vector2 pointerPosition = mouse.position.ReadValue();
+                Vector2 delta = pointerPosition - previousPointerPosition;
+                previousPointerPosition = pointerPosition;
                 yaw = Mathf.Clamp(yaw + delta.x * sensitivity, -horizontalLimit, horizontalLimit);
                 pitch = Mathf.Clamp(pitch - delta.y * sensitivity, -verticalLimit, verticalLimit);
                 ApplyOrbit();
