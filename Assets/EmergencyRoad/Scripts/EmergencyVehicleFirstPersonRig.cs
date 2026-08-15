@@ -10,6 +10,7 @@ namespace EmergencyRoad
 
         [Header("CAMERA ENTRY THROUGH LEFT WINDOW")]
         [SerializeField] private Vector3 leftWindowEntryOffset = new(-1.15f, .08f, -.35f);
+        [SerializeField, Min(0f)] private float entryCurveSideClearance = .9f;
         [SerializeField, Range(45f, 90f)] private float firstPersonFieldOfView = 64f;
 
         [Header("STEERING WHEEL")]
@@ -37,6 +38,9 @@ namespace EmergencyRoad
         public float FirstPersonFieldOfView => firstPersonFieldOfView;
         public Vector3 LeftWindowEntryPosition => cameraPivot != null
             ? StableCameraPosition + StableCameraRotation * leftWindowEntryOffset
+            : transform.position;
+        public Vector3 OuterWindowEntryPosition => cameraPivot != null
+            ? LeftWindowEntryPosition + StableCameraRotation * (Vector3.left * entryCurveSideClearance)
             : transform.position;
 
         private void Awake()

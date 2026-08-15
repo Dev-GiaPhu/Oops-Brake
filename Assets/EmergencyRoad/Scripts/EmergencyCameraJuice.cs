@@ -166,9 +166,9 @@ namespace EmergencyRoad
             Vector3 thirdTarget = ThirdPersonTargetPosition;
             Vector3 destination = transitionToFirstPerson ? vehicleRig.StableCameraPosition : thirdTarget;
             Quaternion destinationRotation = transitionToFirstPerson ? vehicleRig.StableCameraRotation : baseRotation;
-            Vector3 window = vehicleRig.LeftWindowEntryPosition;
-            Vector3 controlA = Vector3.Lerp(transitionStartPosition, window, .58f);
-            Vector3 controlB = window;
+            Vector3 outerWindow = vehicleRig.OuterWindowEntryPosition;
+            Vector3 controlA = Vector3.Lerp(transitionStartPosition, outerWindow, .58f);
+            Vector3 controlB = outerWindow;
             CameraTransform.position = CubicBezier(transitionStartPosition, controlA, controlB, destination, smooth);
             CameraTransform.rotation = Quaternion.Slerp(transitionStartRotation, destinationRotation, smooth);
             if (controlledCamera != null)

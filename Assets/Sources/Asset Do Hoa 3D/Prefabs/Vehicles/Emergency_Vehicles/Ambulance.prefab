@@ -1182,6 +1182,7 @@ MonoBehaviour:
   cameraPivot: {fileID: 5950426215655437212}
   steeringWheel: {fileID: 8470198352638912561}
   leftWindowEntryOffset: {x: -1.15, y: 0.08, z: -0.35}
+  entryCurveSideClearance: 0.9
   firstPersonFieldOfView: 64
   steeringLocalAxis: {x: 0, y: 1, z: 0}
   maximumSteeringAngle: 105
