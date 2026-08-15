@@ -61,6 +61,7 @@ namespace EmergencyRoad
         private const float VehicleLength = 4.2f;
         private float nextObstacleDistance = 20f;
         private int nextChunkSequence;
+        private int retainedRearChunkCount;
         private int nextCrossroadSequence;
         private int lastCrossroadSequence = -100;
         private int nextCrossroadRadius = 1;
@@ -195,13 +196,20 @@ namespace EmergencyRoad
             nextCrossroadSequence = Random.Range(min, Mathf.Max(min, max) + 1);
             nextCrossroadRadius = CrossroadRadius(nextCrossroadSequence);
 
-            int chunkCount = Mathf.Clamp(Mathf.CeilToInt(150f / ChunkSpacing) + 3, 12, 28);
-            for (int i = 0; i < chunkCount; i++)
+            int forwardChunkCount = Mathf.Clamp(Mathf.CeilToInt(150f / ChunkSpacing) + 3, 12, 28);
+            retainedRearChunkCount = forwardChunkCount;
+
+            // Keep the same number of authored chunks behind and ahead so rear-view
+            // cameras never reveal the unloaded edge of the endless world.
+            for (int i = -retainedRearChunkCount; i < forwardChunkCount; i++)
             {
-                RoadChunk chunk = RoadChunk.Create(runtimeWorldRoot, catalog, i * ChunkSpacing, ShouldSpawnCrossroad(i), i, this);
+                bool isForwardChunk = i >= 0;
+                int sequence = isForwardChunk ? i : Mathf.Abs(i) % 2;
+                RoadChunk chunk = RoadChunk.Create(runtimeWorldRoot, catalog, i * ChunkSpacing,
+                    isForwardChunk && ShouldSpawnCrossroad(sequence), sequence, this);
                 if (chunk != null) chunks.Add(chunk);
             }
-            nextChunkSequence = chunkCount;
+            nextChunkSequence = forwardChunkCount;
         }
 
         private void BuildHud()
@@ -256,7 +264,8 @@ namespace EmergencyRoad
             for (int i = 0; i < chunks.Count; i++) chunks[i].Move(-dz);
 
             RoadChunk first = chunks[0];
-            if (first.PositionZ < -42f)
+            float rearRecycleBoundary = -(retainedRearChunkCount + .5f) * ChunkSpacing;
+            if (first.PositionZ < rearRecycleBoundary)
             {
                 float lastZ = chunks[^1].PositionZ;
                 chunks.RemoveAt(0);
