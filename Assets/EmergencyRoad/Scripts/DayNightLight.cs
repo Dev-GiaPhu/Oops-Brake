@@ -8,6 +8,10 @@ namespace EmergencyRoad
     {
         [SerializeField] private bool invert;
 
+        [Header("LIGHT MODE")]
+        [SerializeField] private bool useFade = true;
+        [SerializeField] private bool useStartupFlicker;
+
         [Header("SMOOTH LIGHT TRANSITION")]
         [SerializeField, Min(.05f)] private float fadeInDuration = .9f;
         [SerializeField, Min(.05f)] private float fadeOutDuration = .65f;
@@ -51,13 +55,16 @@ namespace EmergencyRoad
             transitionTime += Time.deltaTime;
             if (transitionTime < 0f) return;
 
-            float duration = targetOn ? fadeInDuration : fadeOutDuration;
-            float progress = Mathf.Clamp01(transitionTime / duration);
-            float smoothProgress = progress * progress * (3f - 2f * progress);
+            float fadeDuration = targetOn ? fadeInDuration : fadeOutDuration;
+            float totalDuration = targetOn
+                ? Mathf.Max(useFade ? fadeDuration : 0f, useStartupFlicker ? startupFlickerDuration : 0f)
+                : useFade ? fadeDuration : 0f;
+            float fadeProgress = useFade ? Mathf.Clamp01(transitionTime / fadeDuration) : 1f;
+            float smoothProgress = fadeProgress * fadeProgress * (3f - 2f * fadeProgress);
             float targetIntensity = targetOn ? fullIntensity : 0f;
             float intensity = Mathf.Lerp(startIntensity, targetIntensity, smoothProgress);
 
-            if (targetOn && transitionTime < startupFlickerDuration)
+            if (targetOn && useStartupFlicker && transitionTime < startupFlickerDuration)
             {
                 float fadeFlicker = 1f - transitionTime / Mathf.Max(.001f, startupFlickerDuration);
                 float waveA = Mathf.Sin((transitionTime * flickerSpeed + flickerPhase) * 6.283185f);
@@ -67,7 +74,7 @@ namespace EmergencyRoad
             }
 
             controlledLight.intensity = intensity;
-            if (progress < 1f) return;
+            if (transitionTime < totalDuration) return;
 
             controlledLight.intensity = targetIntensity;
             controlledLight.enabled = targetOn;
@@ -86,6 +93,13 @@ namespace EmergencyRoad
             }
 
             startIntensity = controlledLight.enabled ? controlledLight.intensity : 0f;
+            if (!useFade && (!targetOn || !useStartupFlicker))
+            {
+                controlledLight.intensity = targetOn ? fullIntensity : 0f;
+                controlledLight.enabled = targetOn;
+                transitioning = false;
+                return;
+            }
             transitionTime = targetOn ? -Random.Range(0f, randomStartDelay) : 0f;
             if (targetOn) controlledLight.enabled = true;
             transitioning = true;
