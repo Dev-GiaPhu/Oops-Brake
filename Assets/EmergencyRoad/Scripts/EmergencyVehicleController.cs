@@ -20,6 +20,7 @@ namespace EmergencyRoad
         private Vector3 baseScale;
         private Vector3 baseLocalPosition;
         private double nextHornDspTime;
+        private EmergencyVehicleFirstPersonRig firstPersonRig;
 
         public int CurrentLane => lane;
         public bool HornHeld { get; private set; }
@@ -45,6 +46,7 @@ namespace EmergencyRoad
             targetX = 0f;
             baseScale = visual.localScale;
             baseLocalPosition = visual.localPosition;
+            firstPersonRig = visual.GetComponentInChildren<EmergencyVehicleFirstPersonRig>(true);
         }
 
         private void Update()
@@ -62,6 +64,8 @@ namespace EmergencyRoad
             p.x = Mathf.SmoothDamp(p.x, targetX, ref bump, .12f);
             transform.position = p;
             visual.localRotation = Quaternion.Slerp(visual.localRotation, Quaternion.Euler(0, 0, (targetX - p.x) * -5f), Time.deltaTime * 8f);
+            if (firstPersonRig != null)
+                firstPersonRig.SetSteering((targetX - p.x) / Mathf.Max(.1f, EmergencyRoadGame.LaneWidth * .45f));
         }
 
         private void Shift(int dir)
@@ -195,6 +199,7 @@ namespace EmergencyRoad
         {
             crashed = true;
             HornHeld = false;
+            if (firstPersonRig != null) firstPersonRig.SetSteering(0f);
             EnableHeavyCrashPhysics(impactDirection);
             Vector3 localImpact = transform.InverseTransformDirection(impactDirection.normalized);
             game.SpawnImpactVfx(transform, new Vector3(Mathf.Clamp(localImpact.x, -1f, 1f) * .8f, .72f, Mathf.Clamp(localImpact.z, -1f, 1f) * 1.35f));
