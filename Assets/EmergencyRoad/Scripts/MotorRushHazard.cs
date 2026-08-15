@@ -165,9 +165,11 @@ namespace EmergencyRoad
             exploded = true;
             if (!preserveAfterPlayerHit && impactedCollider != null)
             {
+                // Return to the last safe physics position before releasing the rigidbody.
+                // The road scroll is simulated, so retaining forward motor speed here
+                // would visually carry the bike through the object it just struck.
                 transform.position = previousPosition;
                 impactedCollider.enabled = true;
-                impactedCollider.isTrigger = false;
                 Physics.SyncTransforms();
             }
             BoxCollider physicsCollider = GetComponent<BoxCollider>();
@@ -199,8 +201,10 @@ namespace EmergencyRoad
                 body.interpolation = RigidbodyInterpolation.Interpolate;
                 compensateMapScroll = !preserveAfterPlayerHit && game != null;
                 debrisPhysicsAge = 0f;
-                float impactForwardMomentum = preserveAfterPlayerHit ? 6.5f : Mathf.Max(3f, speed * .18f);
-                body.linearVelocity = new Vector3(Random.Range(-1.25f, 1.25f), 3.6f, impactForwardMomentum);
+                float impactLongitudinalVelocity = preserveAfterPlayerHit
+                    ? 6.5f
+                    : -Mathf.Max(2.5f, game != null ? game.CurrentSpeed * .45f : speed * .2f);
+                body.linearVelocity = new Vector3(Random.Range(-1.25f, 1.25f), 3.6f, impactLongitudinalVelocity);
                 body.angularVelocity = new Vector3(Random.Range(2.2f, 4.2f), Random.Range(-2.2f, 2.2f), Random.Range(-4.2f, 4.2f));
                 explodedBody = body;
             }

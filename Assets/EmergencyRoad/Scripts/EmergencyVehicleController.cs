@@ -59,7 +59,10 @@ namespace EmergencyRoad
             if (Keyboard.current.aKey.wasPressedThisFrame) Shift(-1);
             if (Keyboard.current.dKey.wasPressedThisFrame) Shift(1);
             HornHeld = Keyboard.current.spaceKey.isPressed;
-            if (HornHeld && AudioSettings.dspTime >= nextHornDspTime) Honk();
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+                Honk();
+            else if (HornHeld && AudioSettings.dspTime >= nextHornDspTime)
+                Honk();
             Vector3 p = transform.position;
             p.x = Mathf.SmoothDamp(p.x, targetX, ref bump, .12f);
             transform.position = p;
