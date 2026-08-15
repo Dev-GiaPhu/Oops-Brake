@@ -88,7 +88,40 @@ namespace EmergencyRoad
             view.garage = EmergencyRoadUI.Button(view.gameOverPanel.transform,"BACK TO GARAGE",new(.08f,.45f,.65f,1),new(.14f,.1f),new(.86f,.25f),Vector2.zero,Vector2.zero,null);
             view.pausePanel.SetActive(false);
             view.gameOverPanel.SetActive(false);
+            EnsureFirstPersonMirrors(view);
             return view;
+        }
+
+        public static EmergencyFirstPersonMirrorView EnsureFirstPersonMirrors(EmergencyRoadGameView view)
+        {
+            EmergencyFirstPersonMirrorView mirrors = view.GetComponent<EmergencyFirstPersonMirrorView>();
+            if (mirrors == null) mirrors = view.gameObject.AddComponent<EmergencyFirstPersonMirrorView>();
+            Transform parent = view.transform;
+            Image left = CreateMirror(parent, "Left Rear View Mirror", new Vector2(.025f, .2f), new Vector2(.19f, .39f));
+            Image right = CreateMirror(parent, "Right Rear View Mirror", new Vector2(.81f, .2f), new Vector2(.975f, .39f));
+            mirrors.Configure(left, right);
+            view.firstPersonMirrors = mirrors;
+            return mirrors;
+        }
+
+        private static Image CreateMirror(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax)
+        {
+            Transform existing = parent.Find(name);
+            bool created = existing == null;
+            GameObject go = created ? new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)) : existing.gameObject;
+            go.transform.SetParent(parent, false);
+            Image image = go.GetComponent<Image>();
+            if (created)
+            {
+                RectTransform rect = (RectTransform)go.transform;
+                rect.anchorMin = anchorMin;
+                rect.anchorMax = anchorMax;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+                image.color = new Color(.06f, .12f, .17f, .92f);
+            }
+            image.raycastTarget = false;
+            return image;
         }
 
         private static Canvas CreateCanvas(Transform parent, string name)

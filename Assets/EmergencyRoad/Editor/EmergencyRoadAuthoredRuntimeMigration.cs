@@ -105,7 +105,6 @@ namespace EmergencyRoad.Editor
                 Debug.LogError("[Emergency Road] Menu scene thiếu EmergencyRoadMenuView.");
                 return false;
             }
-
             Transform pivot = FindTransform(scene, "Selected Vehicle Preview (Ambulance)");
             if (pivot == null)
             {
@@ -156,6 +155,8 @@ namespace EmergencyRoad.Editor
                 Debug.LogError("[Emergency Road] Game scene thiếu EmergencyRoadGameView.");
                 return false;
             }
+
+            EmergencyRoadSceneUIFactory.EnsureFirstPersonMirrors(view);
 
             EmergencyRoadAudio audio = EnsureAudioService(scene, root, catalog);
             GameObject systems = FindDirectOrSceneObject(scene, "Gameplay Systems (runtime controller)");

@@ -13,6 +13,7 @@ namespace EmergencyRoad
 
         private Transform target;
         private EmergencyVehicleFirstPersonRig vehicleRig;
+        private EmergencyFirstPersonMirrorView mirrorView;
         private Vector3 basePosition;
         private Quaternion baseRotation;
         private float shakeTime;
@@ -34,14 +35,18 @@ namespace EmergencyRoad
 
         public void Initialize(Transform value) => Initialize(value, null);
 
-        public void Initialize(Transform value, EmergencyVehicleFirstPersonRig rig)
+        public void Initialize(Transform value, EmergencyVehicleFirstPersonRig rig) => Initialize(value, rig, null);
+
+        public void Initialize(Transform value, EmergencyVehicleFirstPersonRig rig, EmergencyFirstPersonMirrorView mirrors)
         {
             target = value;
             vehicleRig = rig;
+            mirrorView = mirrors;
             basePosition = transform.position;
             baseRotation = transform.rotation;
-            firstPerson = false;
+            firstPerson = EmergencyRoadProfile.Current.firstPersonView && CanSwitchView;
             transitioning = false;
+            mirrorView?.SetVisible(firstPerson);
             if (controlledCamera == null)
                 Debug.LogError("[Emergency Road] EmergencyCameraJuice thiếu Camera reference trong Inspector.", this);
         }
@@ -57,6 +62,7 @@ namespace EmergencyRoad
             crashView = true;
             firstPerson = false;
             transitioning = false;
+            mirrorView?.SetVisible(false);
             float side = impactDirection.x >= 0f ? -1f : 1f;
             crashOffset = new Vector3(side * 6.8f, 4.4f, -6.8f);
             Shake(.48f, .28f);
@@ -76,6 +82,9 @@ namespace EmergencyRoad
             transitionStartPosition = transform.position;
             transitionStartRotation = transform.rotation;
             transitionStartFov = controlledCamera != null ? controlledCamera.fieldOfView : 58f;
+            EmergencyRoadProfile.Current.firstPersonView = toFirstPerson;
+            EmergencyRoadProfile.Save();
+            mirrorView?.SetVisible(toFirstPerson);
         }
 
         private void LateUpdate()

@@ -260,6 +260,7 @@ namespace EmergencyRoad
         public float musicVolume = 0.75f;
         public float sfxVolume = 0.9f;
         public bool sideCollisionEnabled = false;
+        public bool firstPersonView;
         public List<int> unlockedVehicles = new() { 0 };
     }
 

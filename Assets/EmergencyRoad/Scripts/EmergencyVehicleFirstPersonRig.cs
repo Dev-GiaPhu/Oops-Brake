@@ -13,7 +13,7 @@ namespace EmergencyRoad
         [SerializeField, Range(45f, 90f)] private float firstPersonFieldOfView = 64f;
 
         [Header("STEERING WHEEL")]
-        [SerializeField] private Vector3 steeringLocalAxis = Vector3.forward;
+        [SerializeField] private Vector3 steeringLocalAxis = Vector3.up;
         [SerializeField, Range(15f, 240f)] private float maximumSteeringAngle = 105f;
         [SerializeField, Min(1f)] private float steeringSharpness = 11f;
         [SerializeField, Min(1f)] private float returnSharpness = 8f;
