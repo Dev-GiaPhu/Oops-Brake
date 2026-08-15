@@ -59,6 +59,7 @@ namespace EmergencyRoad
             }
             if (Keyboard.current.aKey.wasPressedThisFrame) Shift(-1);
             if (Keyboard.current.dKey.wasPressedThisFrame) Shift(1);
+            if (Keyboard.current.cKey.wasPressedThisFrame) game.ToggleCameraView();
             HornHeld = Keyboard.current.spaceKey.isPressed;
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
                 Honk();

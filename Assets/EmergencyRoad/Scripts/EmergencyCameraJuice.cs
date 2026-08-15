@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace EmergencyRoad
 {
@@ -8,7 +7,6 @@ namespace EmergencyRoad
         [Header("SCENE REFERENCES - DRAG DIRECTLY")]
         [SerializeField] private Camera controlledCamera;
         [Header("VIEW SWITCH")]
-        [SerializeField] private Key switchViewKey = Key.C;
         [SerializeField, Min(.15f)] private float transitionDuration = .45f;
 
         private Transform target;
@@ -29,7 +27,7 @@ namespace EmergencyRoad
         private float transitionStartFov;
 
         public bool CanSwitchView => vehicleRig != null && vehicleRig.HasCameraPivot;
-        public bool IsFirstPerson => firstPerson;
+        public bool IsFirstPerson => transitioning ? transitionToFirstPerson : firstPerson;
 
         public void ConfigureCamera(Camera camera) => controlledCamera = camera;
 
@@ -46,7 +44,12 @@ namespace EmergencyRoad
             baseRotation = transform.rotation;
             firstPerson = EmergencyRoadProfile.Current.firstPersonView && CanSwitchView;
             transitioning = false;
-            mirrorView?.SetVisible(firstPerson);
+            if (firstPerson)
+            {
+                transform.SetPositionAndRotation(vehicleRig.StableCameraPosition, vehicleRig.StableCameraRotation);
+                if (controlledCamera != null) controlledCamera.fieldOfView = vehicleRig.FirstPersonFieldOfView;
+            }
+            mirrorView?.SetVisible(firstPerson, true);
             if (controlledCamera == null)
                 Debug.LogError("[Emergency Road] EmergencyCameraJuice thiếu Camera reference trong Inspector.", this);
         }
@@ -68,10 +71,16 @@ namespace EmergencyRoad
             Shake(.48f, .28f);
         }
 
-        private void Update()
+        public bool ToggleView()
         {
-            if (crashView || !CanSwitchView || Keyboard.current == null) return;
-            if (Keyboard.current[switchViewKey].wasPressedThisFrame) BeginViewTransition(!firstPerson);
+            if (crashView || !CanSwitchView)
+            {
+                Debug.LogWarning("[Emergency Road] Không thể đổi góc nhìn: xe hiện tại chưa có Camera Pivot hợp lệ.", this);
+                return false;
+            }
+
+            BeginViewTransition(!IsFirstPerson);
+            return true;
         }
 
         private void BeginViewTransition(bool toFirstPerson)
