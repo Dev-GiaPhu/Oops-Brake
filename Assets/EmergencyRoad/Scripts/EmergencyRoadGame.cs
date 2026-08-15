@@ -56,6 +56,8 @@ namespace EmergencyRoad
         private float distance;
         private int collectedCoins;
         private float speed = 18f;
+        private float baseSpeed = 18f;
+        private float hornBoost01;
         private const float StartSpeed = 18f;
         private const float MaxSpeed = 45f;
         private const float VehicleLength = 4.2f;
@@ -79,6 +81,8 @@ namespace EmergencyRoad
         public bool Ended => ended;
         public float Distance => distance;
         public float CurrentSpeed => speed;
+        public float BaseSpeed => baseSpeed;
+        public float HornBoost01 => hornBoost01;
         public IReadOnlyList<RoadHazard> ActiveHazards => activeHazards;
         public IReadOnlyList<MotorRushHazard> ActiveMotorHazards => activeMotorHazards;
         internal GameObject RoadChunkRootPrefab => roadChunkRootPrefab;
@@ -235,7 +239,15 @@ namespace EmergencyRoad
             float start = Settings != null ? Settings.startSpeed : StartSpeed;
             float max = Settings != null ? Settings.maxSpeed : MaxSpeed;
             float ramp = Settings != null ? Settings.distanceToMaxSpeed : 800f;
-            speed = Mathf.Min(max, start + (max - start) * distance / Mathf.Max(10f, ramp));
+            baseSpeed = Mathf.Min(max, start + (max - start) * distance / Mathf.Max(10f, ramp));
+            EmergencyRoadGameplaySettings tuning = Settings;
+            bool hornHeld = player != null && player.HornHeld;
+            float rampTime = hornHeld
+                ? (tuning != null ? tuning.hornBoostRampUpTime : .75f)
+                : (tuning != null ? tuning.hornBoostRampDownTime : .5f);
+            hornBoost01 = Mathf.MoveTowards(hornBoost01, hornHeld ? 1f : 0f, Time.deltaTime / Mathf.Max(.05f, rampTime));
+            float boostPercent = tuning != null ? tuning.hornSpeedBoostPercent : .1f;
+            speed = baseSpeed * (1f + hornBoost01 * boostPercent);
 
             float dz = speed * Time.deltaTime;
             distance += dz;

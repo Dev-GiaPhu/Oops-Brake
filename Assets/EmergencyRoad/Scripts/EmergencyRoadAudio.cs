@@ -98,11 +98,15 @@ namespace EmergencyRoad
                 sfxSource.PlayOneShot(coinSound, 0.65f);
         }
 
-        public void Horn(AudioClip vehicleHorn = null, int vehicleIndex = -1)
+        public double Horn(AudioClip vehicleHorn = null, int vehicleIndex = -1)
         {
             AudioClip clip = vehicleHorn != null ? vehicleHorn : defaultHornSound;
             if (sfxSource != null && clip != null)
+            {
                 sfxSource.PlayOneShot(clip, 0.85f);
+                return AudioSettings.dspTime + clip.length / Mathf.Max(.01f, Mathf.Abs(sfxSource.pitch));
+            }
+            return AudioSettings.dspTime + .25d;
         }
 
         public void Crash()

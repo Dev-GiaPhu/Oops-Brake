@@ -15,6 +15,9 @@ MonoBehaviour:
   startSpeed: 18
   maxSpeed: 45
   distanceToMaxSpeed: 800
+  hornSpeedBoostPercent: 0.1
+  hornBoostRampUpTime: 0.75
+  hornBoostRampDownTime: 0.5
   gapAtStart: 8.4
   gapAtMaxSpeed: 50
   minimumObstacleReactionTime: 0.75

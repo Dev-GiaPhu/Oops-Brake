@@ -10,6 +10,10 @@ namespace EmergencyRoad
         [Min(1)] public float startSpeed=18f;
         [Min(1)] public float maxSpeed=45f;
         [Min(10)] public float distanceToMaxSpeed=800f;
+        [Header("Horn Speed Boost")]
+        [Range(0f,.5f)] public float hornSpeedBoostPercent=.1f;
+        [Min(.05f), Tooltip("Thời gian giữ Space để đạt đủ mức tăng tốc.")] public float hornBoostRampUpTime=.75f;
+        [Min(.05f), Tooltip("Thời gian sau khi thả Space để trở về tốc độ cơ sở theo quãng đường.")] public float hornBoostRampDownTime=.5f;
         [Header("Obstacle Density")]
         [FormerlySerializedAs("minimumSpeedGapMultiplier"), FormerlySerializedAs("minimumObstacleGap"), FormerlySerializedAs("gapAtStart"), Min(0), Tooltip("Khoảng cách hàng chướng ngại khi xe đang ở tốc độ tối thiểu.")] public float obstacleGapAtMinimumSpeed=28f;
         [FormerlySerializedAs("maximumSpeedGapMultiplier"), FormerlySerializedAs("maximumObstacleGap"), FormerlySerializedAs("gapAtMaxSpeed"), Min(0), Tooltip("Khoảng cách hàng chướng ngại khi xe đạt tốc độ tối đa.")] public float obstacleGapAtMaximumSpeed=70f;

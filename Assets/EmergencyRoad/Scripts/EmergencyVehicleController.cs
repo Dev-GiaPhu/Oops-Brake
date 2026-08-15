@@ -19,8 +19,10 @@ namespace EmergencyRoad
         private Coroutine hornEffect;
         private Vector3 baseScale;
         private Vector3 baseLocalPosition;
+        private double nextHornDspTime;
 
         public int CurrentLane => lane;
+        public bool HornHeld { get; private set; }
 
         public void AutomationMoveTowardLane(int desiredLane, bool bypassSideSafety = false)
         {
@@ -47,10 +49,15 @@ namespace EmergencyRoad
 
         private void Update()
         {
-            if (crashed || Time.timeScale == 0f || Keyboard.current == null || visual == null) return;
+            if (crashed || Time.timeScale == 0f || Keyboard.current == null || visual == null)
+            {
+                HornHeld = false;
+                return;
+            }
             if (Keyboard.current.aKey.wasPressedThisFrame) Shift(-1);
             if (Keyboard.current.dKey.wasPressedThisFrame) Shift(1);
-            if (Keyboard.current.spaceKey.wasPressedThisFrame) Honk();
+            HornHeld = Keyboard.current.spaceKey.isPressed;
+            if (HornHeld && AudioSettings.dspTime >= nextHornDspTime) Honk();
             Vector3 p = transform.position;
             p.x = Mathf.SmoothDamp(p.x, targetX, ref bump, .12f);
             transform.position = p;
@@ -124,7 +131,7 @@ namespace EmergencyRoad
 
         private void Honk()
         {
-            game.Audio.Horn(vehicleHorn, vehicleIndex);
+            nextHornDspTime = game.Audio.Horn(vehicleHorn, vehicleIndex);
             if (hornEffect != null) StopCoroutine(hornEffect);
             if (edgeEffect != null)
             {
@@ -187,11 +194,14 @@ namespace EmergencyRoad
         public void CrashVisual(Vector3 impactDirection)
         {
             crashed = true;
+            HornHeld = false;
             EnableHeavyCrashPhysics(impactDirection);
             Vector3 localImpact = transform.InverseTransformDirection(impactDirection.normalized);
             game.SpawnImpactVfx(transform, new Vector3(Mathf.Clamp(localImpact.x, -1f, 1f) * .8f, .72f, Mathf.Clamp(localImpact.z, -1f, 1f) * 1.35f));
             StartCoroutine(Crumple(impactDirection));
         }
+
+        private void OnDisable() => HornHeld = false;
 
         private void EnableHeavyCrashPhysics(Vector3 impactDirection)
         {
