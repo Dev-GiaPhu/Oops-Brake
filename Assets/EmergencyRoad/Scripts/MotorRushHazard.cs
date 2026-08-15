@@ -25,10 +25,11 @@ namespace EmergencyRoad
 
         public void Initialize(float x, EmergencyRoadGame owner, Transform playerTransform, Camera camera)
         {
-            InitializeLane(Mathf.Clamp(Mathf.RoundToInt(x / EmergencyRoadGame.LaneWidth), -1, 1), owner, camera);
+            GameObject visualPrefab = owner != null && owner.Catalog != null ? owner.Catalog.motorcyclePrefab : null;
+            InitializeLane(Mathf.Clamp(Mathf.RoundToInt(x / EmergencyRoadGame.LaneWidth), -1, 1), owner, camera, visualPrefab);
         }
 
-        public void InitializeLane(int lane, EmergencyRoadGame owner, Camera camera)
+        public void InitializeLane(int lane, EmergencyRoadGame owner, Camera camera, GameObject motorcycleVisualPrefab = null)
         {
             game = owner;
             trackingCamera = camera;
@@ -37,6 +38,7 @@ namespace EmergencyRoad
             transform.position = new Vector3(lockedTargetX, .45f, -18f);
             EmergencyRoadGameplaySettings tuning = owner != null ? owner.Settings : null;
             speed = tuning != null ? tuning.motorSpeed : 34f;
+            BuildVisualFromCatalog(motorcycleVisualPrefab);
             visualRenderers = GetComponentsInChildren<Renderer>(true);
             body = GetComponent<Rigidbody>();
             hitbox = GetComponent<BoxCollider>();
@@ -49,6 +51,25 @@ namespace EmergencyRoad
                 body.interpolation = RigidbodyInterpolation.Interpolate;
             }
             previousPosition = transform.position;
+        }
+
+        private void BuildVisualFromCatalog(GameObject visualPrefab)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                GameObject obsoleteVisual = transform.GetChild(i).gameObject;
+                obsoleteVisual.SetActive(false);
+                Destroy(obsoleteVisual);
+            }
+
+            if (visualPrefab == null) return;
+            GameObject visual = Instantiate(visualPrefab, transform, false);
+            visual.name = "Motorcycle Visual";
+            visual.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            visual.transform.localScale = Vector3.one;
+            foreach (Collider visualCollider in visual.GetComponentsInChildren<Collider>(true))
+                visualCollider.enabled = false;
+            EmergencyRoadGame.FitVehicle(visual, .95f, 2.25f);
         }
 
         private void Update()

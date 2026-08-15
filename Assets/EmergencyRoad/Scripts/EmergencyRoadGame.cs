@@ -37,8 +37,6 @@ namespace EmergencyRoad
         [SerializeField] private GameObject sameDirectionTrafficPrefab;
         [SerializeField] private GameObject crossTrafficHazardPrefab;
         [SerializeField] private GameObject routeMarkerPrefab;
-        [SerializeField] private GameObject motorRushHazardPrefab;
-        [SerializeField] private GameObject motorWarningLinePrefab;
         [SerializeField] private GameObject impactVfxPrefab;
         [SerializeField] private GameObject motorImpactVfxPrefab;
 
@@ -126,7 +124,8 @@ namespace EmergencyRoad
             BuildHud();
 
             if (coinSpawner != null) coinSpawner.Configure(this, catalog.coinPrefab);
-            if (motorRushDirector != null) motorRushDirector.Configure(this, motorWarningLinePrefab, motorRushHazardPrefab);
+            if (motorRushDirector != null)
+                motorRushDirector.Configure(this, catalog.motorcyclePrefab);
         }
 
         private bool ValidateReferences()
@@ -141,9 +140,11 @@ namespace EmergencyRoad
             valid &= Require(player, "Emergency Vehicle Controller");
             valid &= Require(gameplayCamera, "Gameplay Camera");
             valid &= Require(cameraJuice, "Camera Juice");
+            valid &= Require(motorRushDirector, "Motor Rush Director");
             valid &= Require(roadChunkRootPrefab, "Road Chunk Root Prefab");
             valid &= Require(grassGroundPrefab, "Grass Ground Prefab");
             valid &= Require(soilGroundPrefab, "Soil Ground Prefab");
+            valid &= Require(catalog != null ? catalog.motorcyclePrefab : null, "Motorcycle Prefab trong Catalog");
             return valid;
         }
 

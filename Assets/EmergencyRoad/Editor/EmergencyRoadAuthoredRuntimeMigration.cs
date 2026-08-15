@@ -263,15 +263,12 @@ namespace EmergencyRoad.Editor
             SetReference(gameSO, "sameDirectionTrafficPrefab", sameDirection);
             SetReference(gameSO, "crossTrafficHazardPrefab", crossTraffic);
             SetReference(gameSO, "routeMarkerPrefab", routeMarker);
-            SetReference(gameSO, "motorRushHazardPrefab", motorRush);
-            SetReference(gameSO, "motorWarningLinePrefab", warning);
             SetReference(gameSO, "impactVfxPrefab", impact);
             SetReference(gameSO, "motorImpactVfxPrefab", motorImpact);
             gameSO.ApplyModifiedPropertiesWithoutUndo();
 
             SerializedObject coinSO = new(coinSpawner);
             SetReference(coinSO, "game", game);
-            SetReference(coinSO, "coinPrefab", catalog.coinPrefab);
             coinSO.ApplyModifiedPropertiesWithoutUndo();
 
             SerializedObject motorSO = new(motorDirector);
@@ -445,13 +442,6 @@ namespace EmergencyRoad.Editor
             body.useGravity = false;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             body.interpolation = RigidbodyInterpolation.Interpolate;
-            if (catalog.motorcyclePrefab != null)
-            {
-                GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(catalog.motorcyclePrefab);
-                visual.name = "Motorcycle Visual";
-                visual.transform.SetParent(root.transform, false);
-                foreach (Collider collider in visual.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(collider);
-            }
             PrefabUtility.SaveAsPrefabAsset(root, MotorRushPath);
             Object.DestroyImmediate(root);
         }

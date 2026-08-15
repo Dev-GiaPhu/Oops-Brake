@@ -11,12 +11,12 @@ namespace EmergencyRoad
         [SerializeField] private AudioSource musicSource;
         [SerializeField] private AudioSource sfxSource;
 
-        [Header("AUDIO CLIPS - DRAG IN INSPECTOR")]
-        [SerializeField] private AudioClip backgroundMusic;
-        [SerializeField] private AudioClip buttonClickSound;
-        [SerializeField] private AudioClip coinSound;
-        [SerializeField] private AudioClip defaultHornSound;
-        [SerializeField] private AudioClip collisionSound;
+        // Shared clips have one authoritative source: EmergencyRoadCatalog.
+        private AudioClip backgroundMusic;
+        private AudioClip buttonClickSound;
+        private AudioClip coinSound;
+        private AudioClip defaultHornSound;
+        private AudioClip collisionSound;
 
         public AudioSource MusicSource => musicSource;
         public AudioSource SfxSource => sfxSource;

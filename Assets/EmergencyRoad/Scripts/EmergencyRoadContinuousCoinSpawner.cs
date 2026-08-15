@@ -13,7 +13,7 @@ namespace EmergencyRoad
 
         [Header("DIRECT REFERENCES - DRAG IN INSPECTOR")]
         [SerializeField] private EmergencyRoadGame game;
-        [SerializeField] private GameObject coinPrefab;
+        private GameObject coinPrefab;
 
         private readonly List<GameObject> activeCoins = new();
         private int previousLane = 99;

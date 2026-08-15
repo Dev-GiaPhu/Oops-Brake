@@ -13,12 +13,12 @@ namespace EmergencyRoad
 
         private float timer;
         private bool active;
+        private GameObject motorcycleVisualPrefab;
 
-        public void Configure(EmergencyRoadGame owner, GameObject warningPrefab, GameObject hazardPrefab)
+        public void Configure(EmergencyRoadGame owner, GameObject visualPrefab)
         {
             game = owner;
-            warningLinePrefab = warningPrefab;
-            motorRushHazardPrefab = hazardPrefab;
+            motorcycleVisualPrefab = visualPrefab;
             timer = Random.Range(10f, 15f);
         }
 
@@ -68,7 +68,7 @@ namespace EmergencyRoad
             }
             else
             {
-                motor.InitializeLane(targetLane, game, game.GameplayCamera);
+                motor.InitializeLane(targetLane, game, game.GameplayCamera, motorcycleVisualPrefab);
                 Debug.Assert(motor.TargetLane == targetLane, "Motor warning lane and spawned motorcycle lane must match.", motor);
                 game.RegisterMotor(motor);
             }
