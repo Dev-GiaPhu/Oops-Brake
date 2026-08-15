@@ -172,7 +172,7 @@ namespace EmergencyRoad
             visual.transform.localPosition = Vector3.zero;
             visual.transform.localRotation = Quaternion.identity;
             visual.transform.localScale = Vector3.one;
-            FitVehicle(visual, 2.2f, 4.2f);
+            FitVehicle(visual, 2.2f, 4.2f, false);
 
             player.Initialize(visual.transform, this, catalog.HornForVehicle(selected), selected);
             cameraJuice.Initialize(playerRoot);
@@ -504,18 +504,22 @@ namespace EmergencyRoad
             SceneManager.LoadScene("Menu");
         }
 
-        public static void FitVehicle(GameObject visual, float targetWidth, float targetLength)
+        public static void FitVehicle(GameObject visual, float targetWidth, float targetLength, bool alignRendererBounds = true)
         {
-            Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0) return;
+            Renderer[] allRenderers = visual.GetComponentsInChildren<Renderer>(true);
+            List<Renderer> renderers = new(allRenderers.Length);
+            foreach (Renderer renderer in allRenderers)
+                if (renderer is MeshRenderer || renderer is SkinnedMeshRenderer) renderers.Add(renderer);
+            if (renderers.Count == 0) return;
             Vector3 anchor = visual.transform.localPosition;
             Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+            for (int i = 1; i < renderers.Count; i++) bounds.Encapsulate(renderers[i].bounds);
             float scaleByWidth = targetWidth / Mathf.Max(.1f, bounds.size.x);
             float scaleByLength = targetLength / Mathf.Max(.1f, bounds.size.z);
             visual.transform.localScale *= Mathf.Min(scaleByWidth, scaleByLength * 1.15f);
+            if (!alignRendererBounds) return;
             bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+            for (int i = 1; i < renderers.Count; i++) bounds.Encapsulate(renderers[i].bounds);
             Transform parent = visual.transform.parent;
             Vector3 centerLocal = parent != null ? parent.InverseTransformPoint(bounds.center) : bounds.center;
             Vector3 bottomLocal = parent != null ? parent.InverseTransformPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z)) : new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
