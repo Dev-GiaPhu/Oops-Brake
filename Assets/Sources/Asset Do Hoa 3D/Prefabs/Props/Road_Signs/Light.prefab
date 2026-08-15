@@ -114,13 +114,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7837689039432556925}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.6427876, y: 0, z: 0, w: 0.7660445}
+  m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
   m_LocalPosition: {x: 0, y: 5.62, z: 1.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4194234447806301702}
-  m_LocalEulerAnglesHint: {x: 80, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 60, y: 0, z: 0}
 --- !u!108 &6901504420330537336
 Light:
   m_ObjectHideFlags: 0
@@ -131,11 +131,11 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 1, g: 0.9065651, b: 0.18396229, a: 1}
-  m_Intensity: 20
-  m_Range: 10
-  m_SpotAngle: 82.28226
-  m_InnerSpotAngle: 21.80208
+  m_Color: {r: 1, g: 0.9744194, b: 0.7783019, a: 1}
+  m_Intensity: 100
+  m_Range: 20
+  m_SpotAngle: 179
+  m_InnerSpotAngle: 47.28514
   m_CookieSize: 10
   m_Shadows:
     m_Type: 2
@@ -222,3 +222,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invert: 0
+  useFade: 0
+  useStartupFlicker: 1
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.4
+  flickerSpeed: 4
+  flickerMinimum: 0.1

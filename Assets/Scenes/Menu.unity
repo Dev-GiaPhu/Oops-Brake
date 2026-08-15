@@ -166,8 +166,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
@@ -1053,6 +1053,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &349633361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349633356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatedTarget: {fileID: 349633357}
+  hoverScale: 1.06
+  pressedScale: 0.96
+  hoverLift: 3
+  smoothTime: 0.08
 --- !u!1 &487318597
 GameObject:
   m_ObjectHideFlags: 0
@@ -1694,6 +1711,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &547857108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547857103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatedTarget: {fileID: 547857104}
+  hoverScale: 1.06
+  pressedScale: 0.96
+  hoverLift: 3
+  smoothTime: 0.08
 --- !u!1 &554484047
 GameObject:
   m_ObjectHideFlags: 0
@@ -3707,6 +3741,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1120536288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1120536283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatedTarget: {fileID: 1120536284}
+  hoverScale: 1.06
+  pressedScale: 0.96
+  hoverLift: 3
+  smoothTime: 0.08
 --- !u!1 &1136676347
 GameObject:
   m_ObjectHideFlags: 0
@@ -4481,6 +4532,23 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1277281503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1277281498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatedTarget: {fileID: 1277281499}
+  hoverScale: 1.06
+  pressedScale: 0.96
+  hoverLift: 3
+  smoothTime: 0.08
 --- !u!1 &1292030451
 GameObject:
   m_ObjectHideFlags: 0
@@ -5049,6 +5117,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1491754601}
   m_CullTransparentMesh: 1
+--- !u!114 &1491754605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491754601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b962f849ce42e1880cda4e6e1397d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatedTarget: {fileID: 1491754602}
+  speed: 1.25
+  pulseAmount: 0.035
+  floatDistance: 5
+  tiltDegrees: 1.2
 --- !u!1 &1515349790
 GameObject:
   m_ObjectHideFlags: 0
@@ -6855,15 +6940,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44fc52df413d42ab83b83bfa4bc53c2d, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   vehicleCenter: {fileID: 1520820098}
   draggableScreenWidth: 0.75
   horizontalLimit: 30
   verticalLimit: 10
   sensitivity: 0.11
   dragThresholdPixels: 6
-  dragSmoothTime: 0.12
+  dragSmoothTime: 0.25
   returnDelay: 1
   returnSmoothTime: 1
 --- !u!1 &2200000010
@@ -7137,91 +7222,6 @@ PrefabInstance:
       addedObject: {fileID: 524333727}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 94f14d7628ce3e24c87766f5d86b0ff9, type: 3}
---- !u!114 &349633361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349633356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  animatedTarget: {fileID: 349633357}
-  hoverScale: 1.06
-  pressedScale: 0.96
-  hoverLift: 3
-  smoothTime: 0.08
---- !u!114 &547857108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 547857103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  animatedTarget: {fileID: 547857104}
-  hoverScale: 1.06
-  pressedScale: 0.96
-  hoverLift: 3
-  smoothTime: 0.08
---- !u!114 &1120536288
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1120536283}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  animatedTarget: {fileID: 1120536284}
-  hoverScale: 1.06
-  pressedScale: 0.96
-  hoverLift: 3
-  smoothTime: 0.08
---- !u!114 &1277281503
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1277281498}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7e1a61d35a4481b87cb842d31a120cc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  animatedTarget: {fileID: 1277281499}
-  hoverScale: 1.06
-  pressedScale: 0.96
-  hoverLift: 3
-  smoothTime: 0.08
---- !u!114 &1491754605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1491754601}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4b962f849ce42e1880cda4e6e1397d8, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  animatedTarget: {fileID: 1491754602}
-  speed: 1.25
-  pulseAmount: 0.035
-  floatDistance: 5
-  tiltDegrees: 1.2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
