@@ -15,6 +15,7 @@ namespace EmergencyRoad
         [SerializeField, Range(3f, 25f)] private float verticalLimit = 10f;
         [SerializeField, Min(.01f)] private float sensitivity = .11f;
         [SerializeField, Min(1f)] private float dragThresholdPixels = 6f;
+        [SerializeField, Range(.02f, .5f)] private float dragSmoothTime = .12f;
         [SerializeField, Min(0f)] private float returnDelay = 2.5f;
         [SerializeField, Min(.05f)] private float returnSmoothTime = .65f;
 
@@ -22,6 +23,10 @@ namespace EmergencyRoad
         private Quaternion homeRotation;
         private float yaw;
         private float pitch;
+        private float smoothYaw;
+        private float smoothPitch;
+        private float yawVelocity;
+        private float pitchVelocity;
         private Vector3 dragStartOffset;
         private Vector3 dragStartRight;
         private Quaternion dragStartRotation;
@@ -70,6 +75,10 @@ namespace EmergencyRoad
                     previousPointerPosition = pointerPosition;
                     yaw = 0f;
                     pitch = 0f;
+                    smoothYaw = 0f;
+                    smoothPitch = 0f;
+                    yawVelocity = 0f;
+                    pitchVelocity = 0f;
                     return;
                 }
 
@@ -114,8 +123,12 @@ namespace EmergencyRoad
 
         private void ApplyOrbit()
         {
-            Quaternion orbit = Quaternion.AngleAxis(yaw, Vector3.up) *
-                               Quaternion.AngleAxis(pitch, dragStartRight);
+            smoothYaw = Mathf.SmoothDamp(smoothYaw, yaw, ref yawVelocity, dragSmoothTime,
+                Mathf.Infinity, Time.unscaledDeltaTime);
+            smoothPitch = Mathf.SmoothDamp(smoothPitch, pitch, ref pitchVelocity, dragSmoothTime,
+                Mathf.Infinity, Time.unscaledDeltaTime);
+            Quaternion orbit = Quaternion.AngleAxis(smoothYaw, Vector3.up) *
+                               Quaternion.AngleAxis(smoothPitch, dragStartRight);
             transform.position = vehicleCenter.position + orbit * dragStartOffset;
             transform.rotation = orbit * dragStartRotation;
         }
