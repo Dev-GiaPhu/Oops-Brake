@@ -18,8 +18,10 @@ namespace EmergencyRoad
         private static readonly int WetDarkeningId = Shader.PropertyToID("_EmergencyWetDarkening");
         private static readonly int PuddleScaleId = Shader.PropertyToID("_EmergencyPuddleScale");
         private static readonly int RippleStrengthId = Shader.PropertyToID("_EmergencyRippleStrength");
+        private static readonly int TrackDistanceId = Shader.PropertyToID("_EmergencyTrackDistance");
 
         [Header("THAM CHIEU TRONG SCENE")]
+        [SerializeField] private EmergencyRoadGame gameplay;
         [SerializeField] private Transform followTarget;
         [SerializeField] private ParticleSystem rainParticles;
         [SerializeField] private Light lightningLight;
@@ -86,6 +88,7 @@ namespace EmergencyRoad
         {
             Shader.SetGlobalFloat(WetnessId, 0f);
             Shader.SetGlobalFloat(RainIntensityId, 0f);
+            Shader.SetGlobalFloat(TrackDistanceId, 0f);
         }
 
         private void Awake()
@@ -145,6 +148,10 @@ namespace EmergencyRoad
 
         private void LateUpdate()
         {
+            // Chunks move backward while the player stays near the origin. Adding the exact
+            // accumulated scroll distance makes procedural puddles remain glued to each chunk.
+            Shader.SetGlobalFloat(TrackDistanceId, gameplay != null ? gameplay.Distance : 0f);
+
             if (followTarget == null || rainParticles == null) return;
 
             Vector3 flatForward = Vector3.ProjectOnPlane(followTarget.forward, Vector3.up).normalized;

@@ -74,6 +74,8 @@ Open `Game.unity` and select `WEATHER SYSTEM - SCENE AUTHORED`. The whole weathe
 
 `EmergencyGlobalWetness.mat` is a URP full-screen material. It reconstructs world position and normals so roads, vehicles, buildings and props become wet without replacing their individual materials. Horizontal surfaces receive procedural puddles and animated rain rings. The renderer pass automatically skips clear/dry frames, so clear weather has no full-screen/depth-normal cost.
 
+Puddle noise uses `EmergencyRoadGame.Distance` as its road-space offset. Because gameplay simulates forward travel by moving chunks backward, this compensating offset keeps puddles and ripples fixed to each road chunk instead of sliding across its mesh. The offset stops automatically on pause and game over with the gameplay distance.
+
 If a renderer or scene reference is removed, run `Tools > Emergency Road > Weather > Install Or Repair Weather System`. This repairs both PC/mobile renderer features and missing scene components without replacing custom particle or audio settings that are still assigned.
 
 ## Gameplay tuning

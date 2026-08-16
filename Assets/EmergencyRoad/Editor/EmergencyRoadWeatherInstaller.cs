@@ -23,6 +23,13 @@ namespace EmergencyRoad.Editor
         static EmergencyRoadWeatherInstaller()
         {
             EditorApplication.delayCall += TryInstallIntoOpenGameScene;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredEditMode)
+                EditorApplication.delayCall += TryInstallIntoOpenGameScene;
         }
 
         [MenuItem("Tools/Emergency Road/Weather/Install Or Repair Weather System")]
@@ -84,6 +91,13 @@ namespace EmergencyRoad.Editor
             }
 
             SerializedObject weatherObject = new(weather);
+            EmergencyRoadGame gameplay = GetReference<EmergencyRoadGame>(weatherObject, "gameplay");
+            if (gameplay == null)
+            {
+                gameplay = FindInScene<EmergencyRoadGame>(scene);
+                changed |= SetReference(weatherObject, "gameplay", gameplay);
+            }
+
             ParticleSystem rain = GetReference<ParticleSystem>(weatherObject, "rainParticles");
             if (rain == null)
             {
@@ -141,13 +155,21 @@ namespace EmergencyRoad.Editor
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating)
                 return;
 
-            Scene scene = SceneManager.GetActiveScene();
-            if (!scene.IsValid() || !scene.isLoaded || scene.path != GameScenePath) return;
+            Scene previousActiveScene = SceneManager.GetActiveScene();
+            Scene gameScene = SceneManager.GetSceneByPath(GameScenePath);
+            bool openedTemporarily = !gameScene.IsValid() || !gameScene.isLoaded;
+            if (openedTemporarily)
+                gameScene = EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Additive);
 
-            bool wasDirty = scene.isDirty;
-            bool changed = EnsureWeatherForScene(scene);
-            if (changed && !wasDirty)
-                EditorSceneManager.SaveScene(scene);
+            bool changed = EnsureWeatherForScene(gameScene);
+            if (changed) EditorSceneManager.SaveScene(gameScene);
+
+            if (openedTemporarily)
+            {
+                EditorSceneManager.CloseScene(gameScene, true);
+                if (previousActiveScene.IsValid() && previousActiveScene.isLoaded)
+                    SceneManager.SetActiveScene(previousActiveScene);
+            }
         }
 
         private static Material EnsureMaterial(string materialPath, string shaderPath, Color? color)

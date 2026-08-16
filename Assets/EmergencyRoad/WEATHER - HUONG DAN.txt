@@ -24,6 +24,8 @@ DO UOT TOAN CANH
 EmergencyGlobalWetness.mat tao do uot, phan sang, noise, vung nuoc va gon mua cho
 duong, xe, nha, cay va vat the ma khong can thay tung material. Khi troi kho hoan
 toan, renderer pass tu bo qua de khong ton chi phi ve depth/normal/full-screen.
+Noise va vung nuoc dung Distance cua gameplay de bam theo chunk duong dang chay lui,
+khong bi truot tren mat duong khi game gia lap xe chay toi.
 
 NEU BI MAT OBJECT HOAC REFERENCE
 

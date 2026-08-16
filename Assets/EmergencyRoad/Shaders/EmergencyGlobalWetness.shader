@@ -28,6 +28,7 @@ Shader "Hidden/EmergencyRoad/GlobalWetness"
             float _EmergencyWetDarkening;
             float _EmergencyPuddleScale;
             float _EmergencyRippleStrength;
+            float _EmergencyTrackDistance;
 
             float Hash21(float2 value)
             {
@@ -95,9 +96,14 @@ Shader "Hidden/EmergencyRoad/GlobalWetness"
                 float3 viewDirection = normalize(_WorldSpaceCameraPos.xyz - positionWS);
 
                 float upward = pow(saturate(normalWS.y), 5.0);
-                float noise = Fbm(positionWS.xz * max(.02, _EmergencyPuddleScale));
+                float groundMask = 1.0 - smoothstep(.55, 1.35, positionWS.y);
+                float2 trackAnchoredXZ = positionWS.xz + float2(0.0, _EmergencyTrackDistance);
+                float noise = Fbm(trackAnchoredXZ * max(.02, _EmergencyPuddleScale));
                 float puddleThreshold = lerp(.88, .38, saturate(_EmergencyPuddleAmount * _EmergencyWetness));
-                float puddle = smoothstep(puddleThreshold, puddleThreshold + .13, noise) * upward * _EmergencyWetness;
+                float puddle = smoothstep(puddleThreshold, puddleThreshold + .13, noise)
+                    * upward
+                    * groundMask
+                    * _EmergencyWetness;
 
                 float generalWet = _EmergencyWetness * lerp(.48, 1.0, upward);
                 float3 darkened = sceneColor.rgb * (1.0 - _EmergencyWetDarkening * generalWet);
@@ -107,7 +113,7 @@ Shader "Hidden/EmergencyRoad/GlobalWetness"
                 float3 wetColor = darkened + float3(.48, .58, .68) * skySheen;
 
                 float2 rippleDirection;
-                float ripple = Ripple(positionWS.xz, rippleDirection)
+                float ripple = Ripple(trackAnchoredXZ, rippleDirection)
                     * puddle
                     * _EmergencyRainIntensity
                     * _EmergencyRippleStrength;
