@@ -7466,8 +7466,9 @@ MonoBehaviour:
   introClip: {fileID: 0}
   displayDuration: 2
   logoPopDuration: 0.45
-  travelDuration: 0.85
-  backgroundFadeDuration: 0.65
+  travelDuration: 1.15
+  backgroundFadeDuration: 0.8
+  logoVisualPivot: {x: 0.5013, y: 0.5215}
   introLogoScale: 1.35
   travelArcHeight: 90
   travelTilt: 8
@@ -7475,6 +7476,7 @@ MonoBehaviour:
   introPulseAmount: 0.025
   introFloatDistance: 8
   introRockDegrees: 2.5
+  arrivalAnimationSpeed: 0.12
   playOncePerApplication: 1
   allowSkip: 1
   skipDelay: 0.4

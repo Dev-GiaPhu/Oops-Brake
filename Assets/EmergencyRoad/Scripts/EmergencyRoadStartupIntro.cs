@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace EmergencyRoad
 {
     [DisallowMultipleComponent]
-    [DefaultExecutionOrder(-10000)]
+    [DefaultExecutionOrder(10000)]
     public sealed class EmergencyRoadStartupIntro : MonoBehaviour
     {
         [Header("SCENE OBJECTS - DRAG DIRECTLY")]
@@ -20,8 +20,12 @@ namespace EmergencyRoad
         [Header("INTRO TIMING")]
         [SerializeField, Min(.1f)] private float displayDuration = 2f;
         [SerializeField, Min(.1f)] private float logoPopDuration = .45f;
-        [SerializeField, Min(.1f)] private float travelDuration = .85f;
-        [SerializeField, Min(.1f)] private float backgroundFadeDuration = .65f;
+        [SerializeField, Min(.1f)] private float travelDuration = 1.15f;
+        [SerializeField, Min(.1f)] private float backgroundFadeDuration = .8f;
+
+        [Header("LOGO VISUAL CENTRE")]
+        [SerializeField, Tooltip("Pivot theo phan anh that cua logo, khong tinh vung trong suot cua PNG.")]
+        private Vector2 logoVisualPivot = new(.5013f, .5215f);
 
         [Header("CARTOON LOGO MOTION")]
         [SerializeField, Range(1f, 2f)] private float introLogoScale = 1.35f;
@@ -31,6 +35,8 @@ namespace EmergencyRoad
         [SerializeField, Range(0f, .12f)] private float introPulseAmount = .025f;
         [SerializeField, Range(0f, 30f)] private float introFloatDistance = 8f;
         [SerializeField, Range(0f, 8f)] private float introRockDegrees = 2.5f;
+        [SerializeField, Range(0f, 1f), Tooltip("Toc do dao dong con lai khi logo gan cham dich.")]
+        private float arrivalAnimationSpeed = .12f;
 
         [Header("BEHAVIOUR")]
         [SerializeField] private bool playOncePerApplication = true;
@@ -51,6 +57,7 @@ namespace EmergencyRoad
         private Vector2 originalRectSize;
         private Color backgroundColor;
         private float startedAt;
+        private float introPhase;
         private bool logoPrepared;
         private bool skipRequested;
 
@@ -77,8 +84,10 @@ namespace EmergencyRoad
             playedThisApplication = true;
             startedAt = Time.unscaledTime;
             skipRequested = false;
+            introPhase = 0f;
             backgroundColor = backgroundImage.color;
             backgroundImage.raycastTarget = true;
+            Canvas.ForceUpdateCanvases();
             PrepareMenuLogo();
 
             if (introAudioSource != null && introClip != null)
@@ -135,13 +144,14 @@ namespace EmergencyRoad
             originalPivot = menuLogo.pivot;
             originalLocalScale = menuLogo.localScale;
             originalLocalRotation = menuLogo.localRotation;
-            destinationWorldPosition = menuLogo.position;
+            Vector2 visualPivot = new(Mathf.Clamp01(logoVisualPivot.x), Mathf.Clamp01(logoVisualPivot.y));
+            destinationWorldPosition = NormalizedRectPointToWorld(menuLogo, visualPivot);
             originalRectSize = menuLogo.rect.size;
 
             menuLogo.SetParent(transform, true);
             menuLogo.anchorMin = new Vector2(.5f, .5f);
             menuLogo.anchorMax = new Vector2(.5f, .5f);
-            menuLogo.pivot = new Vector2(.5f, .5f);
+            menuLogo.pivot = visualPivot;
             menuLogo.sizeDelta = originalRectSize;
             menuLogo.position = logoStartMarker.position;
             menuLogo.localScale = originalLocalScale * .35f;
@@ -162,7 +172,7 @@ namespace EmergencyRoad
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, logoPopDuration));
                 float back = EaseOutBack(t);
-                float wave = IntroWave;
+                float wave = AdvanceIntroWave(1f);
                 Vector3 animatedScale = targetScale * (1f + wave * introPulseAmount);
                 Quaternion animatedRotation = targetRotation * Quaternion.Euler(0f, 0f, wave * introRockDegrees);
                 menuLogo.position = logoStartMarker.position + Vector3.up * (wave * introFloatDistance * back);
@@ -184,10 +194,11 @@ namespace EmergencyRoad
                 elapsed += Time.unscaledDeltaTime;
                 float moveT = Mathf.Clamp01(elapsed / Mathf.Max(.1f, travelDuration));
                 float fadeT = Mathf.Clamp01(elapsed / Mathf.Max(.1f, backgroundFadeDuration));
-                float moveEase = Smooth(moveT);
-                float fadeEase = Smooth(fadeT);
-                float wave = IntroWave;
+                float moveEase = Smoother(moveT);
+                float fadeEase = Smoother(fadeT);
                 float idleEnvelope = 1f - moveEase;
+                float waveSpeed = Mathf.Lerp(arrivalAnimationSpeed, 1f, Smoother(idleEnvelope));
+                float wave = AdvanceIntroWave(waveSpeed);
 
                 Vector3 position = Vector3.LerpUnclamped(logoStartMarker.position, destinationWorldPosition, moveEase);
                 position += Vector3.up * (4f * moveEase * (1f - moveEase) * travelArcHeight);
@@ -210,7 +221,7 @@ namespace EmergencyRoad
 
         private void ApplyIntroIdle()
         {
-            float wave = IntroWave;
+            float wave = AdvanceIntroWave(1f);
             menuLogo.position = logoStartMarker.position + Vector3.up * (wave * introFloatDistance);
             menuLogo.localScale = originalLocalScale * introLogoScale * (1f + wave * introPulseAmount);
             menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f,
@@ -248,9 +259,28 @@ namespace EmergencyRoad
             gameObject.SetActive(false);
         }
 
-        private static float Smooth(float t) => t * t * (3f - 2f * t);
+        private float AdvanceIntroWave(float speedMultiplier)
+        {
+            introPhase += Time.unscaledDeltaTime * introIdleSpeed * Mathf.Max(0f, speedMultiplier)
+                          * Mathf.PI * 2f;
+            return Mathf.Sin(introPhase);
+        }
 
-        private float IntroWave => Mathf.Sin((Time.unscaledTime - startedAt) * introIdleSpeed * Mathf.PI * 2f);
+        private static float Smoother(float t)
+        {
+            t = Mathf.Clamp01(t);
+            return t * t * t * (t * (t * 6f - 15f) + 10f);
+        }
+
+        private static Vector3 NormalizedRectPointToWorld(RectTransform rectTransform, Vector2 normalizedPoint)
+        {
+            Rect rect = rectTransform.rect;
+            Vector3 localPoint = new(
+                Mathf.LerpUnclamped(rect.xMin, rect.xMax, normalizedPoint.x),
+                Mathf.LerpUnclamped(rect.yMin, rect.yMax, normalizedPoint.y),
+                0f);
+            return rectTransform.TransformPoint(localPoint);
+        }
 
         private static float EaseOutBack(float t)
         {
