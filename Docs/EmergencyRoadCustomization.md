@@ -59,6 +59,23 @@ Drag imported `.wav` or `.ogg` clips into these fields. Empty fields use generat
 - Motor speed, delayed tracking, weave and final lock distance are in `MotorRushHazard`.
 - Crash deformation is `EmergencyVehicleController.Crumple`; crash camera shake and `Crash Clip` are triggered together.
 
+## Weather, rain and global wetness
+
+Open `Game.unity` and select `WEATHER SYSTEM - SCENE AUTHORED`. The whole weather setup is visible and editable in the Hierarchy:
+
+- `Rain VFX - EDIT PARTICLE HERE`: authored Particle System for drop count, size, wind noise and color.
+- `Lightning Flash Light - EDIT HERE`: the directional flash light used by lightning.
+- `Rain Loop Audio - Drop Clip Here`: 2D looping rain AudioSource.
+- `Thunder One Shot Audio - Drop Clips On Parent`: 2D thunder AudioSource.
+- On the parent `EmergencyWeatherSystem`, drag a loop into `Rain Loop` and one or more clips into `Thunder Clips`.
+- `Day Rain Chance` and `Night Rain Chance` control random weather separately for day/night.
+- `Clear Duration Range`, `Rain Duration Range` and `Transition Duration` control scheduling and smooth fades.
+- `Puddle Amount`, `Wet Darkening`, `Puddle World Scale` and `Ripple Strength` control the procedural wet look.
+
+`EmergencyGlobalWetness.mat` is a URP full-screen material. It reconstructs world position and normals so roads, vehicles, buildings and props become wet without replacing their individual materials. Horizontal surfaces receive procedural puddles and animated rain rings. The renderer pass automatically skips clear/dry frames, so clear weather has no full-screen/depth-normal cost.
+
+If a renderer or scene reference is removed, run `Tools > Emergency Road > Weather > Install Or Repair Weather System`. This repairs both PC/mobile renderer features and missing scene components without replacing custom particle or audio settings that are still assigned.
+
 ## Gameplay tuning
 
 In `EmergencyRoadGame.cs`:

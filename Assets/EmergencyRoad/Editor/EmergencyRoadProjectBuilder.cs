@@ -249,7 +249,7 @@ namespace EmergencyRoad.Editor
             var root = new GameObject("GAME SCENE AUTHORING");
             new GameObject("Authoring Version 22 - Split Main Menu And Garage").transform.SetParent(root.transform);
             var preview = new GameObject("Preview Root (visible in Edit Mode)").transform; preview.SetParent(root.transform);
-            CreateCamera(preview,"Chase Camera",new Vector3(0,7.6f,-10.5f),new Vector3(22,0,0));
+            GameObject gameplayCameraObject=CreateCamera(preview,"Chase Camera",new Vector3(0,7.6f,-10.5f),new Vector3(22,0,0));
             CreateLight(preview,"Sun",Vector3.zero).AddComponent<DayNightCycle>();
             CreatePostFx(preview,catalog);
             var world=new GameObject("Endless World Preview").transform;world.SetParent(preview);
@@ -278,6 +278,7 @@ namespace EmergencyRoad.Editor
             EmergencyRoadUI.Configure(catalog);
             EmergencyRoadSceneUIFactory.CreateGame(preview);
             root.AddComponent<EmergencyRoadSceneAuthoring>().Configure(EmergencyRoadSceneKind.Game,catalog,preview,catalog.laneWidth,catalog.roadLength);
+            EmergencyRoadWeatherInstaller.EnsureWeatherForScene(scene,preview,gameplayCameraObject.GetComponent<Camera>());
             EditorSceneManager.SaveScene(scene,"Assets/Scenes/Game.unity");
         }
 

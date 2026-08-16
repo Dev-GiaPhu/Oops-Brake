@@ -1,0 +1,33 @@
+HE THONG THOI TIET EMERGENCY ROAD
+
+1. Mo Assets/Scenes/Game.unity.
+2. Chon object: WEATHER SYSTEM - SCENE AUTHORED.
+3. Tren component Emergency Weather System:
+   - Rain Loop: keo tha am thanh mua lap lien tuc.
+   - Thunder Clips: them mot hoac nhieu am thanh sam.
+   - Day/Night Rain Chance: ti le mua ban ngay/ban dem.
+   - Clear/Rain Duration Range: thoi gian moi trang thai.
+   - Puddle Amount: so luong vung nuoc.
+   - Wet Darkening: muc toi khi be mat bi uot.
+   - Puddle World Scale: kich thuoc mang noise tao vung nuoc.
+   - Ripple Strength: do ro cua gon mua tren vung nuoc.
+
+CAC OBJECT CON DE CHINH TRUC TIEP
+
+- Rain VFX - EDIT PARTICLE HERE: Particle System cua mua.
+- Lightning Flash Light - EDIT HERE: Light cua sam chop.
+- Rain Loop Audio - Drop Clip Here: AudioSource tieng mua.
+- Thunder One Shot Audio - Drop Clips On Parent: AudioSource tieng sam.
+
+DO UOT TOAN CANH
+
+EmergencyGlobalWetness.mat tao do uot, phan sang, noise, vung nuoc va gon mua cho
+duong, xe, nha, cay va vat the ma khong can thay tung material. Khi troi kho hoan
+toan, renderer pass tu bo qua de khong ton chi phi ve depth/normal/full-screen.
+
+NEU BI MAT OBJECT HOAC REFERENCE
+
+Chay menu:
+Tools > Emergency Road > Weather > Install Or Repair Weather System
+
+Lenh nay chi tao lai phan bi thieu, khong thay cac particle/audio tuy chinh van con duoc gan.
