@@ -10,6 +10,10 @@ namespace EmergencyRoad
         [SerializeField] private RawImage leftMirror;
         [SerializeField] private RawImage rightMirror;
 
+        [Header("MIRROR FRAMES - DRAG PARENT OBJECTS HERE")]
+        [SerializeField] private RectTransform leftFrame;
+        [SerializeField] private RectTransform rightFrame;
+
         [Header("SLIDE ANIMATION")]
         [SerializeField, Min(.05f)] private float slideDuration = .28f;
         [SerializeField, Min(0f)] private float hiddenPadding = 24f;
@@ -28,6 +32,14 @@ namespace EmergencyRoad
         {
             leftMirror = left;
             rightMirror = right;
+            initialized = false;
+        }
+
+        public void ConfigureFrames(RectTransform left, RectTransform right)
+        {
+            leftFrame = left;
+            rightFrame = right;
+            initialized = false;
         }
 
         private void Awake()
@@ -55,8 +67,10 @@ namespace EmergencyRoad
         private void CacheLayout()
         {
             if (initialized || !IsConfigured) return;
-            leftRect = leftMirror.rectTransform;
-            rightRect = rightMirror.rectTransform;
+            // Move the parent frames when assigned. Moving both a frame and its
+            // child RawImage would apply the slide offset twice.
+            leftRect = leftFrame != null ? leftFrame : leftMirror.rectTransform;
+            rightRect = rightFrame != null ? rightFrame : rightMirror.rectTransform;
             leftShown = leftRect.anchoredPosition;
             rightShown = rightRect.anchoredPosition;
             initialized = true;
@@ -70,8 +84,11 @@ namespace EmergencyRoad
             Vector2 rightHidden = rightShown + Vector2.right * (rightRect.rect.width + hiddenPadding);
             leftRect.anchoredPosition = Vector2.LerpUnclamped(leftHidden, leftShown, eased);
             rightRect.anchoredPosition = Vector2.LerpUnclamped(rightHidden, rightShown, eased);
-            leftMirror.enabled = visibility > .001f;
-            rightMirror.enabled = visibility > .001f;
+            bool visible = visibility > .001f;
+            if (leftFrame != null) leftFrame.gameObject.SetActive(visible);
+            if (rightFrame != null) rightFrame.gameObject.SetActive(visible);
+            leftMirror.enabled = visible;
+            rightMirror.enabled = visible;
         }
     }
 }
