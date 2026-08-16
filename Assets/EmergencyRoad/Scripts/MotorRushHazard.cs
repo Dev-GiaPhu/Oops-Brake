@@ -80,8 +80,9 @@ namespace EmergencyRoad
 
         private void FixedUpdate()
         {
-            if (!exploded && game != null)
+            if (!exploded)
             {
+                if (game == null || game.Ended) return;
                 previousPosition = body != null ? body.position : transform.position;
                 Vector3 p = previousPosition;
                 p.z += speed * Time.fixedDeltaTime;
@@ -115,7 +116,14 @@ namespace EmergencyRoad
                 else transform.SetPositionAndRotation(p, rotation);
                 return;
             }
-            if (!exploded || !compensateMapScroll || explodedBody == null || game == null) return;
+
+            if (explodedBody == null || game == null) return;
+            if (game.Ended)
+            {
+                StopMapScrollCompensation();
+                return;
+            }
+            if (!compensateMapScroll) return;
             debrisPhysicsAge += Time.fixedDeltaTime;
             EmergencyRoadGameplaySettings tuning = game.Settings;
             float hold = tuning != null ? tuning.motorDebrisImpactHoldTime : .35f;
@@ -123,6 +131,15 @@ namespace EmergencyRoad
             float sharpness = tuning != null ? tuning.motorDebrisMapFollowSharpness : 2.2f;
             Vector3 velocity = explodedBody.linearVelocity;
             velocity.z = Mathf.Lerp(velocity.z, -game.CurrentSpeed, 1f - Mathf.Exp(-sharpness * Time.fixedDeltaTime));
+            explodedBody.linearVelocity = velocity;
+        }
+
+        private void StopMapScrollCompensation()
+        {
+            if (!compensateMapScroll || explodedBody == null) return;
+            compensateMapScroll = false;
+            Vector3 velocity = explodedBody.linearVelocity;
+            velocity.z = 0f;
             explodedBody.linearVelocity = velocity;
         }
 
