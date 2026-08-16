@@ -18,6 +18,7 @@ namespace EmergencyRoad
         private static readonly int WetDarkeningId = Shader.PropertyToID("_EmergencyWetDarkening");
         private static readonly int PuddleScaleId = Shader.PropertyToID("_EmergencyPuddleScale");
         private static readonly int RippleStrengthId = Shader.PropertyToID("_EmergencyRippleStrength");
+        private static readonly int RippleSizeId = Shader.PropertyToID("_EmergencyRippleSize");
         private static readonly int TrackDistanceId = Shader.PropertyToID("_EmergencyTrackDistance");
 
         [Header("THAM CHIEU TRONG SCENE")]
@@ -55,6 +56,7 @@ namespace EmergencyRoad
         [SerializeField, Range(0f, .5f)] private float wetDarkening = .14f;
         [SerializeField, Range(.02f, 1f)] private float puddleWorldScale = .14f;
         [SerializeField, Range(0f, 2f)] private float rippleStrength = 1f;
+        [SerializeField, Range(.15f, 1f)] private float rippleWorldSize = .55f;
 
         [Header("SUONG KHI MUA")]
         [SerializeField] private bool controlRainFog = true;
@@ -293,6 +295,7 @@ namespace EmergencyRoad
             Shader.SetGlobalFloat(WetDarkeningId, wetDarkening);
             Shader.SetGlobalFloat(PuddleScaleId, puddleWorldScale);
             Shader.SetGlobalFloat(RippleStrengthId, rippleStrength);
+            Shader.SetGlobalFloat(RippleSizeId, rippleWorldSize);
         }
 
         private void UpdateAudio()

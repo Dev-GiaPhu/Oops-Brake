@@ -28,6 +28,7 @@ Shader "Hidden/EmergencyRoad/GlobalWetness"
             float _EmergencyWetDarkening;
             float _EmergencyPuddleScale;
             float _EmergencyRippleStrength;
+            float _EmergencyRippleSize;
             float _EmergencyTrackDistance;
 
             float Hash21(float2 value)
@@ -68,8 +69,9 @@ Shader "Hidden/EmergencyRoad/GlobalWetness"
 
                 float speed = lerp(1.1, 1.8, Hash21(cell + 19.3));
                 float phase = frac(_Time.y * speed + Hash21(cell + 4.2));
-                float radius = phase * .52;
-                float ring = 1.0 - smoothstep(.018, .055, abs(distanceToDrop - radius));
+                float rippleSize = clamp(_EmergencyRippleSize, .15, 1.0);
+                float radius = phase * .52 * rippleSize;
+                float ring = 1.0 - smoothstep(.012, lerp(.026, .055, rippleSize), abs(distanceToDrop - radius));
                 float life = smoothstep(1.0, .72, phase) * smoothstep(0.0, .08, phase);
                 return ring * life;
             }

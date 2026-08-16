@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 namespace EmergencyRoad.Editor
 {
-    [InitializeOnLoad]
     public static class EmergencyRoadWeatherInstaller
     {
         private const string GameScenePath = "Assets/Scenes/Game.unity";
@@ -19,18 +18,6 @@ namespace EmergencyRoad.Editor
         private const string PcRendererPath = "Assets/Settings/PC_Renderer.asset";
         private const string MobileRendererPath = "Assets/Settings/Mobile_Renderer.asset";
         private const string FeatureName = "Emergency Global Wetness - Clear Weather Has Zero Cost";
-
-        static EmergencyRoadWeatherInstaller()
-        {
-            EditorApplication.delayCall += TryInstallIntoOpenGameScene;
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.EnteredEditMode)
-                EditorApplication.delayCall += TryInstallIntoOpenGameScene;
-        }
 
         [MenuItem("Tools/Emergency Road/Weather/Install Or Repair Weather System")]
         public static void InstallOrRepairFromMenu()
@@ -148,28 +135,6 @@ namespace EmergencyRoad.Editor
 
             EnsureRendererFeature(PcRendererPath, wetnessMaterial);
             EnsureRendererFeature(MobileRendererPath, wetnessMaterial);
-        }
-
-        private static void TryInstallIntoOpenGameScene()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating)
-                return;
-
-            Scene previousActiveScene = SceneManager.GetActiveScene();
-            Scene gameScene = SceneManager.GetSceneByPath(GameScenePath);
-            bool openedTemporarily = !gameScene.IsValid() || !gameScene.isLoaded;
-            if (openedTemporarily)
-                gameScene = EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Additive);
-
-            bool changed = EnsureWeatherForScene(gameScene);
-            if (changed) EditorSceneManager.SaveScene(gameScene);
-
-            if (openedTemporarily)
-            {
-                EditorSceneManager.CloseScene(gameScene, true);
-                if (previousActiveScene.IsValid() && previousActiveScene.isLoaded)
-                    SceneManager.SetActiveScene(previousActiveScene);
-            }
         }
 
         private static Material EnsureMaterial(string materialPath, string shaderPath, Color? color)
@@ -295,7 +260,7 @@ namespace EmergencyRoad.Editor
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.startLifetime = new ParticleSystem.MinMaxCurve(.8f, 1.35f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(27f, 36f);
-            main.startSize = new ParticleSystem.MinMaxCurve(.035f, .07f);
+            main.startSize = new ParticleSystem.MinMaxCurve(.025f, .05f);
             main.startColor = new ParticleSystem.MinMaxGradient(new Color(.7f, .84f, 1f, .38f), new Color(.82f, .91f, 1f, .62f));
             main.maxParticles = 1200;
 

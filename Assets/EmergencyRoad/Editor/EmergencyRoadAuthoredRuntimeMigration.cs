@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 
 namespace EmergencyRoad.Editor
 {
-    [InitializeOnLoad]
     public static class EmergencyRoadAuthoredRuntimeMigration
     {
         private const string CatalogPath = "Assets/EmergencyRoad/Resources/EmergencyRoadCatalog.asset";
@@ -28,18 +27,6 @@ namespace EmergencyRoad.Editor
         private const string MotorWarningMaterialPath = "Assets/EmergencyRoad/Resources/MotorWarning.mat";
         private const string ImpactVfxPath = RuntimePrefabFolder + "/VehicleImpactVFX.prefab";
         private const string MotorImpactVfxPath = RuntimePrefabFolder + "/MotorImpactVFX.prefab";
-
-        static EmergencyRoadAuthoredRuntimeMigration()
-        {
-            EditorSceneManager.sceneOpened += OnSceneOpened;
-        }
-
-        private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
-            if (scene.path != "Assets/Scenes/Menu.unity" && scene.path != "Assets/Scenes/Game.unity") return;
-            EditorApplication.delayCall += () => MigrateScene(scene, false);
-        }
 
         [MenuItem("Tools/Emergency Road/Migrate All To Inspector References")]
         public static void MigrateAllScenes()
@@ -155,8 +142,6 @@ namespace EmergencyRoad.Editor
                 Debug.LogError("[Emergency Road] Game scene thiếu EmergencyRoadGameView.");
                 return false;
             }
-
-            EmergencyRoadSceneUIFactory.EnsureFirstPersonMirrors(view);
 
             EmergencyRoadAudio audio = EnsureAudioService(scene, root, catalog);
             GameObject systems = FindDirectOrSceneObject(scene, "Gameplay Systems (runtime controller)");

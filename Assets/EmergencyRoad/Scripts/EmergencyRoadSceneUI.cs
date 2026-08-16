@@ -96,6 +96,11 @@ namespace EmergencyRoad
         {
             EmergencyFirstPersonMirrorView mirrors = view.GetComponent<EmergencyFirstPersonMirrorView>();
             if (mirrors == null) mirrors = view.gameObject.AddComponent<EmergencyFirstPersonMirrorView>();
+            if (mirrors.IsConfigured)
+            {
+                view.firstPersonMirrors = mirrors;
+                return mirrors;
+            }
             Transform parent = view.transform;
             RawImage left = CreateMirror(parent, "Left Rear View Mirror", new Vector2(.025f, .2f), new Vector2(.19f, .39f));
             RawImage right = CreateMirror(parent, "Right Rear View Mirror", new Vector2(.81f, .2f), new Vector2(.975f, .39f));
@@ -106,10 +111,10 @@ namespace EmergencyRoad
 
         private static RawImage CreateMirror(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax)
         {
-            Transform existing = parent.Find(name);
+            Transform existing = FindDescendant(parent, name);
             bool created = existing == null;
             GameObject go = created ? new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage)) : existing.gameObject;
-            go.transform.SetParent(parent, false);
+            if (created) go.transform.SetParent(parent, false);
             Image oldImage = go.GetComponent<Image>();
             if (oldImage != null) Object.DestroyImmediate(oldImage);
             RawImage image = go.GetComponent<RawImage>();
@@ -125,6 +130,17 @@ namespace EmergencyRoad
             }
             image.raycastTarget = false;
             return image;
+        }
+
+        private static Transform FindDescendant(Transform parent, string name)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name) return child;
+                Transform nested = FindDescendant(child, name);
+                if (nested != null) return nested;
+            }
+            return null;
         }
 
         private static Canvas CreateCanvas(Transform parent, string name)
