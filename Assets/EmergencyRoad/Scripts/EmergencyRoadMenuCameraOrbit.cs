@@ -27,9 +27,6 @@ namespace EmergencyRoad
         private float smoothPitch;
         private float yawVelocity;
         private float pitchVelocity;
-        private Vector3 dragStartOffset;
-        private Vector3 dragStartRight;
-        private Quaternion dragStartRotation;
         private Vector2 previousPointerPosition;
         private Vector2 pressedPointerPosition;
         private float releasedAt = float.NegativeInfinity;
@@ -69,16 +66,14 @@ namespace EmergencyRoad
                         return;
 
                     dragging = true;
-                    dragStartOffset = transform.position - vehicleCenter.position;
-                    dragStartRight = transform.right;
-                    dragStartRotation = transform.rotation;
                     previousPointerPosition = pointerPosition;
-                    yaw = 0f;
-                    pitch = 0f;
-                    smoothYaw = 0f;
-                    smoothPitch = 0f;
+                    // Continue from the current absolute orbit. Limits must remain
+                    // relative to the authored home camera across repeated drags.
+                    yaw = smoothYaw;
+                    pitch = smoothPitch;
                     yawVelocity = 0f;
                     pitchVelocity = 0f;
+                    returningHome = false;
                     return;
                 }
 
@@ -108,29 +103,32 @@ namespace EmergencyRoad
 
             if (!returningHome) return;
             if (Time.unscaledTime - releasedAt < returnDelay) return;
-            float blend = 1f - Mathf.Exp(-Time.unscaledDeltaTime / returnSmoothTime * 4f);
-            yaw = Mathf.Lerp(yaw, 0f, blend);
-            pitch = Mathf.Lerp(pitch, 0f, blend);
-            transform.position = Vector3.Lerp(transform.position, homePosition, blend);
-            transform.rotation = Quaternion.Slerp(transform.rotation, homeRotation, blend);
-            if ((transform.position - homePosition).sqrMagnitude < .000001f &&
-                Quaternion.Angle(transform.rotation, homeRotation) < .01f)
+            yaw = 0f;
+            pitch = 0f;
+            ApplyOrbit(returnSmoothTime);
+            if (Mathf.Abs(smoothYaw) < .01f && Mathf.Abs(smoothPitch) < .01f)
             {
+                smoothYaw = 0f;
+                smoothPitch = 0f;
                 transform.SetPositionAndRotation(homePosition, homeRotation);
                 returningHome = false;
             }
         }
 
-        private void ApplyOrbit()
+        private void ApplyOrbit() => ApplyOrbit(dragSmoothTime);
+
+        private void ApplyOrbit(float smoothTime)
         {
-            smoothYaw = Mathf.SmoothDamp(smoothYaw, yaw, ref yawVelocity, dragSmoothTime,
+            smoothYaw = Mathf.SmoothDamp(smoothYaw, yaw, ref yawVelocity, smoothTime,
                 Mathf.Infinity, Time.unscaledDeltaTime);
-            smoothPitch = Mathf.SmoothDamp(smoothPitch, pitch, ref pitchVelocity, dragSmoothTime,
+            smoothPitch = Mathf.SmoothDamp(smoothPitch, pitch, ref pitchVelocity, smoothTime,
                 Mathf.Infinity, Time.unscaledDeltaTime);
+            Vector3 homeOffset = homePosition - vehicleCenter.position;
+            Vector3 homeRight = homeRotation * Vector3.right;
             Quaternion orbit = Quaternion.AngleAxis(smoothYaw, Vector3.up) *
-                               Quaternion.AngleAxis(smoothPitch, dragStartRight);
-            transform.position = vehicleCenter.position + orbit * dragStartOffset;
-            transform.rotation = orbit * dragStartRotation;
+                               Quaternion.AngleAxis(smoothPitch, homeRight);
+            transform.position = vehicleCenter.position + orbit * homeOffset;
+            transform.rotation = orbit * homeRotation;
         }
     }
 }
