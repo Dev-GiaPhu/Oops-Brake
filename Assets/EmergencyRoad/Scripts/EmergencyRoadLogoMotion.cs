@@ -14,9 +14,13 @@ namespace EmergencyRoad
         [SerializeField, Range(0f, 15f)] private float floatDistance = 5f;
         [SerializeField, Range(0f, 4f)] private float tiltDegrees = 1.2f;
 
+        [Header("SMOOTH INTRO HANDOFF")]
+        [SerializeField, Min(0f)] private float resumeBlendDuration = .28f;
+
         private Vector3 baseScale;
         private Vector2 basePosition;
         private Quaternion baseRotation;
+        private float animationWeight;
 
         private void Awake()
         {
@@ -28,17 +32,21 @@ namespace EmergencyRoad
         {
             if (animatedTarget == null) animatedTarget = transform as RectTransform;
             CaptureBasePose();
+            animationWeight = resumeBlendDuration <= 0f ? 1f : 0f;
         }
 
         private void Update()
         {
             if (animatedTarget == null) return;
+            animationWeight = Mathf.MoveTowards(animationWeight, 1f,
+                Time.unscaledDeltaTime / Mathf.Max(.01f, resumeBlendDuration));
+            float blend = animationWeight * animationWeight * (3f - 2f * animationWeight);
             float phase = Time.unscaledTime * speed;
             float wave = Mathf.Sin(phase * Mathf.PI * 2f);
-            animatedTarget.localScale = baseScale * (1f + wave * pulseAmount);
-            animatedTarget.anchoredPosition = basePosition + Vector2.up * (wave * floatDistance);
+            animatedTarget.localScale = baseScale * (1f + wave * pulseAmount * blend);
+            animatedTarget.anchoredPosition = basePosition + Vector2.up * (wave * floatDistance * blend);
             animatedTarget.localRotation = baseRotation * Quaternion.Euler(0f, 0f,
-                Mathf.Sin(phase * Mathf.PI) * tiltDegrees);
+                Mathf.Sin(phase * Mathf.PI) * tiltDegrees * blend);
         }
 
         private void OnDisable()

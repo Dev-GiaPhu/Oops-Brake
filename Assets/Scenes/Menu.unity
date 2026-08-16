@@ -5233,6 +5233,7 @@ MonoBehaviour:
   pulseAmount: 0.035
   floatDistance: 5
   tiltDegrees: 1.2
+  resumeBlendDuration: 0.28
 --- !u!1 &1515349790
 GameObject:
   m_ObjectHideFlags: 0
@@ -7470,6 +7471,10 @@ MonoBehaviour:
   introLogoScale: 1.35
   travelArcHeight: 90
   travelTilt: 8
+  introIdleSpeed: 1.25
+  introPulseAmount: 0.025
+  introFloatDistance: 8
+  introRockDegrees: 2.5
   playOncePerApplication: 1
   allowSkip: 1
   skipDelay: 0.4

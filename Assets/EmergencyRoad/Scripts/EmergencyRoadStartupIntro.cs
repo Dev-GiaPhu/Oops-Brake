@@ -27,6 +27,10 @@ namespace EmergencyRoad
         [SerializeField, Range(1f, 2f)] private float introLogoScale = 1.35f;
         [SerializeField, Range(0f, 240f)] private float travelArcHeight = 90f;
         [SerializeField, Range(0f, 20f)] private float travelTilt = 8f;
+        [SerializeField, Range(.1f, 4f)] private float introIdleSpeed = 1.25f;
+        [SerializeField, Range(0f, .12f)] private float introPulseAmount = .025f;
+        [SerializeField, Range(0f, 30f)] private float introFloatDistance = 8f;
+        [SerializeField, Range(0f, 8f)] private float introRockDegrees = 2.5f;
 
         [Header("BEHAVIOUR")]
         [SerializeField] private bool playOncePerApplication = true;
@@ -90,6 +94,7 @@ namespace EmergencyRoad
             while (elapsed < remainingDisplay && !skipRequested)
             {
                 elapsed += Time.unscaledDeltaTime;
+                ApplyIntroIdle();
                 yield return null;
             }
 
@@ -103,8 +108,9 @@ namespace EmergencyRoad
         {
             if (!allowSkip || Time.unscaledTime - startedAt < skipDelay) return;
             bool keyboardPressed = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
-            bool mousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
-            if (keyboardPressed || mousePressed) skipRequested = true;
+            bool pointerPressed = Pointer.current != null && Pointer.current.press.wasPressedThisFrame;
+            bool touchPressed = Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
+            if (keyboardPressed || pointerPressed || touchPressed) skipRequested = true;
         }
 
         private bool ValidateReferences()
@@ -139,7 +145,7 @@ namespace EmergencyRoad
             menuLogo.sizeDelta = originalRectSize;
             menuLogo.position = logoStartMarker.position;
             menuLogo.localScale = originalLocalScale * .35f;
-            menuLogo.localRotation = Quaternion.Euler(0f, 0f, -10f);
+            menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f, -10f);
             logoPrepared = true;
         }
 
@@ -148,7 +154,7 @@ namespace EmergencyRoad
             Vector3 startScale = menuLogo.localScale;
             Vector3 targetScale = originalLocalScale * introLogoScale;
             Quaternion startRotation = menuLogo.localRotation;
-            Quaternion targetRotation = Quaternion.Euler(0f, 0f, -3f);
+            Quaternion targetRotation = originalLocalRotation * Quaternion.Euler(0f, 0f, -3f);
             float elapsed = 0f;
 
             while (elapsed < logoPopDuration && !skipRequested)
@@ -156,20 +162,20 @@ namespace EmergencyRoad
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, logoPopDuration));
                 float back = EaseOutBack(t);
-                menuLogo.localScale = Vector3.LerpUnclamped(startScale, targetScale, back);
-                menuLogo.localRotation = Quaternion.SlerpUnclamped(startRotation, targetRotation, back);
+                float wave = IntroWave;
+                Vector3 animatedScale = targetScale * (1f + wave * introPulseAmount);
+                Quaternion animatedRotation = targetRotation * Quaternion.Euler(0f, 0f, wave * introRockDegrees);
+                menuLogo.position = logoStartMarker.position + Vector3.up * (wave * introFloatDistance * back);
+                menuLogo.localScale = Vector3.LerpUnclamped(startScale, animatedScale, back);
+                menuLogo.localRotation = Quaternion.SlerpUnclamped(startRotation, animatedRotation, back);
                 yield return null;
             }
 
-            menuLogo.localScale = targetScale;
-            menuLogo.localRotation = targetRotation;
+            ApplyIntroIdle();
         }
 
         private IEnumerator AnimateLogoToMenu()
         {
-            Vector3 startPosition = menuLogo.position;
-            Vector3 startScale = menuLogo.localScale;
-            Quaternion startRotation = menuLogo.localRotation;
             float totalDuration = Mathf.Max(travelDuration, backgroundFadeDuration);
             float elapsed = 0f;
 
@@ -180,20 +186,35 @@ namespace EmergencyRoad
                 float fadeT = Mathf.Clamp01(elapsed / Mathf.Max(.1f, backgroundFadeDuration));
                 float moveEase = Smooth(moveT);
                 float fadeEase = Smooth(fadeT);
+                float wave = IntroWave;
+                float idleEnvelope = 1f - moveEase;
 
-                Vector3 position = Vector3.LerpUnclamped(startPosition, destinationWorldPosition, moveEase);
+                Vector3 position = Vector3.LerpUnclamped(logoStartMarker.position, destinationWorldPosition, moveEase);
                 position += Vector3.up * (4f * moveEase * (1f - moveEase) * travelArcHeight);
+                position += Vector3.up * (wave * introFloatDistance * idleEnvelope);
                 menuLogo.position = position;
-                menuLogo.localScale = Vector3.LerpUnclamped(startScale, originalLocalScale, moveEase);
-                Quaternion travelRotation = originalLocalRotation * Quaternion.Euler(0f, 0f,
-                    Mathf.Sin(moveEase * Mathf.PI) * travelTilt);
-                menuLogo.localRotation = Quaternion.SlerpUnclamped(startRotation, travelRotation, moveEase);
+                Vector3 travelScale = Vector3.LerpUnclamped(originalLocalScale * introLogoScale,
+                    originalLocalScale, moveEase);
+                menuLogo.localScale = travelScale * (1f + wave * introPulseAmount * idleEnvelope);
+                float angle = Mathf.Lerp(-3f, 0f, moveEase)
+                              + Mathf.Sin(moveEase * Mathf.PI) * travelTilt
+                              + wave * introRockDegrees * idleEnvelope;
+                menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f, angle);
 
                 Color faded = backgroundColor;
                 faded.a = backgroundColor.a * (1f - fadeEase);
                 backgroundImage.color = faded;
                 yield return null;
             }
+        }
+
+        private void ApplyIntroIdle()
+        {
+            float wave = IntroWave;
+            menuLogo.position = logoStartMarker.position + Vector3.up * (wave * introFloatDistance);
+            menuLogo.localScale = originalLocalScale * introLogoScale * (1f + wave * introPulseAmount);
+            menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f,
+                -3f + wave * introRockDegrees);
         }
 
         private void FinishInstantly()
@@ -228,6 +249,8 @@ namespace EmergencyRoad
         }
 
         private static float Smooth(float t) => t * t * (3f - 2f * t);
+
+        private float IntroWave => Mathf.Sin((Time.unscaledTime - startedAt) * introIdleSpeed * Mathf.PI * 2f);
 
         private static float EaseOutBack(float t)
         {
