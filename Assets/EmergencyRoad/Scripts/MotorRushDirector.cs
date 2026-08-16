@@ -14,6 +14,7 @@ namespace EmergencyRoad
         private float timer;
         private bool active;
         private GameObject motorcycleVisualPrefab;
+        private int reservedLane = int.MinValue;
 
         public void Configure(EmergencyRoadGame owner, GameObject visualPrefab)
         {
@@ -48,10 +49,17 @@ namespace EmergencyRoad
             }
 
             active = true;
+            reservedLane = targetLane;
+            game.ReserveMotorLane(targetLane);
             float elapsed = 0f;
             game.SetHazardAlert("MÔ TÔ SẮP XUẤT HIỆN");
             while (elapsed < warningDuration)
             {
+                if (game == null || game.Ended)
+                {
+                    CancelWarning();
+                    yield break;
+                }
                 elapsed += Time.deltaTime;
                 laneWarningView.Show(targetLane, warningDuration - elapsed);
                 yield return null;
@@ -59,6 +67,16 @@ namespace EmergencyRoad
 
             laneWarningView.Hide();
             game.SetHazardAlert("");
+            float catchTime = Mathf.Max(.1f, (game.Player.transform.position.z + 18f) / Mathf.Max(1f, motorSpeed));
+            float projectedZ = game.Player.transform.position.z + game.CurrentSpeed * catchTime;
+            float obstacleSafety = tuning != null ? tuning.motorObstacleSafetyDistance : 9f;
+            if (!game.IsMotorLaneCorridorClear(targetLane, projectedZ - obstacleSafety, projectedZ + obstacleSafety))
+            {
+                ReleaseReservation();
+                timer = tuning != null ? tuning.motorPlanningRetryDelay : 1f;
+                active = false;
+                yield break;
+            }
             GameObject motorObject = Instantiate(motorRushHazardPrefab, transform, false);
             MotorRushHazard motor = motorObject.GetComponent<MotorRushHazard>();
             if (motor == null)
@@ -73,14 +91,31 @@ namespace EmergencyRoad
                 game.RegisterMotor(motor);
             }
 
-            while (motor != null) yield return null;
+            while (motor != null && game != null && !game.Ended) yield return null;
+            ReleaseReservation();
             timer = Random.Range(15f, 23f);
             active = false;
+        }
+
+        private void CancelWarning()
+        {
+            if (laneWarningView != null) laneWarningView.Hide();
+            if (game != null) game.SetHazardAlert("");
+            ReleaseReservation();
+            active = false;
+        }
+
+        private void ReleaseReservation()
+        {
+            if (reservedLane < -1 || reservedLane > 1) return;
+            if (game != null) game.ReleaseMotorLane(reservedLane);
+            reservedLane = int.MinValue;
         }
 
         private void OnDisable()
         {
             if (laneWarningView != null) laneWarningView.Hide();
+            ReleaseReservation();
             active = false;
         }
     }

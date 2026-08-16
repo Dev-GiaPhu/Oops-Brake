@@ -44,6 +44,7 @@ namespace EmergencyRoad
         private readonly List<RoadHazard> activeHazards = new();
         private readonly List<RoadRouteMarker> activeRouteMarkers = new();
         private readonly List<MotorRushHazard> activeMotorHazards = new();
+        private int motorReservedLane = int.MinValue;
 
         private TMP_Text scoreText;
         private TMP_Text coinText;
@@ -333,8 +334,28 @@ namespace EmergencyRoad
             if (motor != null && !activeMotorHazards.Contains(motor)) activeMotorHazards.Add(motor);
         }
 
+        internal void ReserveMotorLane(int lane) => motorReservedLane = Mathf.Clamp(lane, -1, 1);
+
+        internal void ReleaseMotorLane(int lane)
+        {
+            if (motorReservedLane == Mathf.Clamp(lane, -1, 1)) motorReservedLane = int.MinValue;
+        }
+
+        internal bool IsMotorLaneReserved(int lane) => motorReservedLane == Mathf.Clamp(lane, -1, 1);
+
+        internal bool IsSameDirectionCoinPathClear(int lane, float vehicleZ, float roadSpeed)
+        {
+            return coinSpawner == null || coinSpawner.IsSameDirectionPathClear(lane, vehicleZ, roadSpeed);
+        }
+
+        internal bool IsCrossTrafficCoinPathClear(bool fromLeft, int targetLane, float worldZ)
+        {
+            return coinSpawner == null || coinSpawner.IsCrossingPathClear(fromLeft, targetLane, worldZ);
+        }
+
         internal bool IsLaneReserved(int lane, float minimumZ, float maximumZ)
         {
+            if (IsMotorLaneReserved(lane)) return true;
             for (int i = activeRouteMarkers.Count - 1; i >= 0; i--)
             {
                 RoadRouteMarker marker = activeRouteMarkers[i];
@@ -353,6 +374,7 @@ namespace EmergencyRoad
         {
             if (result == null || result.Length < 3) return;
             result[0] = result[1] = result[2] = false;
+            if (motorReservedLane >= -1 && motorReservedLane <= 1) result[motorReservedLane + 1] = true;
             for (int i = activeRouteMarkers.Count - 1; i >= 0; i--)
             {
                 RoadRouteMarker marker = activeRouteMarkers[i];
@@ -395,8 +417,14 @@ namespace EmergencyRoad
                     continue;
                 }
                 Vector3 position = hazard.transform.position;
-                if (position.z < minimumZ || position.z > maximumZ || Mathf.Abs(position.x) > LaneWidth * 1.5f) continue;
-                occupiedLane[Mathf.Clamp(Mathf.RoundToInt(position.x / LaneWidth) + 1, 0, 2)] = true;
+                if (position.z < minimumZ || position.z > maximumZ) continue;
+                SideCrossingHazard crossing = hazard.GetComponent<SideCrossingHazard>();
+                if (crossing != null && crossing.enabled)
+                {
+                    for (int lane = -1; lane <= 1; lane++)
+                        if (crossing.WillCrossLane(lane)) occupiedLane[lane + 1] = true;
+                }
+                else occupiedLane[Mathf.Clamp(Mathf.RoundToInt(position.x / LaneWidth), -1, 1) + 1] = true;
             }
 
             int[] candidates = { -1, 0, 1 };
@@ -426,12 +454,16 @@ namespace EmergencyRoad
         internal void PlanEscapeLanes(int requestedLane, bool wantsTwoLaneBlock, out int firstOpenLane, out int secondOpenLane)
         {
             requestedLane = Mathf.Clamp(requestedLane, -1, 1);
+            if (IsMotorLaneReserved(requestedLane)) requestedLane = NearestNonMotorLane(requestedLane);
             secondOpenLane = -99;
             if (!hasEscapeLane)
             {
                 escapeLane = escapeTargetLane = requestedLane;
                 hasEscapeLane = true;
             }
+
+            if (IsMotorLaneReserved(escapeLane)) escapeLane = escapeTargetLane = requestedLane;
+            if (IsMotorLaneReserved(escapeTargetLane)) escapeTargetLane = requestedLane;
 
             if (!wantsTwoLaneBlock)
             {
@@ -453,6 +485,46 @@ namespace EmergencyRoad
             firstOpenLane = escapeLane;
         }
 
+        private int NearestNonMotorLane(int lane)
+        {
+            for (int distance = 1; distance <= 2; distance++)
+            {
+                int left = lane - distance;
+                if (left >= -1 && !IsMotorLaneReserved(left)) return left;
+                int right = lane + distance;
+                if (right <= 1 && !IsMotorLaneReserved(right)) return right;
+            }
+            return lane;
+        }
+
+        internal bool IsMotorLaneCorridorClear(int lane, float minimumZ, float maximumZ)
+        {
+            float laneX = Mathf.Clamp(lane, -1, 1) * LaneWidth;
+            for (int i = activeHazards.Count - 1; i >= 0; i--)
+            {
+                RoadHazard hazard = activeHazards[i];
+                if (hazard == null)
+                {
+                    activeHazards.RemoveAt(i);
+                    continue;
+                }
+
+                Collider hitbox = hazard.GetComponentInChildren<Collider>();
+                Bounds bounds = hitbox != null
+                    ? hitbox.bounds
+                    : new Bounds(hazard.transform.position, new Vector3(2.5f, 2f, 4.5f));
+                if (bounds.max.z < minimumZ || bounds.min.z > maximumZ) continue;
+                SideCrossingHazard crossing = hazard.GetComponent<SideCrossingHazard>();
+                if (crossing != null && crossing.enabled)
+                {
+                    if (crossing.WillCrossLane(lane)) return false;
+                    continue;
+                }
+                if (laneX >= bounds.min.x - .2f && laneX <= bounds.max.x + .2f) return false;
+            }
+            return true;
+        }
+
         internal float ResolveMotorTargetX(float requestedX, float minimumZ, float maximumZ)
         {
             int requestedLane = Mathf.Clamp(Mathf.RoundToInt(requestedX / LaneWidth), -1, 1);
@@ -470,13 +542,19 @@ namespace EmergencyRoad
             return bestLane * LaneWidth;
         }
 
-        internal void SpawnSameDirectionTraffic(int lane, float worldZ)
+        internal bool SpawnSameDirectionTraffic(int lane, float worldZ)
         {
             if (sameDirectionTrafficPrefab == null || catalog.trafficVehicles.Count == 0)
             {
                 Debug.LogError("[Emergency Road] Thiếu Same Direction Traffic Prefab hoặc Traffic Vehicle Prefab trong Inspector.", this);
-                return;
+                return false;
             }
+
+            EmergencyRoadGameplaySettings tuning = Settings;
+            float minimum = tuning != null ? tuning.trafficMinimumRoadSpeed : 8f;
+            float maximum = Mathf.Max(minimum, tuning != null ? tuning.trafficMaximumRoadSpeed : 14f);
+            float roadSpeed = Random.Range(minimum, maximum);
+            if (IsMotorLaneReserved(lane) || !IsSameDirectionCoinPathClear(lane, worldZ, roadSpeed)) return false;
 
             GameObject holder = Instantiate(sameDirectionTrafficPrefab, runtimeWorldRoot, false);
             holder.name = "Road Hazard - Same Direction Traffic";
@@ -491,7 +569,7 @@ namespace EmergencyRoad
             {
                 Debug.LogError("[Emergency Road] Same Direction Traffic Prefab phải chứa sẵn RoadHazard + BoxCollider + Rigidbody + SameDirectionTraffic + EmergencyTrafficCrashResponder.", holder);
                 Destroy(holder);
-                return;
+                return false;
             }
 
             GameObject source = catalog.trafficVehicles[Random.Range(0, catalog.trafficVehicles.Count)];
@@ -506,15 +584,13 @@ namespace EmergencyRoad
             body.isKinematic = true;
             body.useGravity = false;
 
-            EmergencyRoadGameplaySettings tuning = Settings;
-            float minimum = tuning != null ? tuning.trafficMinimumRoadSpeed : 8f;
-            float maximum = Mathf.Max(minimum, tuning != null ? tuning.trafficMaximumRoadSpeed : 14f);
-            mover.Initialize(this, lane, Random.Range(minimum, maximum), tuning != null ? tuning.trafficLaneChangeChance : .38f,
+            mover.Initialize(this, lane, roadSpeed, tuning != null ? tuning.trafficLaneChangeChance : .38f,
                 tuning != null ? tuning.trafficLaneDecisionInterval : 2.2f,
                 tuning != null ? tuning.trafficBrakingDistance : 11f,
                 tuning != null ? tuning.trafficBrakingStrength : 10f);
             responder.Configure(this, true, impactVfxPrefab);
             RegisterHazard(hazard);
+            return true;
         }
 
         internal static void DisableVisualColliders(GameObject visual)
@@ -974,21 +1050,30 @@ namespace EmergencyRoad
 
             if (catalog.trafficVehicles.Count > 0 && Random.value < movingTrafficChance)
             {
-                int trafficLane = openLane;
-                while (trafficLane == openLane || trafficLane == transitionLane) trafficLane = Random.Range(-1, 2);
-                owner.SpawnSameDirectionTraffic(trafficLane, root.transform.position.z + obstacleZ);
-                return;
+                int firstCandidate = Random.Range(-1, 2);
+                for (int offset = 0; offset < 3; offset++)
+                {
+                    int trafficLane = ((firstCandidate + 1 + offset) % 3) - 1;
+                    if (trafficLane == openLane || trafficLane == transitionLane || owner.IsMotorLaneReserved(trafficLane)) continue;
+                    if (owner.SpawnSameDirectionTraffic(trafficLane, root.transform.position.z + obstacleZ)) return;
+                }
             }
 
             if (wantsTwoLaneBlock && transitionLane < -1)
             {
-                for (int lane = -1; lane <= 1; lane++) if (lane != openLane) SpawnObstacle(lane, obstacleZ);
+                for (int lane = -1; lane <= 1; lane++)
+                    if (lane != openLane && !owner.IsMotorLaneReserved(lane)) SpawnObstacle(lane, obstacleZ);
             }
             else
             {
-                int blockedLane = Random.Range(-1, 2);
-                while (blockedLane == openLane || blockedLane == transitionLane) blockedLane = Random.Range(-1, 2);
-                SpawnObstacle(blockedLane, obstacleZ);
+                int firstCandidate = Random.Range(-1, 2);
+                for (int offset = 0; offset < 3; offset++)
+                {
+                    int blockedLane = ((firstCandidate + 1 + offset) % 3) - 1;
+                    if (blockedLane == openLane || blockedLane == transitionLane || owner.IsMotorLaneReserved(blockedLane)) continue;
+                    SpawnObstacle(blockedLane, obstacleZ);
+                    break;
+                }
             }
         }
 
@@ -1015,6 +1100,7 @@ namespace EmergencyRoad
 
         private void SpawnObstacle(int lane, float localZ)
         {
+            if (owner.IsMotorLaneReserved(lane)) return;
             if (owner.ObstacleHazardPrefab == null)
             {
                 Debug.LogError("[Emergency Road] Thiếu Obstacle Hazard Wrapper Prefab trên Game Controller.");
@@ -1148,7 +1234,9 @@ namespace EmergencyRoad
             float protectedDistance = Mathf.Max(routeLookDistance, EmergencyRoadGame.ChunkSpacing * 2.25f);
             Physics.SyncTransforms();
             foreach (int lane in priority)
-                if (!owner.IsLaneReserved(lane, worldZ - protectedDistance, worldZ + protectedDistance) && !IsHazardLaneOccupied(lane, worldZ)) return lane;
+                if (!owner.IsLaneReserved(lane, worldZ - protectedDistance, worldZ + protectedDistance) &&
+                    owner.IsCrossTrafficCoinPathClear(fromLeft, lane, worldZ) &&
+                    !IsHazardLaneOccupied(lane, worldZ)) return lane;
             return -99;
         }
 

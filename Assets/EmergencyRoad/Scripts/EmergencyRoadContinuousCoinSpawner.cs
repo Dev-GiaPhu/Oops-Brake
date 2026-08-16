@@ -16,6 +16,7 @@ namespace EmergencyRoad
         private GameObject coinPrefab;
 
         private readonly List<GameObject> activeCoins = new();
+        private readonly Collider[] overlapHits = new Collider[24];
         private int previousLane = 99;
         private bool initialized;
 
@@ -108,22 +109,24 @@ namespace EmergencyRoad
 
         private void SpawnSparseCoin(float requestedZ)
         {
-            int lane = ChooseLane();
-            float spawnZ = requestedZ;
-            for (int attempt = 0; attempt < 6; attempt++)
+            int preferredLane = ChooseLane();
+            for (int longitudinalAttempt = 0; longitudinalAttempt < 3; longitudinalAttempt++)
             {
-                Vector3 candidate = new(lane * EmergencyRoadGame.LaneWidth, 1.1f, spawnZ);
-                if (!IsBlocked(candidate))
+                float spawnZ = requestedZ + longitudinalAttempt * 3.5f;
+                for (int laneOffset = 0; laneOffset < 3; laneOffset++)
                 {
+                    int lane = ((preferredLane + 1 + laneOffset) % 3) - 1;
+                    Vector3 candidate = new(lane * EmergencyRoadGame.LaneWidth, 1.1f, spawnZ);
+                    if (IsBlocked(candidate)) continue;
+
                     CreateCoin(candidate);
                     previousLane = lane;
                     return;
                 }
-                lane = ChooseAlternativeLane(lane);
-                spawnZ += 2.5f;
             }
-            CreateCoin(new Vector3(lane * EmergencyRoadGame.LaneWidth, 1.1f, spawnZ));
-            previousLane = lane;
+
+            // Không cưỡng ép tạo coin khi cả ba làn đều đang có xe/chướng ngại.
+            // Vòng FillRoadAhead tiếp theo sẽ thử một vị trí xa hơn.
         }
 
         private int ChooseLane()
@@ -139,13 +142,71 @@ namespace EmergencyRoad
             return ((currentLane + 1 + offset) % 3) - 1;
         }
 
-        private static bool IsBlocked(Vector3 position)
+        internal bool IsSameDirectionPathClear(int lane, float vehicleZ, float roadSpeed)
         {
-            Collider[] hits = Physics.OverlapBox(position, new Vector3(1.05f, .8f, 2.1f), Quaternion.identity, ~0, QueryTriggerInteraction.Collide);
-            foreach (Collider hit in hits)
+            lane = Mathf.Clamp(lane, -1, 1);
+            for (int i = 0; i < activeCoins.Count; i++)
             {
+                GameObject coin = activeCoins[i];
+                if (coin == null || !coin.activeSelf) continue;
+                Vector3 coinPosition = coin.transform.position;
+                int coinLane = Mathf.Clamp(Mathf.RoundToInt(coinPosition.x / EmergencyRoadGame.LaneWidth), -1, 1);
+                if (coinLane != lane) continue;
+
+                float distanceAhead = coinPosition.z - vehicleZ;
+                if (distanceAhead < -3.8f) continue;
+                float contactTime = Mathf.Max(0f, distanceAhead - 3.8f) / Mathf.Max(1f, roadSpeed);
+                float coinZAtContact = coinPosition.z - game.CurrentSpeed * contactTime;
+                if (coinZAtContact > RemoveBehindDistance) return false;
+            }
+            return true;
+        }
+
+        internal bool IsCrossingPathClear(bool fromLeft, int targetLane, float worldZ)
+        {
+            float startX = fromLeft ? -12f : 12f;
+            float targetX = Mathf.Clamp(targetLane, -1, 1) * EmergencyRoadGame.LaneWidth;
+            float minimumX = Mathf.Min(startX, targetX) - 1.35f;
+            float maximumX = Mathf.Max(startX, targetX) + 1.35f;
+            for (int i = 0; i < activeCoins.Count; i++)
+            {
+                GameObject coin = activeCoins[i];
+                if (coin == null || !coin.activeSelf) continue;
+                Vector3 position = coin.transform.position;
+                if (Mathf.Abs(position.z - worldZ) <= 3f && position.x >= minimumX && position.x <= maximumX)
+                    return false;
+            }
+            return true;
+        }
+
+        private bool IsBlocked(Vector3 position)
+        {
+            IReadOnlyList<RoadHazard> hazards = game.ActiveHazards;
+            for (int i = 0; i < hazards.Count; i++)
+            {
+                RoadHazard hazard = hazards[i];
+                if (hazard == null) continue;
+                SameDirectionTraffic sameDirection = hazard.GetComponent<SameDirectionTraffic>();
+                if (sameDirection != null && sameDirection.WillIntersectCoin(position, RemoveBehindDistance)) return true;
+                SideCrossingHazard crossing = hazard.GetComponent<SideCrossingHazard>();
+                if (crossing != null && crossing.WillIntersectCoin(position)) return true;
+            }
+
+            int hitCount = Physics.OverlapBoxNonAlloc(
+                position,
+                new Vector3(1.25f, .9f, 2.8f),
+                overlapHits,
+                Quaternion.identity,
+                ~0,
+                QueryTriggerInteraction.Collide);
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider hit = overlapHits[i];
+                overlapHits[i] = null;
                 if (hit == null) continue;
-                if (hit.GetComponentInParent<RoadHazard>() != null || hit.GetComponentInParent<MotorRushHazard>() != null) return true;
+                if (hit.GetComponentInParent<RoadHazard>() != null ||
+                    hit.GetComponentInParent<MotorRushHazard>() != null)
+                    return true;
             }
             return false;
         }

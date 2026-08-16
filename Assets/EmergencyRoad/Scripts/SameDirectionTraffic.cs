@@ -80,11 +80,26 @@ namespace EmergencyRoad
             int direction = Random.value < .5f ? -1 : 1;
             int candidate = Mathf.Clamp(lane + direction, -1, 1);
             if (candidate == lane) candidate = Mathf.Clamp(lane - direction, -1, 1);
-            if (candidate != lane && !LaneIsReservedEscape(candidate) && LaneIsClear(candidate))
+            if (candidate != lane && !LaneIsReservedEscape(candidate) &&
+                game.IsSameDirectionCoinPathClear(candidate, transform.position.z, cruiseSpeed) && LaneIsClear(candidate))
             {
                 lane = candidate;
                 targetX = lane * EmergencyRoadGame.LaneWidth;
             }
+        }
+
+        internal bool WillIntersectCoin(Vector3 coinPosition, float coinRemoveZ)
+        {
+            float laneMargin = 1.35f;
+            float minimumX = Mathf.Min(transform.position.x, targetX) - laneMargin;
+            float maximumX = Mathf.Max(transform.position.x, targetX) + laneMargin;
+            if (coinPosition.x < minimumX || coinPosition.x > maximumX) return false;
+
+            float distanceAhead = coinPosition.z - transform.position.z;
+            if (distanceAhead < -3.8f) return false;
+            float contactTime = Mathf.Max(0f, distanceAhead - 3.8f) / Mathf.Max(1f, cruiseSpeed);
+            float coinZAtContact = coinPosition.z - game.CurrentSpeed * contactTime;
+            return coinZAtContact > coinRemoveZ;
         }
 
         private int FindSoleOpenRoute()
@@ -104,13 +119,15 @@ namespace EmergencyRoad
         {
             int left = lane - 1;
             int right = lane + 1;
-            if (left >= -1 && !LaneIsReservedEscape(left) && LaneIsClear(left))
+            if (left >= -1 && !LaneIsReservedEscape(left) &&
+                game.IsSameDirectionCoinPathClear(left, transform.position.z, cruiseSpeed) && LaneIsClear(left))
             {
                 lane = left;
                 targetX = lane * EmergencyRoadGame.LaneWidth;
                 return;
             }
-            if (right <= 1 && !LaneIsReservedEscape(right) && LaneIsClear(right))
+            if (right <= 1 && !LaneIsReservedEscape(right) &&
+                game.IsSameDirectionCoinPathClear(right, transform.position.z, cruiseSpeed) && LaneIsClear(right))
             {
                 lane = right;
                 targetX = lane * EmergencyRoadGame.LaneWidth;
@@ -133,13 +150,15 @@ namespace EmergencyRoad
             int best = -99;
             for (int candidate = -1; candidate <= 1; candidate++)
             {
-                if (reservedLanes[candidate + 1] || !LaneIsClear(candidate)) continue;
+                if (reservedLanes[candidate + 1] ||
+                    !game.IsSameDirectionCoinPathClear(candidate, transform.position.z, cruiseSpeed) ||
+                    !LaneIsClear(candidate)) continue;
                 if (best == -99 || Mathf.Abs(candidate - lane) < Mathf.Abs(best - lane)) best = candidate;
             }
 
             if (best == -99 || best == lane) return;
             int step = lane + System.Math.Sign(best - lane);
-            if (!LaneIsClear(step)) return;
+            if (!game.IsSameDirectionCoinPathClear(step, transform.position.z, cruiseSpeed) || !LaneIsClear(step)) return;
 
             lane = step;
             targetX = lane * EmergencyRoadGame.LaneWidth;
