@@ -76,7 +76,9 @@ namespace EmergencyRoad
             crashView = true;
             firstPerson = false;
             transitioning = false;
-            mirrorView?.SetVisible(false);
+            // Game Over must never share the screen with the first-person mirrors.
+            // Regular V-key toggling still uses the authored slide animation.
+            mirrorView?.SetVisible(false, true);
             float side = impactDirection.x >= 0f ? -1f : 1f;
             crashOffset = new Vector3(side * 6.8f, 4.4f, -6.8f);
             Shake(.48f, .28f);

@@ -82,9 +82,9 @@ namespace EmergencyRoad
             Bind(sceneView.sideCollision, ToggleSideCollision);
             Bind(sceneView.selectVehicle, OpenGarage);
             Bind(sceneView.garageBack, CloseGarage);
-            Bind(sceneView.controlsOpen, () => { sceneView.settingsPanel.SetActive(false); sceneView.controlsPanel.SetActive(true); });
+            Bind(sceneView.controlsOpen, () => { SetPanel(sceneView.settingsPanel, false); SetPanel(sceneView.controlsPanel, true); });
             Bind(sceneView.settingsClose, ToggleSettings);
-            Bind(sceneView.controlsBack, () => { sceneView.controlsPanel.SetActive(false); sceneView.settingsPanel.SetActive(true); });
+            Bind(sceneView.controlsBack, () => { SetPanel(sceneView.controlsPanel, false); SetPanel(sceneView.settingsPanel, true); });
             Bind(sceneView.music, v =>
             {
                 EmergencyRoadProfile.Current.musicVolume = v;
@@ -98,10 +98,10 @@ namespace EmergencyRoad
                 EmergencyRoadProfile.Save();
             }, EmergencyRoadProfile.Current.sfxVolume);
 
-            sceneView.mainMenuPanel.SetActive(true);
-            sceneView.garagePanel.SetActive(false);
-            sceneView.settingsPanel.SetActive(false);
-            sceneView.controlsPanel.SetActive(false);
+            SetPanel(sceneView.mainMenuPanel, true, true);
+            SetPanel(sceneView.garagePanel, false, true);
+            SetPanel(sceneView.settingsPanel, false, true);
+            SetPanel(sceneView.controlsPanel, false, true);
             RefreshSideCollisionLabel();
         }
 
@@ -123,21 +123,38 @@ namespace EmergencyRoad
         private void OpenGarage()
         {
             Select(ResolveOwnedSelection());
-            sceneView.mainMenuPanel.SetActive(false);
-            sceneView.garagePanel.SetActive(true);
+            SetPanel(sceneView.mainMenuPanel, false);
+            SetPanel(sceneView.garagePanel, true);
         }
 
         private void CloseGarage()
         {
             Select(ResolveOwnedSelection());
-            sceneView.garagePanel.SetActive(false);
-            sceneView.mainMenuPanel.SetActive(true);
+            SetPanel(sceneView.garagePanel, false);
+            SetPanel(sceneView.mainMenuPanel, true);
         }
 
         private void ToggleSettings()
         {
-            sceneView.settingsPanel.SetActive(!sceneView.settingsPanel.activeSelf);
-            sceneView.controlsPanel.SetActive(false);
+            SetPanel(sceneView.settingsPanel, !PanelIsVisible(sceneView.settingsPanel));
+            SetPanel(sceneView.controlsPanel, false);
+        }
+
+        private static bool PanelIsVisible(GameObject panel)
+        {
+            if (panel == null) return false;
+            EmergencyPanelTransition transition = panel.GetComponent<EmergencyPanelTransition>();
+            return transition != null ? transition.TargetVisible : panel.activeSelf;
+        }
+
+        private static void SetPanel(GameObject panel, bool visible, bool immediate = false)
+        {
+            if (panel == null) return;
+            EmergencyPanelTransition transition = panel.GetComponent<EmergencyPanelTransition>();
+            if (transition != null)
+                transition.SetVisible(visible, immediate);
+            else
+                panel.SetActive(visible);
         }
 
         private void ToggleSideCollision()

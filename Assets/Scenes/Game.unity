@@ -1866,6 +1866,8 @@ GameObject:
   - component: {fileID: 166769404}
   - component: {fileID: 166769405}
   - component: {fileID: 166769406}
+  - component: {fileID: 920100001}
+  - component: {fileID: 920100002}
   m_Layer: 0
   m_Name: "T\u1EA0M D\u1EEANG"
   m_TagString: Untagged
@@ -1873,6 +1875,37 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!225 &920100001
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 166769403}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &920100002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 166769403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f20d3a19a384f5c9b0915f20e714223, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  canvasGroup: {fileID: 920100001}
+  animatedRoot: {fileID: 166769404}
+  style: 3
+  duration: 0.26
+  hiddenOffset: {x: 0, y: -36}
+  hiddenScale: 0.9
+  deactivateWhenHidden: 1
 --- !u!224 &166769404
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28499,6 +28532,8 @@ GameObject:
   - component: {fileID: 1928240669}
   - component: {fileID: 1928240670}
   - component: {fileID: 1928240671}
+  - component: {fileID: 920100011}
+  - component: {fileID: 920100012}
   m_Layer: 0
   m_Name: "H\u1EBET L\u01AF\u1EE2T!"
   m_TagString: Untagged
@@ -28506,6 +28541,37 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!225 &920100011
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928240668}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &920100012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928240668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f20d3a19a384f5c9b0915f20e714223, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  canvasGroup: {fileID: 920100011}
+  animatedRoot: {fileID: 1928240669}
+  style: 3
+  duration: 0.32
+  hiddenOffset: {x: 0, y: -42}
+  hiddenScale: 0.88
+  deactivateWhenHidden: 1
 --- !u!224 &1928240669
 RectTransform:
   m_ObjectHideFlags: 0

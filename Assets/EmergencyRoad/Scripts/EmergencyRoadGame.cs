@@ -249,8 +249,8 @@ namespace EmergencyRoad
             Bind(sceneView.retry, Restart);
             Bind(sceneView.garage, Menu);
 
-            if (pausePanel != null) pausePanel.SetActive(false);
-            if (gameOverPanel != null) gameOverPanel.SetActive(false);
+            SetPanel(pausePanel, false, true);
+            SetPanel(gameOverPanel, false, true);
         }
 
         private void Bind(Button button, UnityEngine.Events.UnityAction action)
@@ -594,14 +594,24 @@ namespace EmergencyRoad
             EmergencyRoadProfile.Current.highScore = Mathf.Max(score, EmergencyRoadProfile.Current.highScore);
             EmergencyRoadProfile.Save();
             if (gameOverScore != null) gameOverScore.text = $"{score:N0} m  •  BEST {EmergencyRoadProfile.Current.highScore:N0} m";
-            if (gameOverPanel != null) gameOverPanel.SetActive(true);
+            SetPanel(gameOverPanel, true);
         }
 
         private void TogglePause()
         {
             paused = !paused;
             Time.timeScale = paused ? 0f : 1f;
-            if (pausePanel != null) pausePanel.SetActive(paused);
+            SetPanel(pausePanel, paused);
+        }
+
+        private static void SetPanel(GameObject panel, bool visible, bool immediate = false)
+        {
+            if (panel == null) return;
+            EmergencyPanelTransition transition = panel.GetComponent<EmergencyPanelTransition>();
+            if (transition != null)
+                transition.SetVisible(visible, immediate);
+            else
+                panel.SetActive(visible);
         }
 
         private void Restart()
