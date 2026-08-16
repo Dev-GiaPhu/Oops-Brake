@@ -20,6 +20,7 @@ namespace EmergencyRoad
         private static readonly int RippleStrengthId = Shader.PropertyToID("_EmergencyRippleStrength");
         private static readonly int RippleSizeId = Shader.PropertyToID("_EmergencyRippleSize");
         private static readonly int TrackDistanceId = Shader.PropertyToID("_EmergencyTrackDistance");
+        private static readonly int WetnessWarmupId = Shader.PropertyToID("_EmergencyWetnessWarmup");
 
         [Header("THAM CHIEU TRONG SCENE")]
         [SerializeField] private EmergencyRoadGame gameplay;
@@ -44,6 +45,9 @@ namespace EmergencyRoad
         [SerializeField] private Vector2 clearDurationRange = new(35f, 70f);
         [SerializeField] private Vector2 rainDurationRange = new(28f, 55f);
         [SerializeField, Min(.1f)] private float transitionDuration = 4f;
+
+        [Header("KHOI DONG SHADER - CHONG CHOP XANH")]
+        [SerializeField, Range(2, 30)] private int shaderWarmupFrames = 8;
 
         [Header("MUA")]
         [SerializeField, Min(0f)] private float maximumEmissionRate = 720f;
@@ -80,6 +84,7 @@ namespace EmergencyRoad
         private Color initialFogColor;
         private FogMode initialFogMode;
         private float initialFogDensity;
+        private bool shaderWarmupComplete;
 
         public WeatherState CurrentWeather => currentWeather;
         public float RainBlend => rainBlend;
@@ -91,6 +96,7 @@ namespace EmergencyRoad
             Shader.SetGlobalFloat(WetnessId, 0f);
             Shader.SetGlobalFloat(RainIntensityId, 0f);
             Shader.SetGlobalFloat(TrackDistanceId, 0f);
+            Shader.SetGlobalFloat(WetnessWarmupId, 0f);
         }
 
         private void Awake()
@@ -110,12 +116,20 @@ namespace EmergencyRoad
         private void OnEnable()
         {
             DayNightCycle.NightStateChanged += OnNightStateChanged;
+            if (!Application.isPlaying) return;
+
+            shaderWarmupComplete = false;
+            Shader.SetGlobalFloat(WetnessWarmupId, 1f);
+            StartCoroutine(CompleteShaderWarmup());
         }
 
         private void Start()
         {
             WeatherState initial = randomizeOnStart ? PickWeatherForCurrentLight() : startingWeather;
-            SetWeather(initial, true);
+            SetWeather(initial, false);
+            rainBlend = 0f;
+            wetness = 0f;
+            ApplyRainVisuals();
             ScheduleLightning();
         }
 
@@ -140,6 +154,18 @@ namespace EmergencyRoad
 
         private void Update()
         {
+            if (!shaderWarmupComplete)
+            {
+                // Keep the warmup pass visually neutral. It prepares URP resources
+                // before rain becomes visible, so no blue fallback frame appears.
+                rainBlend = 0f;
+                wetness = 0f;
+                ApplyRainVisuals();
+                UpdateAudio();
+                UpdateFog();
+                return;
+            }
+
             float delta = Time.deltaTime;
             UpdateWeatherSchedule(delta);
             UpdateRainAndWetness(delta);
@@ -224,6 +250,16 @@ namespace EmergencyRoad
                 thunderAudioSource.playOnAwake = false;
                 thunderAudioSource.loop = false;
             }
+        }
+
+        private IEnumerator CompleteShaderWarmup()
+        {
+            int frames = Mathf.Clamp(shaderWarmupFrames, 2, 30);
+            for (int frame = 0; frame < frames; frame++)
+                yield return null;
+
+            Shader.SetGlobalFloat(WetnessWarmupId, 0f);
+            shaderWarmupComplete = true;
         }
 
         private void SetWeather(WeatherState state, bool immediate)
@@ -412,6 +448,7 @@ namespace EmergencyRoad
             rainDurationRange.y = Mathf.Max(rainDurationRange.x, rainDurationRange.y);
             lightningIntervalRange.x = Mathf.Max(.5f, lightningIntervalRange.x);
             lightningIntervalRange.y = Mathf.Max(lightningIntervalRange.x, lightningIntervalRange.y);
+            shaderWarmupFrames = Mathf.Clamp(shaderWarmupFrames, 2, 30);
             ApplyTuningGlobals();
         }
 #endif

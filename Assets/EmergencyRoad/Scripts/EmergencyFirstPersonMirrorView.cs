@@ -25,6 +25,10 @@ namespace EmergencyRoad
         private float visibility;
         private float targetVisibility;
         private bool initialized;
+        private bool leftOriginalActive;
+        private bool rightOriginalActive;
+        private bool leftOriginalEnabled;
+        private bool rightOriginalEnabled;
 
         public bool IsConfigured => leftMirror != null && rightMirror != null;
 
@@ -48,6 +52,17 @@ namespace EmergencyRoad
             ApplyLayout();
         }
 
+        private void OnEnable()
+        {
+            if (initialized && Application.isPlaying)
+                ApplyLayout();
+        }
+
+        private void OnDisable()
+        {
+            RestoreAuthoredLayout();
+        }
+
         public void SetVisible(bool visible, bool immediate = false)
         {
             CacheLayout();
@@ -69,11 +84,24 @@ namespace EmergencyRoad
             if (initialized || !IsConfigured) return;
             // Move the parent frames when assigned. Moving both a frame and its
             // child RawImage would apply the slide offset twice.
+            leftFrame = ResolveAuthoredFrame(leftMirror, leftFrame);
+            rightFrame = ResolveAuthoredFrame(rightMirror, rightFrame);
             leftRect = leftFrame != null ? leftFrame : leftMirror.rectTransform;
             rightRect = rightFrame != null ? rightFrame : rightMirror.rectTransform;
             leftShown = leftRect.anchoredPosition;
             rightShown = rightRect.anchoredPosition;
+            leftOriginalActive = leftRect.gameObject.activeSelf;
+            rightOriginalActive = rightRect.gameObject.activeSelf;
+            leftOriginalEnabled = leftMirror.enabled;
+            rightOriginalEnabled = rightMirror.enabled;
             initialized = true;
+        }
+
+        private RectTransform ResolveAuthoredFrame(RawImage mirror, RectTransform assignedFrame)
+        {
+            if (assignedFrame != null) return assignedFrame;
+            RectTransform parent = mirror.rectTransform.parent as RectTransform;
+            return parent != null && parent != transform ? parent : null;
         }
 
         private void ApplyLayout()
@@ -89,6 +117,17 @@ namespace EmergencyRoad
             if (rightFrame != null) rightFrame.gameObject.SetActive(visible);
             leftMirror.enabled = visible;
             rightMirror.enabled = visible;
+        }
+
+        private void RestoreAuthoredLayout()
+        {
+            if (!initialized) return;
+            leftRect.anchoredPosition = leftShown;
+            rightRect.anchoredPosition = rightShown;
+            leftRect.gameObject.SetActive(leftOriginalActive);
+            rightRect.gameObject.SetActive(rightOriginalActive);
+            leftMirror.enabled = leftOriginalEnabled;
+            rightMirror.enabled = rightOriginalEnabled;
         }
     }
 }
