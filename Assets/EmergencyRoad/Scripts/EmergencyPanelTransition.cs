@@ -33,6 +33,7 @@ namespace EmergencyRoad
         private bool targetVisible;
 
         public bool TargetVisible => targetVisible;
+        public float Duration => duration;
 
         private void Awake()
         {
@@ -90,10 +91,12 @@ namespace EmergencyRoad
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.05f, duration));
-                float eased = t * t * (3f - 2f * t);
-                canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, destinationAlpha, eased);
-                animatedRoot.anchoredPosition = Vector2.LerpUnclamped(startPosition, destinationPosition, eased);
-                animatedRoot.localScale = Vector3.LerpUnclamped(startScale, destinationScale, eased);
+                float alphaEase = visible ? EaseOutCubic(t) : Smoother(t);
+                float transformEase = visible ? EaseOutQuint(t) : Smoother(t);
+
+                canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, destinationAlpha, alphaEase);
+                animatedRoot.anchoredPosition = Vector2.LerpUnclamped(startPosition, destinationPosition, transformEase);
+                animatedRoot.localScale = Vector3.LerpUnclamped(startScale, destinationScale, transformEase);
                 yield return null;
             }
 
@@ -131,6 +134,24 @@ namespace EmergencyRoad
             shownScale = animatedRoot.localScale;
             targetVisible = gameObject.activeSelf;
             initialized = true;
+        }
+
+        private static float EaseOutCubic(float t)
+        {
+            float inv = 1f - Mathf.Clamp01(t);
+            return 1f - inv * inv * inv;
+        }
+
+        private static float EaseOutQuint(float t)
+        {
+            float inv = 1f - Mathf.Clamp01(t);
+            return 1f - inv * inv * inv * inv * inv;
+        }
+
+        private static float Smoother(float t)
+        {
+            t = Mathf.Clamp01(t);
+            return t * t * t * (t * (t * 6f - 15f) + 10f);
         }
 
         private bool UsesScale => style == TransitionStyle.ScaleFade || style == TransitionStyle.ScaleSlideFade;

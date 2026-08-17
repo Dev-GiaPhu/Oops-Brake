@@ -20,6 +20,7 @@ namespace EmergencyRoad
         private RectTransform logoCenterMarker;
         [SerializeField] private RectTransform menuLogo;
         [SerializeField] private EmergencyRoadLogoMotion logoIdleMotion;
+        [SerializeField] private EmergencyRoadMenuIntroReveal menuReveal;
         [SerializeField] private AudioSource introAudioSource;
         [SerializeField] private AudioClip introClip;
 
@@ -69,9 +70,6 @@ namespace EmergencyRoad
 
         private void Awake()
         {
-            // Backward-compatible cleanup for Menu scenes authored with the old
-            // full-screen intro Image. The editor authoring tool removes it
-            // permanently; this prevents one frame of the legacy image meanwhile.
             Graphic legacyBackground = GetComponent<Graphic>();
             if (legacyBackground != null) legacyBackground.enabled = false;
         }
@@ -80,16 +78,15 @@ namespace EmergencyRoad
         {
             if (!ValidateReferences())
             {
-                // Keep the authored Menu usable if the editor setup has not been
-                // run yet. The intro root may still contain an input-blocking
-                // CanvasGroup from the legacy implementation.
+                if (menuReveal != null) menuReveal.ShowImmediate();
                 gameObject.SetActive(false);
                 yield break;
             }
 
             if (playOncePerApplication && playedThisApplication)
             {
-                FinishInstantly();
+                menuReveal.ShowImmediate();
+                gameObject.SetActive(false);
                 yield break;
             }
 
@@ -100,6 +97,7 @@ namespace EmergencyRoad
             Canvas.ForceUpdateCanvases();
             PrepareCamera();
             PrepareMenuLogo();
+            menuReveal.PrepareHidden();
 
             if (introAudioSource != null && introClip != null)
             {
@@ -115,7 +113,9 @@ namespace EmergencyRoad
             if (!skipRequested)
                 yield return AnimateCameraAndLogoHome();
 
-            FinishInstantly();
+            RestorePresentation();
+            yield return menuReveal.Reveal();
+            gameObject.SetActive(false);
         }
 
         private void Update()
@@ -154,6 +154,11 @@ namespace EmergencyRoad
             if (menuLogo == null)
             {
                 Debug.LogError("[Emergency Road] Intro thieu logo hien tai cua Menu.", this);
+                valid = false;
+            }
+            if (menuReveal == null)
+            {
+                Debug.LogError("[Emergency Road] Intro thieu Menu Intro Reveal. Chay Setup Menu Commercial Reveal de wire UI.", this);
                 valid = false;
             }
             return valid;
@@ -270,7 +275,7 @@ namespace EmergencyRoad
             }
         }
 
-        private void FinishInstantly()
+        private void RestorePresentation()
         {
             if (introAudioSource != null && introAudioSource.isPlaying)
                 introAudioSource.Stop();
@@ -297,8 +302,6 @@ namespace EmergencyRoad
 
                 if (logoIdleMotion != null) logoIdleMotion.enabled = true;
             }
-
-            gameObject.SetActive(false);
         }
 
         private static float Smoother(float t)
