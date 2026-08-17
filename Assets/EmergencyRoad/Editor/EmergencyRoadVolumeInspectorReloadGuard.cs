@@ -10,9 +10,11 @@ using UnityEngine.Rendering;
 namespace EmergencyRoad.Editor
 {
     /// <summary>
-    /// Prevents Unity 6 URP embedded Volume editors from surviving a script/play-mode
-    /// reload with destroyed targets. Never ForceRebuild an invalid Volume editor:
-    /// doing so is what can create Bloom/DoF/MotionBlur editors with null targets.
+    /// Workaround for Unity 6 Inspector/URP editor state surviving play-mode or script
+    /// reload with destroyed targets. The play-mode path deliberately unlocks every
+    /// Inspector, because Unity's stale-target regression is not limited to Volume
+    /// editors once an Inspector has been locked. Never ForceRebuild an invalid
+    /// editor; disposing it before the transition is the safe path.
     /// </summary>
     [InitializeOnLoad]
     internal static class EmergencyRoadVolumeInspectorReloadGuard
@@ -26,6 +28,8 @@ namespace EmergencyRoad.Editor
         private static readonly PropertyInfo InspectorLockedProperty = InspectorWindowType?.GetProperty(
             "isLocked", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
+        private static bool playTransitionPrepared;
+
         static EmergencyRoadVolumeInspectorReloadGuard()
         {
             AssemblyReloadEvents.beforeAssemblyReload -= ReleaseVolumeInspectors;
@@ -36,6 +40,9 @@ namespace EmergencyRoad.Editor
 
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+
+            EditorApplication.update -= OnEditorUpdate;
+            EditorApplication.update += OnEditorUpdate;
         }
 
         private static void OnCompilationStarted(object context)
@@ -43,10 +50,56 @@ namespace EmergencyRoad.Editor
             ReleaseVolumeInspectors();
         }
 
+        private static void OnEditorUpdate()
+        {
+            bool preparingPlay = EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying;
+
+            if (preparingPlay)
+            {
+                if (!playTransitionPrepared)
+                {
+                    playTransitionPrepared = true;
+                    ReleaseAllInspectorsBeforePlay();
+                }
+            }
+            else
+            {
+                playTransitionPrepared = false;
+            }
+        }
+
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.ExitingPlayMode)
-                ReleaseVolumeInspectors();
+            if (state == PlayModeStateChange.ExitingEditMode)
+            {
+                // Fallback in case Unity reaches the play-mode callback before our
+                // update-loop transition detector on a particular editor frame.
+                ReleaseAllInspectorsBeforePlay();
+            }
+            else if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                ReleaseAllInspectorsBeforePlay();
+            }
+        }
+
+        private static void ReleaseAllInspectorsBeforePlay()
+        {
+            HashSet<ActiveEditorTracker> visited = new();
+            UnlockTracker(ActiveEditorTracker.sharedTracker, visited);
+
+            if (InspectorWindowType != null)
+            {
+                UnityEngine.Object[] windows = Resources.FindObjectsOfTypeAll(InspectorWindowType);
+                foreach (UnityEngine.Object window in windows)
+                {
+                    TryUnlockWindow(window, visited);
+                }
+            }
+
+            // Clear every selection before Unity starts replacing scene/editor
+            // objects for Play Mode. This disposes embedded Volume component editors
+            // while their targets are still valid.
+            Selection.objects = Array.Empty<UnityEngine.Object>();
         }
 
         internal static void ReleaseVolumeInspectors()
@@ -61,23 +114,76 @@ namespace EmergencyRoad.Editor
                 UnityEngine.Object[] windows = Resources.FindObjectsOfTypeAll(InspectorWindowType);
                 foreach (UnityEngine.Object window in windows)
                 {
-                    ActiveEditorTracker tracker = InspectorTrackerProperty.GetValue(window) as ActiveEditorTracker;
+                    ActiveEditorTracker tracker = GetTracker(window);
                     AddVolumeTracker(tracker, window, visited, trackers);
                 }
             }
 
-            if (trackers.Count == 0) return;
+            if (trackers.Count == 0)
+                return;
 
             foreach ((ActiveEditorTracker tracker, UnityEngine.Object window) in trackers)
             {
-                tracker.isLocked = false;
+                UnlockTracker(tracker, null);
                 if (window != null)
-                    InspectorLockedProperty?.SetValue(window, false);
+                    TrySetInspectorWindowLocked(window, false);
             }
 
-            // Clearing selection lets Unity dispose the embedded URP editors while
-            // their targets still exist. Intentionally do NOT call ForceRebuild.
-            Selection.activeObject = null;
+            Selection.objects = Array.Empty<UnityEngine.Object>();
+        }
+
+        private static void TryUnlockWindow(UnityEngine.Object window, HashSet<ActiveEditorTracker> visited)
+        {
+            TrySetInspectorWindowLocked(window, false);
+            UnlockTracker(GetTracker(window), visited);
+        }
+
+        private static ActiveEditorTracker GetTracker(UnityEngine.Object window)
+        {
+            if (window == null || InspectorTrackerProperty == null)
+                return null;
+
+            try
+            {
+                return InspectorTrackerProperty.GetValue(window) as ActiveEditorTracker;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void UnlockTracker(ActiveEditorTracker tracker, HashSet<ActiveEditorTracker> visited)
+        {
+            if (tracker == null)
+                return;
+
+            if (visited != null && !visited.Add(tracker))
+                return;
+
+            try
+            {
+                tracker.isLocked = false;
+            }
+            catch
+            {
+                // A tracker can disappear while Unity is rebuilding Editor windows.
+            }
+        }
+
+        private static void TrySetInspectorWindowLocked(UnityEngine.Object window, bool value)
+        {
+            if (window == null || InspectorLockedProperty == null || !InspectorLockedProperty.CanWrite)
+                return;
+
+            try
+            {
+                InspectorLockedProperty.SetValue(window, value);
+            }
+            catch
+            {
+                // Reflection details differ slightly between Unity 6 patch versions.
+            }
         }
 
         private static void AddVolumeTracker(
@@ -86,19 +192,42 @@ namespace EmergencyRoad.Editor
             HashSet<ActiveEditorTracker> visited,
             List<(ActiveEditorTracker tracker, UnityEngine.Object window)> result)
         {
-            if (tracker == null || !visited.Add(tracker) || !HasVolumeEditor(tracker)) return;
+            if (tracker == null || !visited.Add(tracker) || !HasVolumeEditor(tracker))
+                return;
+
             result.Add((tracker, window));
         }
 
         private static bool HasVolumeEditor(ActiveEditorTracker tracker)
         {
-            foreach (UnityEditor.Editor editor in tracker.activeEditors)
+            UnityEditor.Editor[] editors;
+            try
             {
-                if (editor == null) continue;
+                editors = tracker.activeEditors;
+            }
+            catch
+            {
+                return false;
+            }
 
-                if (editor.target is Volume ||
-                    editor.target is VolumeProfile ||
-                    editor.target is VolumeComponent ||
+            foreach (UnityEditor.Editor editor in editors)
+            {
+                if (editor == null)
+                    continue;
+
+                UnityEngine.Object target = null;
+                try
+                {
+                    target = editor.target;
+                }
+                catch
+                {
+                    // A destroyed target is exactly the state we want to dispose.
+                }
+
+                if (target is Volume ||
+                    target is VolumeProfile ||
+                    target is VolumeComponent ||
                     IsVolumeEditor(editor.GetType()))
                     return true;
             }
