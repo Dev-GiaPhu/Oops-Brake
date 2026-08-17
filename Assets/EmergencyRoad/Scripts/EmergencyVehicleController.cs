@@ -57,13 +57,21 @@ namespace EmergencyRoad
                 HornHeld = false;
                 return;
             }
-            if (Keyboard.current.aKey.wasPressedThisFrame) Shift(-1);
-            if (Keyboard.current.dKey.wasPressedThisFrame) Shift(1);
-            HornHeld = Keyboard.current.spaceKey.isPressed;
-            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+
+            bool shiftLeftPressed = Keyboard.current.aKey.wasPressedThisFrame || Keyboard.current.leftArrowKey.wasPressedThisFrame;
+            bool shiftRightPressed = Keyboard.current.dKey.wasPressedThisFrame || Keyboard.current.rightArrowKey.wasPressedThisFrame;
+            if (shiftLeftPressed) Shift(-1);
+            if (shiftRightPressed) Shift(1);
+
+            bool hornSpaceHeld = Keyboard.current.spaceKey.isPressed;
+            bool hornEKeyHeld = Keyboard.current.eKey.isPressed;
+            HornHeld = hornSpaceHeld || hornEKeyHeld;
+            bool hornPressed = Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.eKey.wasPressedThisFrame;
+            if (hornPressed)
                 Honk();
             else if (HornHeld && AudioSettings.dspTime >= nextHornDspTime)
                 Honk();
+
             Vector3 p = transform.position;
             p.x = Mathf.SmoothDamp(p.x, targetX, ref bump, .12f);
             transform.position = p;
