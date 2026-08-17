@@ -234,13 +234,71 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4808909949700521764, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2285358626314997414}
+    - targetCorrespondingSourceObject: {fileID: 218773622377506448, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2886999003465052007}
   m_SourcePrefab: {fileID: 100100000, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
 --- !u!4 &691393055689006300 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2133594953162467821, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
   m_PrefabInstance: {fileID: 1442382354819806513}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1661092067546895265 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 218773622377506448, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+  m_PrefabInstance: {fileID: 1442382354819806513}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2886999003465052007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1661092067546895265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8e10879a2d4a859e8006de55dc5d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
+--- !u!1 &6249009477323770389 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4808909949700521764, guid: 3c1797b6ce0d2d64eb0a86d2e7046c63, type: 3}
+  m_PrefabInstance: {fileID: 1442382354819806513}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2285358626314997414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6249009477323770389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8e10879a2d4a859e8006de55dc5d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
 --- !u!1001 &2457549349600364412
 PrefabInstance:
   m_ObjectHideFlags: 0

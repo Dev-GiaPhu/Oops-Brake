@@ -170,6 +170,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
 --- !u!114 &-5519119997387672872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,6 +212,7 @@ GameObject:
   - component: {fileID: 1387812814357791192}
   - component: {fileID: 3891290382179305900}
   - component: {fileID: 6086599555882135451}
+  - component: {fileID: 7268897299761356887}
   m_Layer: 0
   m_Name: Spot Light
   m_TagString: Untagged
@@ -314,6 +323,27 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &7268897299761356887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3434549032873310440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8e10879a2d4a859e8006de55dc5d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
 --- !u!1 &5132214664787263969
 GameObject:
   m_ObjectHideFlags: 0
@@ -5175,6 +5205,7 @@ GameObject:
   - component: {fileID: 4746794384107009159}
   - component: {fileID: 1169326786532307527}
   - component: {fileID: 1781212801336171591}
+  - component: {fileID: 3041444869585418100}
   m_Layer: 0
   m_Name: Spot Light (1)
   m_TagString: Untagged
@@ -5285,3 +5316,24 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &3041444869585418100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8163895176493555844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8e10879a2d4a859e8006de55dc5d09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invert: 0
+  useFade: 1
+  useStartupFlicker: 0
+  fadeInDuration: 0.9
+  fadeOutDuration: 0.65
+  randomStartDelay: 0.3
+  startupFlickerDuration: 0.42
+  flickerSpeed: 18
+  flickerMinimum: 0.08
