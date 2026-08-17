@@ -2933,9 +2933,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebd954acdcfe0c64baedf4b366312356, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuCamera: {fileID: 2061855437}
+  menuCamera: {fileID: 1313069636}
   cameraIntroMarker: {fileID: 1659783830}
-  cameraOrbit: {fileID: 2061855439}
+  cameraOrbit: {fileID: 0}
   logoStartMarker: {fileID: 910000011}
   logoCenterMarker: {fileID: 1174452330}
   menuLogo: {fileID: 1491754602}
