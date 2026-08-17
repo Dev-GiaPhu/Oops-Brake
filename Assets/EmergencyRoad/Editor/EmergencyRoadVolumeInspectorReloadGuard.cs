@@ -113,9 +113,10 @@ namespace EmergencyRoad.Editor
             foreach (UnityEditor.Editor editor in tracker.activeEditors)
             {
                 if (editor == null) continue;
-                bool isVolumeEditor = editor.target is VolumeProfile
+                bool isVolumeEditor = editor.target is Volume
+                    || editor.target is VolumeProfile
                     || editor.target is VolumeComponent
-                    || IsVolumeComponentEditor(editor.GetType());
+                    || IsVolumeEditor(editor.GetType());
                 if (!isVolumeEditor) continue;
                 if (!invalidOnly || editor.target == null || editor.targets == null || editor.targets.Length == 0)
                     return true;
@@ -123,10 +124,10 @@ namespace EmergencyRoad.Editor
             return false;
         }
 
-        private static bool IsVolumeComponentEditor(System.Type type)
+        private static bool IsVolumeEditor(System.Type type)
         {
             for (System.Type current = type; current != null; current = current.BaseType)
-                if (current.Name == "VolumeComponentEditor") return true;
+                if (current.Name == "VolumeEditor" || current.Name == "VolumeComponentEditor") return true;
             return false;
         }
     }
