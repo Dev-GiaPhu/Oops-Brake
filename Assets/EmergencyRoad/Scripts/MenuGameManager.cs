@@ -77,14 +77,14 @@ namespace EmergencyRoad
             Bind(sceneView.next, () => Select(index + 1));
             Bind(sceneView.vehicleAction, VehicleAction);
             Bind(sceneView.play, Play);
-            Bind(sceneView.settingsOpen, ToggleSettings);
+            Bind(sceneView.settingsOpen, OpenSettings);
             Bind(sceneView.quit, Application.Quit);
             Bind(sceneView.sideCollision, ToggleSideCollision);
             Bind(sceneView.selectVehicle, OpenGarage);
             Bind(sceneView.garageBack, CloseGarage);
-            Bind(sceneView.controlsOpen, () => { SetPanel(sceneView.settingsPanel, false); SetPanel(sceneView.controlsPanel, true); });
-            Bind(sceneView.settingsClose, ToggleSettings);
-            Bind(sceneView.controlsBack, () => { SetPanel(sceneView.controlsPanel, false); SetPanel(sceneView.settingsPanel, true); });
+            Bind(sceneView.controlsOpen, OpenControls);
+            Bind(sceneView.settingsClose, CloseSettings);
+            Bind(sceneView.controlsBack, BackToSettings);
             Bind(sceneView.music, v =>
             {
                 EmergencyRoadProfile.Current.musicVolume = v;
@@ -98,10 +98,7 @@ namespace EmergencyRoad
                 EmergencyRoadProfile.Save();
             }, EmergencyRoadProfile.Current.sfxVolume);
 
-            SetPanel(sceneView.mainMenuPanel, true, true);
-            SetPanel(sceneView.garagePanel, false, true);
-            SetPanel(sceneView.settingsPanel, false, true);
-            SetPanel(sceneView.controlsPanel, false, true);
+            ShowOnlyContent(sceneView.mainMenuPanel, true);
             RefreshSideCollisionLabel();
         }
 
@@ -123,21 +120,45 @@ namespace EmergencyRoad
         private void OpenGarage()
         {
             Select(ResolveOwnedSelection());
-            SetPanel(sceneView.mainMenuPanel, false);
-            SetPanel(sceneView.garagePanel, true);
+            ShowOnlyContent(sceneView.garagePanel);
         }
 
         private void CloseGarage()
         {
             Select(ResolveOwnedSelection());
-            SetPanel(sceneView.garagePanel, false);
-            SetPanel(sceneView.mainMenuPanel, true);
+            ShowOnlyContent(sceneView.mainMenuPanel);
         }
 
-        private void ToggleSettings()
+        private void OpenSettings()
         {
-            SetPanel(sceneView.settingsPanel, !PanelIsVisible(sceneView.settingsPanel));
-            SetPanel(sceneView.controlsPanel, false);
+            ShowOnlyContent(sceneView.settingsPanel);
+        }
+
+        private void CloseSettings()
+        {
+            ShowOnlyContent(sceneView.mainMenuPanel);
+        }
+
+        private void OpenControls()
+        {
+            ShowOnlyContent(sceneView.controlsPanel);
+        }
+
+        private void BackToSettings()
+        {
+            ShowOnlyContent(sceneView.settingsPanel);
+        }
+
+        /// <summary>
+        /// Chỉ đổi các content panel của Menu. Top Bar/HUD nằm ngoài nhóm này nên
+        /// luôn được giữ lại khi mở Garage, Settings hoặc Controls.
+        /// </summary>
+        private void ShowOnlyContent(GameObject targetPanel, bool immediate = false)
+        {
+            SetPanel(sceneView.mainMenuPanel, targetPanel == sceneView.mainMenuPanel, immediate);
+            SetPanel(sceneView.garagePanel, targetPanel == sceneView.garagePanel, immediate);
+            SetPanel(sceneView.settingsPanel, targetPanel == sceneView.settingsPanel, immediate);
+            SetPanel(sceneView.controlsPanel, targetPanel == sceneView.controlsPanel, immediate);
         }
 
         private static bool PanelIsVisible(GameObject panel)
