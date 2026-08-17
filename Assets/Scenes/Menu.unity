@@ -3115,7 +3115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 920000001}
   animatedRoot: {fileID: 1683527617}
-  style: 2
+  style: 1
   duration: 0.28
   hiddenOffset: {x: 72, y: 0}
   hiddenScale: 1
@@ -3146,7 +3146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 920000011}
   animatedRoot: {fileID: 624339209}
-  style: 2
+  style: 1
   duration: 0.28
   hiddenOffset: {x: 72, y: 0}
   hiddenScale: 1
