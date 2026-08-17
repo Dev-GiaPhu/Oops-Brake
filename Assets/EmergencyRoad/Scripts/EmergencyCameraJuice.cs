@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace EmergencyRoad
 {
@@ -77,7 +78,7 @@ namespace EmergencyRoad
             firstPerson = false;
             transitioning = false;
             // Game Over must never share the screen with the first-person mirrors.
-            // Regular V-key toggling still uses the authored slide animation.
+            // Regular G-key toggling still uses the authored slide animation.
             mirrorView?.SetVisible(false, true);
             float side = impactDirection.x >= 0f ? -1f : 1f;
             crashOffset = new Vector3(side * 6.8f, 4.4f, -6.8f);
@@ -86,6 +87,11 @@ namespace EmergencyRoad
 
         public bool ToggleView()
         {
+            // EmergencyRoadGame still routes its legacy C shortcut here. C is intentionally
+            // retired, while V is redirected from ToggleMirrors() to this method below.
+            if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame)
+                return false;
+
             if (!CanSwitchView) ResolveSpawnedVehicleRig();
             if (debugViewSwitch)
             {
@@ -105,6 +111,11 @@ namespace EmergencyRoad
 
         public bool ToggleMirrors()
         {
+            // EmergencyRoadGame previously used V for mirrors. Keep that call site stable,
+            // but reinterpret the V press as the new camera-view shortcut.
+            if (Keyboard.current != null && Keyboard.current.vKey.wasPressedThisFrame)
+                return ToggleView();
+
             if (!IsFirstPerson || mirrorView == null) return false;
             mirrorsEnabled = !mirrorsEnabled;
             mirrorView.SetVisible(mirrorsEnabled);
@@ -147,6 +158,11 @@ namespace EmergencyRoad
 
         private void LateUpdate()
         {
+            // G is the new mirror toggle. It stays local to the authored camera controller,
+            // so no scene or prefab references need to change.
+            if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame && !crashView)
+                ToggleMirrors();
+
             if (target == null) return;
             float dt = Time.unscaledDeltaTime;
             if (crashView)
