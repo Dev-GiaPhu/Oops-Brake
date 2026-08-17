@@ -1137,7 +1137,7 @@ namespace EmergencyRoad
 
             GameObject visual = Object.Instantiate(source, holder.transform, false);
             EmergencyRoadGame.DisableVisualColliders(visual);
-            FitObstacleToLane(visual, hitbox, EmergencyRoadGame.LaneWidth * (tuning != null ? tuning.obstacleLaneWidth : .86f), source.name);
+            FitObstacleToLane(visual, hitbox, EmergencyRoadGame.LaneWidth * (tuning != null ? tuning.obstacleLaneWidth : .86f));
             owner.RegisterHazard(hazard);
             spawned.Add(holder);
         }
@@ -1170,16 +1170,11 @@ namespace EmergencyRoad
             spawned.Add(holder);
         }
 
-        private static void FitObstacleToLane(GameObject visual, BoxCollider hitbox, float targetWidth, string sourceName)
+        private static void FitObstacleToLane(GameObject visual, BoxCollider hitbox, float targetWidth)
         {
             Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
             if (renderers.Length == 0) return;
             Bounds bounds = renderers[0].bounds;
-            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            string id = sourceName.ToLowerInvariant();
-            float visualWidth = id.Contains("cone") ? .65f : id.Contains("box") ? 1.45f : id.Contains("trash") ? 1.85f : targetWidth;
-            visual.transform.localScale *= visualWidth / Mathf.Max(.05f, bounds.size.x);
-            bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
             hitbox.center = hitbox.transform.InverseTransformPoint(bounds.center);
             hitbox.size = new Vector3(targetWidth, Mathf.Max(.35f, bounds.size.y * .88f), Mathf.Clamp(bounds.size.z * .82f, .5f, 2.8f));
