@@ -70,13 +70,17 @@ namespace EmergencyRoad
             float catchTime = Mathf.Max(.1f, (game.Player.transform.position.z + 18f) / Mathf.Max(1f, motorSpeed));
             float projectedZ = game.Player.transform.position.z + game.CurrentSpeed * catchTime;
             float obstacleSafety = tuning != null ? tuning.motorObstacleSafetyDistance : 9f;
-            if (!game.IsMotorLaneCorridorClear(targetLane, projectedZ - obstacleSafety, projectedZ + obstacleSafety))
+            float minimumZ = projectedZ - obstacleSafety;
+            float maximumZ = projectedZ + obstacleSafety;
+            if (!game.IsMotorLaneCorridorClear(targetLane, minimumZ, maximumZ) ||
+                !HasSafeAlternativeLane(targetLane, minimumZ, maximumZ))
             {
                 ReleaseReservation();
                 timer = tuning != null ? tuning.motorPlanningRetryDelay : 1f;
                 active = false;
                 yield break;
             }
+
             GameObject motorObject = Instantiate(motorRushHazardPrefab, transform, false);
             MotorRushHazard motor = motorObject.GetComponent<MotorRushHazard>();
             if (motor == null)
@@ -95,6 +99,17 @@ namespace EmergencyRoad
             ReleaseReservation();
             timer = Random.Range(15f, 23f);
             active = false;
+        }
+
+        private bool HasSafeAlternativeLane(int motorLane, float minimumZ, float maximumZ)
+        {
+            if (game == null) return false;
+            for (int lane = -1; lane <= 1; lane++)
+            {
+                if (lane == motorLane) continue;
+                if (game.IsMotorLaneCorridorClear(lane, minimumZ, maximumZ)) return true;
+            }
+            return false;
         }
 
         private void CancelWarning()
