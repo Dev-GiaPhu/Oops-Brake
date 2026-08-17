@@ -38,13 +38,13 @@ namespace EmergencyRoad.Editor
             }
 
             SessionState.SetBool(SessionKey, false);
-            QueueRepair(forceDefaultProfile: true);
+            QueueRepair(true);
         }
 
         private static void QueueAutomaticRepair()
         {
             if (SessionState.GetBool(SessionKey, false)) return;
-            QueueRepair(forceDefaultProfile: false);
+            QueueRepair(false);
         }
 
         private static void QueueRepair(bool forceDefaultProfile)
@@ -53,7 +53,7 @@ namespace EmergencyRoad.Editor
 
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
             {
-                EditorApplication.delayCall += () => QueueRepair(forceDefaultProfile);
+                EditorApplication.delayCall += delegate { QueueRepair(forceDefaultProfile); };
                 return;
             }
 
@@ -73,12 +73,12 @@ namespace EmergencyRoad.Editor
 
             // Give the Inspector one editor frame to destroy its embedded editors
             // before replacing/reimporting the contaminated profile assets.
-            EditorApplication.delayCall += () => RepairProfiles(contaminated);
+            EditorApplication.delayCall += delegate { RepairProfiles(contaminated); };
         }
 
         private static List<string> FindContaminatedProfiles(bool forceDefaultProfile)
         {
-            List<string> result = new();
+            List<string> result = new List<string>();
             string[] guids = AssetDatabase.FindAssets("t:VolumeProfile", new[] { "Assets" });
 
             foreach (string guid in guids)
@@ -108,8 +108,8 @@ namespace EmergencyRoad.Editor
             if (File.Exists(absolutePath))
             {
                 string yaml = File.ReadAllText(absolutePath);
-                if (yaml.Contains("m_Script: {fileID: 0}", StringComparison.Ordinal) ||
-                    yaml.Contains("Unity.RenderPipelines.Core.Editor.Tests", StringComparison.Ordinal))
+                if (yaml.IndexOf("m_Script: {fileID: 0}", StringComparison.Ordinal) >= 0 ||
+                    yaml.IndexOf("Unity.RenderPipelines.Core.Editor.Tests", StringComparison.Ordinal) >= 0)
                     return true;
             }
 
@@ -117,13 +117,14 @@ namespace EmergencyRoad.Editor
             // components referenced by profile.components. Extra sub-assets are
             // stale/orphaned data and must not survive a package/editor reload.
             UnityEngine.Object[] allAssets = AssetDatabase.LoadAllAssetsAtPath(path);
-            HashSet<VolumeComponent> referenced = new(profile.components);
+            HashSet<VolumeComponent> referenced = new HashSet<VolumeComponent>(profile.components);
             int loadedComponents = 0;
 
             foreach (UnityEngine.Object asset in allAssets)
             {
                 if (asset == null) return true;
-                if (asset is not VolumeComponent component) continue;
+                VolumeComponent component = asset as VolumeComponent;
+                if (component == null) continue;
 
                 loadedComponents++;
                 if (!referenced.Contains(component)) return true;
@@ -140,7 +141,7 @@ namespace EmergencyRoad.Editor
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
             {
                 repairQueued = true;
-                EditorApplication.delayCall += () => RepairProfiles(paths);
+                EditorApplication.delayCall += delegate { RepairProfiles(paths); };
                 return;
             }
 
@@ -160,7 +161,8 @@ namespace EmergencyRoad.Editor
                 if (repairedCount > 0)
                 {
                     Debug.Log(
-                        $"[Emergency Road] Da repair {repairedCount} URP Volume Profile bi null/orphan sub-assets. " +
+                        "[Emergency Road] Da repair " + repairedCount +
+                        " URP Volume Profile bi null/orphan sub-assets. " +
                         "GUID cua profile duoc giu nguyen; cac Volume reference khong bi mat.");
                 }
             }
@@ -181,7 +183,7 @@ namespace EmergencyRoad.Editor
             VolumeProfile sourceProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(path);
             if (sourceProfile == null) return false;
 
-            List<VolumeComponent> sourceComponents = new();
+            List<VolumeComponent> sourceComponents = new List<VolumeComponent>();
             foreach (VolumeComponent component in sourceProfile.components)
                 if (component != null) sourceComponents.Add(component);
 
@@ -233,7 +235,7 @@ namespace EmergencyRoad.Editor
             bool strictCheck = string.Equals(path, DefaultProfilePath, StringComparison.OrdinalIgnoreCase);
             if (repaired == null || IsContaminated(repaired, path, strictCheck))
             {
-                Debug.LogError($"[Emergency Road] Volume profile van con du lieu loi sau repair: {path}");
+                Debug.LogError("[Emergency Road] Volume profile van con du lieu loi sau repair: " + path);
                 return false;
             }
 
