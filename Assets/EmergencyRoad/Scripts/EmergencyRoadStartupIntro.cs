@@ -10,33 +10,28 @@ namespace EmergencyRoad
     public sealed class EmergencyRoadStartupIntro : MonoBehaviour
     {
         [Header("SCENE OBJECTS - DRAG DIRECTLY")]
-        [SerializeField] private Image backgroundImage;
-        [SerializeField] private RectTransform logoStartMarker;
+        [SerializeField] private Camera menuCamera;
+        [SerializeField, Tooltip("Empty GameObject dat tai goc camera bat dau intro.")]
+        private Transform cameraIntroMarker;
+        [SerializeField] private EmergencyRoadMenuCameraOrbit cameraOrbit;
+        [SerializeField, Tooltip("RectTransform marker nam ben duoi man hinh.")]
+        private RectTransform logoStartMarker;
+        [SerializeField, Tooltip("RectTransform marker o dung tam man hinh.")]
+        private RectTransform logoCenterMarker;
         [SerializeField] private RectTransform menuLogo;
         [SerializeField] private EmergencyRoadLogoMotion logoIdleMotion;
         [SerializeField] private AudioSource introAudioSource;
         [SerializeField] private AudioClip introClip;
 
         [Header("INTRO TIMING")]
-        [SerializeField, Min(.1f)] private float displayDuration = 2f;
-        [SerializeField, Min(.1f)] private float logoPopDuration = .45f;
-        [SerializeField, Min(.1f)] private float travelDuration = 1.15f;
-        [SerializeField, Min(.1f)] private float backgroundFadeDuration = .8f;
+        [SerializeField, Min(.1f)] private float logoEnterDuration = .8f;
+        [SerializeField, Min(0f)] private float centerHoldDuration = 2f;
+        [SerializeField, Min(.1f)] private float returnDuration = 1.35f;
 
-        [Header("LOGO VISUAL CENTRE")]
+        [Header("LOGO")]
+        [SerializeField, Range(1f, 2f)] private float introLogoScale = 1.35f;
         [SerializeField, Tooltip("Pivot theo phan anh that cua logo, khong tinh vung trong suot cua PNG.")]
         private Vector2 logoVisualPivot = new(.5013f, .5215f);
-
-        [Header("CARTOON LOGO MOTION")]
-        [SerializeField, Range(1f, 2f)] private float introLogoScale = 1.35f;
-        [SerializeField, Range(0f, 240f)] private float travelArcHeight = 90f;
-        [SerializeField, Range(0f, 20f)] private float travelTilt = 8f;
-        [SerializeField, Range(.1f, 4f)] private float introIdleSpeed = 1.25f;
-        [SerializeField, Range(0f, .12f)] private float introPulseAmount = .025f;
-        [SerializeField, Range(0f, 30f)] private float introFloatDistance = 8f;
-        [SerializeField, Range(0f, 8f)] private float introRockDegrees = 2.5f;
-        [SerializeField, Range(0f, 1f), Tooltip("Toc do dao dong con lai khi logo gan cham dich.")]
-        private float arrivalAnimationSpeed = .12f;
 
         [Header("BEHAVIOUR")]
         [SerializeField] private bool playOncePerApplication = true;
@@ -44,6 +39,7 @@ namespace EmergencyRoad
         [SerializeField, Min(0f)] private float skipDelay = .4f;
 
         private static bool playedThisApplication;
+
         private Transform originalParent;
         private int originalSiblingIndex;
         private Vector2 originalAnchorMin;
@@ -53,18 +49,31 @@ namespace EmergencyRoad
         private Vector2 originalPivot;
         private Vector3 originalLocalScale;
         private Quaternion originalLocalRotation;
+        private Quaternion originalWorldRotation;
         private Vector3 destinationWorldPosition;
         private Vector2 originalRectSize;
-        private Color backgroundColor;
-        private float startedAt;
-        private float introPhase;
+
+        private Vector3 cameraHomePosition;
+        private Quaternion cameraHomeRotation;
+        private bool cameraOrbitWasEnabled;
+        private bool cameraPrepared;
         private bool logoPrepared;
         private bool skipRequested;
+        private float startedAt;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetApplicationState()
         {
             playedThisApplication = false;
+        }
+
+        private void Awake()
+        {
+            // Backward-compatible cleanup for Menu scenes authored with the old
+            // full-screen intro Image. The editor authoring tool removes it
+            // permanently; this prevents one frame of the legacy image meanwhile.
+            Graphic legacyBackground = GetComponent<Graphic>();
+            if (legacyBackground != null) legacyBackground.enabled = false;
         }
 
         private IEnumerator Start()
@@ -84,10 +93,9 @@ namespace EmergencyRoad
             playedThisApplication = true;
             startedAt = Time.unscaledTime;
             skipRequested = false;
-            introPhase = 0f;
-            backgroundColor = backgroundImage.color;
-            backgroundImage.raycastTarget = true;
+
             Canvas.ForceUpdateCanvases();
+            PrepareCamera();
             PrepareMenuLogo();
 
             if (introAudioSource != null && introClip != null)
@@ -96,19 +104,13 @@ namespace EmergencyRoad
                 introAudioSource.Play();
             }
 
-            yield return AnimateLogoPop();
-
-            float remainingDisplay = Mathf.Max(0f, displayDuration - logoPopDuration);
-            float elapsed = 0f;
-            while (elapsed < remainingDisplay && !skipRequested)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                ApplyIntroIdle();
-                yield return null;
-            }
+            yield return AnimateLogoToCenter();
 
             if (!skipRequested)
-                yield return AnimateLogoToMenu();
+                yield return HoldLogoAtCenter();
+
+            if (!skipRequested)
+                yield return AnimateCameraAndLogoHome();
 
             FinishInstantly();
         }
@@ -116,6 +118,7 @@ namespace EmergencyRoad
         private void Update()
         {
             if (!allowSkip || Time.unscaledTime - startedAt < skipDelay) return;
+
             bool keyboardPressed = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
             bool pointerPressed = Pointer.current != null && Pointer.current.press.wasPressedThisFrame;
             bool touchPressed = Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
@@ -125,10 +128,48 @@ namespace EmergencyRoad
         private bool ValidateReferences()
         {
             bool valid = true;
-            if (backgroundImage == null) { Debug.LogError("[Emergency Road] Intro thiếu Background Image.", this); valid = false; }
-            if (logoStartMarker == null) { Debug.LogError("[Emergency Road] Intro thiếu Logo Start Marker.", this); valid = false; }
-            if (menuLogo == null) { Debug.LogError("[Emergency Road] Intro thiếu logo hiện tại của Menu.", this); valid = false; }
+            if (menuCamera == null)
+            {
+                Debug.LogError("[Emergency Road] Intro thieu Menu Camera. Keo Camera Menu vao Inspector.", this);
+                valid = false;
+            }
+            if (cameraIntroMarker == null)
+            {
+                Debug.LogError("[Emergency Road] Intro thieu Camera Intro Marker. Keo Empty GameObject dat goc intro vao Inspector.", this);
+                valid = false;
+            }
+            if (logoStartMarker == null)
+            {
+                Debug.LogError("[Emergency Road] Intro thieu Logo Start Marker ben duoi man hinh.", this);
+                valid = false;
+            }
+            if (logoCenterMarker == null)
+            {
+                Debug.LogError("[Emergency Road] Intro thieu Logo Center Marker o tam man hinh.", this);
+                valid = false;
+            }
+            if (menuLogo == null)
+            {
+                Debug.LogError("[Emergency Road] Intro thieu logo hien tai cua Menu.", this);
+                valid = false;
+            }
             return valid;
+        }
+
+        private void PrepareCamera()
+        {
+            Transform cameraTransform = menuCamera.transform;
+            cameraHomePosition = cameraTransform.position;
+            cameraHomeRotation = cameraTransform.rotation;
+            cameraPrepared = true;
+
+            if (cameraOrbit != null)
+            {
+                cameraOrbitWasEnabled = cameraOrbit.enabled;
+                cameraOrbit.enabled = false;
+            }
+
+            cameraTransform.SetPositionAndRotation(cameraIntroMarker.position, cameraIntroMarker.rotation);
         }
 
         private void PrepareMenuLogo()
@@ -144,94 +185,99 @@ namespace EmergencyRoad
             originalPivot = menuLogo.pivot;
             originalLocalScale = menuLogo.localScale;
             originalLocalRotation = menuLogo.localRotation;
+            originalWorldRotation = menuLogo.rotation;
+
             Vector2 visualPivot = new(Mathf.Clamp01(logoVisualPivot.x), Mathf.Clamp01(logoVisualPivot.y));
             destinationWorldPosition = NormalizedRectPointToWorld(menuLogo, visualPivot);
             originalRectSize = menuLogo.rect.size;
 
             menuLogo.SetParent(transform, true);
+            menuLogo.SetAsLastSibling();
             menuLogo.anchorMin = new Vector2(.5f, .5f);
             menuLogo.anchorMax = new Vector2(.5f, .5f);
             menuLogo.pivot = visualPivot;
             menuLogo.sizeDelta = originalRectSize;
             menuLogo.position = logoStartMarker.position;
-            menuLogo.localScale = originalLocalScale * .35f;
-            menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f, -10f);
+            menuLogo.rotation = originalWorldRotation;
+            menuLogo.localScale = originalLocalScale * introLogoScale;
             logoPrepared = true;
         }
 
-        private IEnumerator AnimateLogoPop()
+        private IEnumerator AnimateLogoToCenter()
         {
-            Vector3 startScale = menuLogo.localScale;
-            Vector3 targetScale = originalLocalScale * introLogoScale;
-            Quaternion startRotation = menuLogo.localRotation;
-            Quaternion targetRotation = originalLocalRotation * Quaternion.Euler(0f, 0f, -3f);
+            Vector3 startPosition = logoStartMarker.position;
+            Vector3 targetPosition = logoCenterMarker.position;
             float elapsed = 0f;
 
-            while (elapsed < logoPopDuration && !skipRequested)
+            while (elapsed < logoEnterDuration && !skipRequested)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, logoPopDuration));
-                float back = EaseOutBack(t);
-                float wave = AdvanceIntroWave(1f);
-                Vector3 animatedScale = targetScale * (1f + wave * introPulseAmount);
-                Quaternion animatedRotation = targetRotation * Quaternion.Euler(0f, 0f, wave * introRockDegrees);
-                menuLogo.position = logoStartMarker.position + Vector3.up * (wave * introFloatDistance * back);
-                menuLogo.localScale = Vector3.LerpUnclamped(startScale, animatedScale, back);
-                menuLogo.localRotation = Quaternion.SlerpUnclamped(startRotation, animatedRotation, back);
+                float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, logoEnterDuration));
+                float eased = Smoother(t);
+                menuLogo.position = Vector3.LerpUnclamped(startPosition, targetPosition, eased);
                 yield return null;
             }
 
-            ApplyIntroIdle();
+            if (!skipRequested)
+                menuLogo.position = targetPosition;
         }
 
-        private IEnumerator AnimateLogoToMenu()
+        private IEnumerator HoldLogoAtCenter()
         {
-            float totalDuration = Mathf.Max(travelDuration, backgroundFadeDuration);
             float elapsed = 0f;
-
-            while (elapsed < totalDuration && !skipRequested)
+            while (elapsed < centerHoldDuration && !skipRequested)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float moveT = Mathf.Clamp01(elapsed / Mathf.Max(.1f, travelDuration));
-                float fadeT = Mathf.Clamp01(elapsed / Mathf.Max(.1f, backgroundFadeDuration));
-                float moveEase = Smoother(moveT);
-                float fadeEase = Smoother(fadeT);
-                float idleEnvelope = 1f - moveEase;
-                float waveSpeed = Mathf.Lerp(arrivalAnimationSpeed, 1f, Smoother(idleEnvelope));
-                float wave = AdvanceIntroWave(waveSpeed);
-
-                Vector3 position = Vector3.LerpUnclamped(logoStartMarker.position, destinationWorldPosition, moveEase);
-                position += Vector3.up * (4f * moveEase * (1f - moveEase) * travelArcHeight);
-                position += Vector3.up * (wave * introFloatDistance * idleEnvelope);
-                menuLogo.position = position;
-                Vector3 travelScale = Vector3.LerpUnclamped(originalLocalScale * introLogoScale,
-                    originalLocalScale, moveEase);
-                menuLogo.localScale = travelScale * (1f + wave * introPulseAmount * idleEnvelope);
-                float angle = Mathf.Lerp(-3f, 0f, moveEase)
-                              + Mathf.Sin(moveEase * Mathf.PI) * travelTilt
-                              + wave * introRockDegrees * idleEnvelope;
-                menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f, angle);
-
-                Color faded = backgroundColor;
-                faded.a = backgroundColor.a * (1f - fadeEase);
-                backgroundImage.color = faded;
+                menuLogo.position = logoCenterMarker.position;
                 yield return null;
             }
         }
 
-        private void ApplyIntroIdle()
+        private IEnumerator AnimateCameraAndLogoHome()
         {
-            float wave = AdvanceIntroWave(1f);
-            menuLogo.position = logoStartMarker.position + Vector3.up * (wave * introFloatDistance);
-            menuLogo.localScale = originalLocalScale * introLogoScale * (1f + wave * introPulseAmount);
-            menuLogo.localRotation = originalLocalRotation * Quaternion.Euler(0f, 0f,
-                -3f + wave * introRockDegrees);
+            Transform cameraTransform = menuCamera.transform;
+            Vector3 cameraStartPosition = cameraTransform.position;
+            Quaternion cameraStartRotation = cameraTransform.rotation;
+            Vector3 logoStartPosition = menuLogo.position;
+            Vector3 logoStartScale = menuLogo.localScale;
+            Quaternion logoStartRotation = menuLogo.rotation;
+            float elapsed = 0f;
+
+            while (elapsed < returnDuration && !skipRequested)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, returnDuration));
+                float eased = Smoother(t);
+
+                cameraTransform.position = Vector3.LerpUnclamped(cameraStartPosition, cameraHomePosition, eased);
+                cameraTransform.rotation = Quaternion.SlerpUnclamped(cameraStartRotation, cameraHomeRotation, eased);
+
+                menuLogo.position = Vector3.LerpUnclamped(logoStartPosition, destinationWorldPosition, eased);
+                menuLogo.localScale = Vector3.LerpUnclamped(logoStartScale, originalLocalScale, eased);
+                menuLogo.rotation = Quaternion.SlerpUnclamped(logoStartRotation, originalWorldRotation, eased);
+                yield return null;
+            }
+
+            if (!skipRequested)
+            {
+                cameraTransform.SetPositionAndRotation(cameraHomePosition, cameraHomeRotation);
+                menuLogo.position = destinationWorldPosition;
+                menuLogo.localScale = originalLocalScale;
+                menuLogo.rotation = originalWorldRotation;
+            }
         }
 
         private void FinishInstantly()
         {
             if (introAudioSource != null && introAudioSource.isPlaying)
                 introAudioSource.Stop();
+
+            if (cameraPrepared && menuCamera != null)
+            {
+                menuCamera.transform.SetPositionAndRotation(cameraHomePosition, cameraHomeRotation);
+                if (cameraOrbit != null) cameraOrbit.enabled = cameraOrbitWasEnabled;
+                cameraPrepared = false;
+            }
 
             if (logoPrepared)
             {
@@ -245,25 +291,11 @@ namespace EmergencyRoad
                 menuLogo.localScale = originalLocalScale;
                 menuLogo.localRotation = originalLocalRotation;
                 logoPrepared = false;
+
                 if (logoIdleMotion != null) logoIdleMotion.enabled = true;
             }
 
-            if (backgroundImage != null)
-            {
-                Color hidden = backgroundImage.color;
-                hidden.a = 0f;
-                backgroundImage.color = hidden;
-                backgroundImage.raycastTarget = false;
-            }
-
             gameObject.SetActive(false);
-        }
-
-        private float AdvanceIntroWave(float speedMultiplier)
-        {
-            introPhase += Time.unscaledDeltaTime * introIdleSpeed * Mathf.Max(0f, speedMultiplier)
-                          * Mathf.PI * 2f;
-            return Mathf.Sin(introPhase);
         }
 
         private static float Smoother(float t)
@@ -280,14 +312,6 @@ namespace EmergencyRoad
                 Mathf.LerpUnclamped(rect.yMin, rect.yMax, normalizedPoint.y),
                 0f);
             return rectTransform.TransformPoint(localPoint);
-        }
-
-        private static float EaseOutBack(float t)
-        {
-            const float c1 = 1.70158f;
-            const float c3 = c1 + 1f;
-            float value = t - 1f;
-            return 1f + c3 * value * value * value + c1 * value * value;
         }
     }
 }
