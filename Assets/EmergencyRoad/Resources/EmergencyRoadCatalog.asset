@@ -20,27 +20,27 @@ MonoBehaviour:
     hornClip: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
   - prefab: {fileID: 1412363122834768907, guid: c2950abe12173684f8fb76d8cd3ed1b3, type: 3}
     displayName: POLICE CAR
-    price: 350
+    price: 30
     hornClip: {fileID: 8300000, guid: c6b5df5cef3264b85b48e9d0c56be7c0, type: 3}
   - prefab: {fileID: 7235495544061757970, guid: 3579b6a191a6262488eca857742b994d, type: 3}
     displayName: FIRE TRUCK
-    price: 700
+    price: 50
     hornClip: {fileID: 8300000, guid: 752a5216621894ce48455d45a83e0361, type: 3}
   - prefab: {fileID: 2102204373591914974, guid: c113180fba5d60d419f8e84af96f8306, type: 3}
     displayName: TAXI
-    price: 1100
+    price: 70
     hornClip: {fileID: 8300000, guid: 5055d0c02c79b47b484a124f3ad90c8a, type: 3}
   - prefab: {fileID: 3894456470624861414, guid: 32e6a997fe85c894486f41e94ec21cf7, type: 3}
     displayName: TANK TRUCK
-    price: 1600
+    price: 100
     hornClip: {fileID: 8300000, guid: 971cebf360fbd4eeb98ad75042c56ee3, type: 3}
   - prefab: {fileID: 6501026745361554071, guid: 3757c09d4e971554ebce6902eca065df, type: 3}
     displayName: BULLDOZER
-    price: 2200
+    price: 300
     hornClip: {fileID: 8300000, guid: 8ea2ae91daa9c4d0aa0bf494f2b92ac3, type: 3}
   - prefab: {fileID: 767612029922381195, guid: 16cdb7563e5978445b6217a646541010, type: 3}
     displayName: EXCAVATOR
-    price: 3000
+    price: 500
     hornClip: {fileID: 8300000, guid: 8ea2ae91daa9c4d0aa0bf494f2b92ac3, type: 3}
   playerVehicles:
   - {fileID: 2908944898091809559, guid: 8d1af90125950e342999c5dbdefdd676, type: 3}
