@@ -80,7 +80,10 @@ namespace EmergencyRoad
         {
             if (!ValidateReferences())
             {
-                enabled = false;
+                // Keep the authored Menu usable if the editor setup has not been
+                // run yet. The intro root may still contain an input-blocking
+                // CanvasGroup from the legacy implementation.
+                gameObject.SetActive(false);
                 yield break;
             }
 
