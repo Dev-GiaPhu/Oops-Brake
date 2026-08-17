@@ -60,6 +60,7 @@ namespace EmergencyRoad
         private bool cameraPrepared;
         private bool logoPrepared;
         private bool skipRequested;
+        private bool cameraReturnStarted;
         private float startedAt;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -93,6 +94,7 @@ namespace EmergencyRoad
             playedThisApplication = true;
             startedAt = Time.unscaledTime;
             skipRequested = false;
+            cameraReturnStarted = false;
 
             Canvas.ForceUpdateCanvases();
             PrepareCamera();
@@ -110,8 +112,12 @@ namespace EmergencyRoad
             if (!skipRequested)
                 yield return HoldLogoAtCenter();
 
-            if (!skipRequested)
-                yield return AnimateCameraAndLogoHome();
+            // Skip is allowed to shorten the logo portion only. The camera must
+            // always travel back to its authored Menu pose instead of snapping.
+            // This also prevents an incidental click used to focus the Game view
+            // from cancelling the most important camera movement in the intro.
+            cameraReturnStarted = true;
+            yield return AnimateCameraAndLogoHome();
 
             RestorePresentation();
             yield return menuReveal.Reveal();
@@ -120,7 +126,7 @@ namespace EmergencyRoad
 
         private void Update()
         {
-            if (!allowSkip || Time.unscaledTime - startedAt < skipDelay) return;
+            if (!allowSkip || cameraReturnStarted || Time.unscaledTime - startedAt < skipDelay) return;
 
             bool keyboardPressed = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
             bool pointerPressed = Pointer.current != null && Pointer.current.press.wasPressedThisFrame;
@@ -251,7 +257,7 @@ namespace EmergencyRoad
             Quaternion logoStartRotation = menuLogo.rotation;
             float elapsed = 0f;
 
-            while (elapsed < returnDuration && !skipRequested)
+            while (elapsed < returnDuration)
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, returnDuration));
@@ -266,13 +272,10 @@ namespace EmergencyRoad
                 yield return null;
             }
 
-            if (!skipRequested)
-            {
-                cameraTransform.SetPositionAndRotation(cameraHomePosition, cameraHomeRotation);
-                menuLogo.position = destinationWorldPosition;
-                menuLogo.localScale = originalLocalScale;
-                menuLogo.rotation = originalWorldRotation;
-            }
+            cameraTransform.SetPositionAndRotation(cameraHomePosition, cameraHomeRotation);
+            menuLogo.position = destinationWorldPosition;
+            menuLogo.localScale = originalLocalScale;
+            menuLogo.rotation = originalWorldRotation;
         }
 
         private void RestorePresentation()
