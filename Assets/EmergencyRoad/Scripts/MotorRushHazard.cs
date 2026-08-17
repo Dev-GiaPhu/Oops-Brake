@@ -9,6 +9,8 @@ namespace EmergencyRoad
         private float speed = 34f;
         private bool exploded;
         private bool hasBeenInsideCamera;
+        private bool passedPlayer;
+        private bool postPassLaneDecisionMade;
         private float lockedTargetX;
         private float lateralVelocity;
         private Camera trackingCamera;
@@ -38,6 +40,9 @@ namespace EmergencyRoad
             transform.position = new Vector3(lockedTargetX, .45f, -18f);
             EmergencyRoadGameplaySettings tuning = owner != null ? owner.Settings : null;
             speed = tuning != null ? tuning.motorSpeed : 34f;
+            passedPlayer = false;
+            postPassLaneDecisionMade = false;
+            lateralVelocity = 0f;
             BuildVisualFromCatalog(motorcycleVisualPrefab);
             visualRenderers = GetComponentsInChildren<Renderer>(true);
             body = GetComponent<Rigidbody>();
@@ -86,7 +91,16 @@ namespace EmergencyRoad
                 previousPosition = body != null ? body.position : transform.position;
                 Vector3 p = previousPosition;
                 p.z += speed * Time.fixedDeltaTime;
-                float desiredX = lockedTargetX + Mathf.Sin(p.z * .28f) * .32f;
+
+                if (!passedPlayer && game.Player != null && p.z >= game.Player.transform.position.z + 2f)
+                {
+                    passedPlayer = true;
+                    TryChoosePostPassLane(p.z);
+                }
+
+                // Stay exactly in the warned lane until the motorcycle has fully passed the player.
+                // Any lane change is decided only after that point and only into a clear corridor.
+                float desiredX = lockedTargetX;
                 float previousX = p.x;
                 p.x = Mathf.SmoothDamp(p.x, desiredX, ref lateralVelocity, .18f, 7f, Time.fixedDeltaTime);
                 float lateral = (p.x - previousX) / Mathf.Max(.001f, Time.fixedDeltaTime);
@@ -132,6 +146,43 @@ namespace EmergencyRoad
             Vector3 velocity = explodedBody.linearVelocity;
             velocity.z = Mathf.Lerp(velocity.z, -game.CurrentSpeed, 1f - Mathf.Exp(-sharpness * Time.fixedDeltaTime));
             explodedBody.linearVelocity = velocity;
+        }
+
+        private void TryChoosePostPassLane(float currentZ)
+        {
+            if (postPassLaneDecisionMade || game == null) return;
+            postPassLaneDecisionMade = true;
+
+            int currentLane = Mathf.Clamp(Mathf.RoundToInt(lockedTargetX / EmergencyRoadGame.LaneWidth), -1, 1);
+            int firstCandidate;
+            int secondCandidate = int.MinValue;
+            if (currentLane == 0)
+            {
+                firstCandidate = Random.value < .5f ? -1 : 1;
+                secondCandidate = -firstCandidate;
+            }
+            else
+            {
+                firstCandidate = 0;
+            }
+
+            EmergencyRoadGameplaySettings tuning = game.Settings;
+            float obstacleSafety = tuning != null ? tuning.motorObstacleSafetyDistance : 9f;
+            float minimumZ = currentZ - 2f;
+            float maximumZ = currentZ + Mathf.Max(12f, obstacleSafety * 1.5f);
+
+            if (TryUsePostPassLane(firstCandidate, minimumZ, maximumZ)) return;
+            if (secondCandidate != int.MinValue) TryUsePostPassLane(secondCandidate, minimumZ, maximumZ);
+        }
+
+        private bool TryUsePostPassLane(int lane, float minimumZ, float maximumZ)
+        {
+            lane = Mathf.Clamp(lane, -1, 1);
+            if (game.IsLaneReserved(lane, minimumZ, maximumZ)) return false;
+            if (!game.IsMotorLaneCorridorClear(lane, minimumZ, maximumZ)) return false;
+            TargetLane = lane;
+            lockedTargetX = lane * EmergencyRoadGame.LaneWidth;
+            return true;
         }
 
         private void StopMapScrollCompensation()
