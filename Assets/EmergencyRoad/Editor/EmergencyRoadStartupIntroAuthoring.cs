@@ -11,6 +11,7 @@ namespace EmergencyRoad.Editor
     /// <summary>
     /// Authors the Menu startup intro entirely in the scene.
     /// Runtime only consumes serialized Inspector references and never creates fallback objects.
+    /// Existing Inspector camera references are authoritative and are never overwritten on reload.
     /// </summary>
     public static class EmergencyRoadStartupIntroAuthoring
     {
@@ -43,7 +44,7 @@ namespace EmergencyRoad.Editor
                 EditorSceneManager.SaveScene(menuScene);
                 Debug.Log(
                     "[Emergency Road] Startup Intro da duoc wire bang scene references. " +
-                    "Di chuyen Empty GameObject 'Intro Camera Start Marker (MOVE THIS)' de chon goc camera bat dau.");
+                    "Camera va Intro Camera Marker da gan trong Inspector se duoc giu nguyen.");
             }
 
             if (openedTemporarily)
@@ -71,8 +72,30 @@ namespace EmergencyRoad.Editor
             if (!scene.IsValid() || !scene.isLoaded) return false;
 
             EmergencyRoadMenuView view = FindInScene<EmergencyRoadMenuView>(scene);
-            Camera menuCamera = FindInScene<Camera>(scene);
+            EmergencyRoadStartupIntro intro = FindInScene<EmergencyRoadStartupIntro>(scene);
+            SerializedObject existingIntroSO = intro != null ? new SerializedObject(intro) : null;
+
+            // Inspector-authored references are the source of truth. Only discover a
+            // camera when the serialized field is actually empty. This prevents every
+            // script reload from replacing the user's chosen Menu camera with the first
+            // Camera component found in the scene.
+            Camera menuCamera = existingIntroSO != null
+                ? GetReference<Camera>(existingIntroSO, "menuCamera")
+                : null;
+            if (menuCamera == null)
+                menuCamera = FindInScene<Camera>(scene);
+
+            EmergencyRoadMenuCameraOrbit existingCameraOrbit = existingIntroSO != null
+                ? GetReference<EmergencyRoadMenuCameraOrbit>(existingIntroSO, "cameraOrbit")
+                : null;
+
             EmergencyRoadLogoMotion logoMotion = FindInScene<EmergencyRoadLogoMotion>(scene);
+            RectTransform menuLogo = existingIntroSO != null
+                ? GetReference<RectTransform>(existingIntroSO, "menuLogo")
+                : null;
+            EmergencyRoadLogoMotion existingLogoMotion = existingIntroSO != null
+                ? GetReference<EmergencyRoadLogoMotion>(existingIntroSO, "logoIdleMotion")
+                : null;
 
             if (view == null)
             {
@@ -81,18 +104,9 @@ namespace EmergencyRoad.Editor
             }
             if (menuCamera == null)
             {
-                Debug.LogError("[Emergency Road] Menu scene thieu Camera.");
+                Debug.LogError("[Emergency Road] Menu scene thieu Camera va Startup Intro chua duoc gan Menu Camera trong Inspector.");
                 return false;
             }
-
-            EmergencyRoadStartupIntro intro = FindInScene<EmergencyRoadStartupIntro>(scene);
-            SerializedObject existingIntroSO = intro != null ? new SerializedObject(intro) : null;
-            RectTransform menuLogo = existingIntroSO != null
-                ? GetReference<RectTransform>(existingIntroSO, "menuLogo")
-                : null;
-            EmergencyRoadLogoMotion existingLogoMotion = existingIntroSO != null
-                ? GetReference<EmergencyRoadLogoMotion>(existingIntroSO, "logoIdleMotion")
-                : null;
 
             if (menuLogo == null && logoMotion != null)
                 menuLogo = logoMotion.transform as RectTransform;
@@ -252,8 +266,9 @@ namespace EmergencyRoad.Editor
                 changed = true;
             }
 
-            EmergencyRoadMenuCameraOrbit cameraOrbit =
-                menuCamera.GetComponent<EmergencyRoadMenuCameraOrbit>();
+            EmergencyRoadMenuCameraOrbit cameraOrbit = existingCameraOrbit;
+            if (cameraOrbit == null)
+                cameraOrbit = menuCamera.GetComponent<EmergencyRoadMenuCameraOrbit>();
 
             changed |= SetReference(introSO, "menuCamera", menuCamera);
             changed |= SetReference(introSO, "cameraIntroMarker", cameraMarker);
