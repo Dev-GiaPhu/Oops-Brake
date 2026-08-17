@@ -1,39 +1,54 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.Compilation;
+using UnityEngine;
 using UnityEngine.Rendering;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace EmergencyRoad.Editor
 {
     [InitializeOnLoad]
     internal static class EmergencyRoadVolumeInspectorReloadGuard
     {
+        private static readonly Type InspectorWindowType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.InspectorWindow");
+        private static readonly PropertyInfo InspectorTrackerProperty = InspectorWindowType?.GetProperty(
+            "tracker", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        private static readonly PropertyInfo InspectorLockedProperty = InspectorWindowType?.GetProperty(
+            "isLocked", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
         static EmergencyRoadVolumeInspectorReloadGuard()
         {
             AssemblyReloadEvents.beforeAssemblyReload -= PrepareVolumeInspectorForObjectInvalidation;
             AssemblyReloadEvents.beforeAssemblyReload += PrepareVolumeInspectorForObjectInvalidation;
+            CompilationPipeline.compilationStarted -= OnCompilationStarted;
+            CompilationPipeline.compilationStarted += OnCompilationStarted;
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             EditorApplication.delayCall += RepairInvalidVolumeEditorsAfterReload;
         }
 
+        private static void OnCompilationStarted(object context)
+        {
+            // At this point the inspected Volume sub-assets are still valid. Rebuild every Inspector now,
+            // before URP destroys/recreates them during the following domain reload.
+            ReleaseVolumeInspectors(rebuildWhileTargetsAreValid: true, invalidOnly: false);
+        }
+
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
             if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.ExitingPlayMode)
-                PrepareVolumeInspectorForObjectInvalidation();
+                ReleaseVolumeInspectors(rebuildWhileTargetsAreValid: true, invalidOnly: false);
             else if (state == PlayModeStateChange.EnteredEditMode || state == PlayModeStateChange.EnteredPlayMode)
                 EditorApplication.delayCall += RepairInvalidVolumeEditorsAfterReload;
         }
 
         private static void PrepareVolumeInspectorForObjectInvalidation()
         {
-            // Unity 6 can keep embedded URP Volume editors alive with null targets across a domain reload.
-            ActiveEditorTracker tracker = ActiveEditorTracker.sharedTracker;
-            if (!HasVolumeEditor(tracker, false)) return;
-
-            tracker.isLocked = false;
-            Selection.activeObject = null;
-            // Do not call ForceRebuild here: the targets are being destroyed and
-            // rebuilding now is what creates MotionBlurEditor with a null target.
+            // The reload has already started, so only release the selection here.
+            // ForceRebuild at this late stage can itself construct a URP editor with a null target.
+            ReleaseVolumeInspectors(rebuildWhileTargetsAreValid: false, invalidOnly: false);
         }
 
         private static void RepairInvalidVolumeEditorsAfterReload()
@@ -45,12 +60,52 @@ namespace EmergencyRoad.Editor
                 return;
             }
 
-            ActiveEditorTracker tracker = ActiveEditorTracker.sharedTracker;
-            if (!HasVolumeEditor(tracker, true)) return;
+            ReleaseVolumeInspectors(rebuildWhileTargetsAreValid: true, invalidOnly: true);
+        }
 
-            tracker.isLocked = false;
+        private static void ReleaseVolumeInspectors(bool rebuildWhileTargetsAreValid, bool invalidOnly)
+        {
+            List<(ActiveEditorTracker tracker, UnityEngine.Object window)> volumeTrackers = new();
+            HashSet<ActiveEditorTracker> visited = new();
+
+            AddVolumeTracker(ActiveEditorTracker.sharedTracker, null, invalidOnly, visited, volumeTrackers);
+
+            if (InspectorWindowType != null && InspectorTrackerProperty != null)
+            {
+                UnityEngine.Object[] inspectorWindows = Resources.FindObjectsOfTypeAll(InspectorWindowType);
+                foreach (UnityEngine.Object window in inspectorWindows)
+                {
+                    ActiveEditorTracker tracker = InspectorTrackerProperty.GetValue(window) as ActiveEditorTracker;
+                    AddVolumeTracker(tracker, window, invalidOnly, visited, volumeTrackers);
+                }
+            }
+
+            if (volumeTrackers.Count == 0) return;
+
+            foreach ((ActiveEditorTracker tracker, UnityEngine.Object window) in volumeTrackers)
+            {
+                tracker.isLocked = false;
+                if (window != null)
+                    InspectorLockedProperty?.SetValue(window, false);
+            }
+
             Selection.activeObject = null;
-            tracker.ForceRebuild();
+
+            if (!rebuildWhileTargetsAreValid) return;
+
+            foreach ((ActiveEditorTracker tracker, _) in volumeTrackers)
+                tracker.ForceRebuild();
+        }
+
+        private static void AddVolumeTracker(
+            ActiveEditorTracker tracker,
+            UnityEngine.Object window,
+            bool invalidOnly,
+            HashSet<ActiveEditorTracker> visited,
+            List<(ActiveEditorTracker tracker, UnityEngine.Object window)> result)
+        {
+            if (tracker == null || !visited.Add(tracker) || !HasVolumeEditor(tracker, invalidOnly)) return;
+            result.Add((tracker, window));
         }
 
         private static bool HasVolumeEditor(ActiveEditorTracker tracker, bool invalidOnly)
